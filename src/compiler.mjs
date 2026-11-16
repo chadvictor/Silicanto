@@ -74,7 +74,11 @@ export function moduleInput(filename, text) {
   };
 }
 
-export function compile(filename, text, loadScene, settings = {}) {
+export function compile(...args) {
+  return compileProject(...args).haxe;
+}
+
+export function compileProject(filename, text, loadScene, settings = {}) {
   const {
     source,
     offset,
@@ -112,7 +116,8 @@ export function compile(filename, text, loadScene, settings = {}) {
     const d = file.parseDiagnostics[0];
     fail(d.start, ts.flattenDiagnosticMessageText(d.messageText, " "));
   }
-  if (usesProceduralGeometry(file)) return emitProcedural(file, fail);
+  if (usesProceduralGeometry(file))
+    return { haxe: emitProcedural(file, fail), graphicsHost: true };
   const names = new Map(),
     classes = new Map();
   const script = scriptBody(file);
@@ -1149,13 +1154,13 @@ export function compile(filename, text, loadScene, settings = {}) {
         "\n}\n",
     );
   }
-  return (
+  const haxe =
     (graphics ? "import Three;\nimport Host;\n\n" : "") +
     "class Sample {\n  static function main() {\n" +
     (graphics ? "    Host.init();\n" : "") +
     lines.join("\n") +
     (graphics ? "\n    Host.run();" : "") +
     "\n  }\n}\n" +
-    classSources.join("\n")
-  );
+    classSources.join("\n");
+  return { haxe, graphicsHost: graphics };
 }

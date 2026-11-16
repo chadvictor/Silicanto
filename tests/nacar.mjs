@@ -12,21 +12,27 @@ import {
 } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { jdk } from "./jdk.mjs";
 import { chromium } from "playwright";
 
 const root = path.resolve(fileURLToPath(new URL("../", import.meta.url)));
 const cli = path.join(root, "src/cli.mjs");
 mkdirSync(path.join(root, "dist"), { recursive: true });
-const build = process.argv[2]
-  ? path.resolve(process.argv[2])
+const args = process.argv.slice(2),
+  javaRequested = args.includes("--java");
+const existing = args.find((s) => s !== "--java");
+const build = existing
+  ? path.resolve(existing)
   : path.join(mkdtempSync(path.join(root, "dist/nacar-test-")), "native");
-if (!process.argv[2])
+if (!existing)
   execFileSync(
     process.execPath,
     [
       cli,
       "build",
       path.join(root, "examples/nacar/main.js"),
+      "--target",
+      javaRequested ? "java" : "c",
       "--out",
       build,
       "--name",
@@ -40,6 +46,9 @@ const manifest = JSON.parse(
 );
 const haxe = manifest.pipeline === "js-haxe";
 assert.ok(haxe || manifest.pipeline === "static-hermes-c-aot");
+const java = manifest.target === "java";
+if (javaRequested) assert.ok(java, "Expected a Java target");
+const jar = path.join(build, "java/Nacar.jar");
 const runtime = path.join(build, "Nacar.app");
 const native = path.join(runtime, "Contents/MacOS/Nacar");
 for (const file of ["main.js", "world.mjs", "probe.mjs"]) {
@@ -54,24 +63,39 @@ for (const file of ["main.js", "world.mjs", "probe.mjs"]) {
   );
 }
 assert.ok(!manifest.inputs.some((entry) => entry.file.endsWith("world.json")));
-const shipped = readdirSync(runtime, { recursive: true });
+const shipped = java
+  ? execFileSync(jdk("jar"), ["tf", jar], { encoding: "utf8" })
+      .trim()
+      .split("\n")
+  : readdirSync(runtime, { recursive: true });
 assert.ok(
   !shipped.some((file) => /\.(m?js|hbc|vertices\.z|probe)$/.test(file)),
 );
 if (haxe) {
   assert.deepEqual(manifest.sceneAssets, {});
-  assert.equal(manifest.target, "c");
+  assert.ok(java || manifest.target === "c");
   const hx = readFileSync(path.join(build, manifest.entry), "utf8");
   for (const name of ["twilightProbe", "fbm", "cluster", "grid"])
     assert.ok(hx.includes("function v_" + name + "_"));
-  assert.match(
-    execFileSync("file", [native], { encoding: "utf8" }),
-    /Mach-O.*arm64/,
-  );
-  assert.match(
-    execFileSync("otool", ["-L", native], { encoding: "utf8" }),
-    /gpu_metal/,
-  );
+  if (java) {
+    assert.ok(shipped.includes("haxe/root/Sample.class"));
+    assert.ok(shipped.includes("native/macos-arm64/libsilicanto_metal.dylib"));
+    const app = readFileSync(
+      path.join(build, "java/src/haxe/root/Sample.java"),
+      "utf8",
+    );
+    for (const fn of ["twilightProbe", "fbm", "cluster", "grid"])
+      assert.ok(app.includes("v_" + fn + "_"));
+  } else {
+    assert.match(
+      execFileSync("file", [native], { encoding: "utf8" }),
+      /Mach-O.*arm64/,
+    );
+    assert.match(
+      execFileSync("otool", ["-L", native], { encoding: "utf8" }),
+      /gpu_metal/,
+    );
+  }
 } else {
   const symbols = execFileSync("nm", [native], { encoding: "utf8" });
   for (const name of [
@@ -101,6 +125,7 @@ const browser = await chromium.launch({
 });
 const report = {
   pipeline: manifest.pipeline,
+  target: manifest.target,
   backend: "Metal",
   architecture: process.arch,
   three: "r180",
@@ -179,9 +204,16 @@ try {
   const compiled = haxe ? await load("/translated/index.html") : null;
   for (const time of [0, 14000, 35000]) {
     const ppm = path.join(qa, "metal-" + time + ".ppm");
-    execFileSync(native, ["--time-ms", String(time), "--capture", ppm], {
-      timeout: 45000,
-    });
+    const command = java
+      ? [jdk("java"), "-Djava.awt.headless=true", "-jar", jar]
+      : [native];
+    execFileSync(
+      command[0],
+      [...command.slice(1), "--time-ms", String(time), "--capture", ppm],
+      {
+        timeout: 45000,
+      },
+    );
     execFileSync("sips", [
       "-s",
       "format",

@@ -1,10 +1,6 @@
 package;
 
 import Three;
-#if !js
-import hxn.window.Window;
-import hxn.window.WindowAttributes;
-#end
 typedef Keyboard = {code:String, repeat:Bool};
 
 #if js
@@ -18,8 +14,7 @@ class Host {
   static final keyHandlers:Array<Keyboard->Void> = [];
   public static function onKey(cb:Keyboard->Void) keyHandlers.push(cb);
   static var pending:Array<Float->Void> = [];
-  static var window:Window;
-  static var surface:MetalSurface;
+  static var surface:DesktopSurface;
   static var capturePath:String;
   static var frameLimit = 0;
   static var captureTime:Null<Float>;
@@ -58,14 +53,7 @@ class Host {
   }
 
   public static function draw(scene:Scene,camera:PerspectiveCamera,aa:Bool) {
-    if (surface == null) {
-      if (capturePath == null) {
-        final a = new WindowAttributes();
-        a.title("Three.js · Metal"); a.width(innerWidth); a.height(innerHeight); a.resizable(false);
-        window = Window.open(a); a.close();
-      }
-      surface = new MetalSurface(window);
-    }
+    if (surface == null) surface = new DesktopSurface(innerWidth,innerHeight,capturePath == null);
     lastScene = scene; lastCamera = camera; antialias = aa;
     surface.draw(scene,camera,aa,innerWidth,innerHeight);
   }
@@ -74,18 +62,10 @@ class Host {
     final start = haxe.Timer.stamp();
     var frame = 0, open = true;
     while (open) {
-      if (window != null) {
-        var polling = true;
-        while (polling) switch window.poll() {
-          case None: polling = false;
-          case Closed | Destroyed: open = false; polling = false;
-          case KeyboardInput(_,Input(Code(Space),_,_,_,Pressed,repeated,_),_):
-            for (cb in keyHandlers) cb({code:"Space", repeat:repeated});
-          case RedrawRequested:
-            if (pending.length == 0 && loop == null && lastScene != null) draw(lastScene,lastCamera,antialias);
-          case _:
-        }
-      }
+      if (surface != null) open = surface.poll(
+        (repeated) -> { for (cb in keyHandlers) cb({code:"Space", repeat:repeated}); },
+        () -> { if (pending.length == 0 && loop == null && lastScene != null) draw(lastScene,lastCamera,antialias); }
+      );
       if (!open) break;
       final time = captureTime!=null ? captureTime : frameLimit > 0 ? frame*(1000.0/60.0) : (haxe.Timer.stamp()-start)*1000;
       final callbacks = pending;
@@ -94,7 +74,7 @@ class Host {
       if (loop != null) loop(time);
       frame++;
       if (frameLimit > 0 && frame >= frameLimit) break;
-      if (window == null && pending.length == 0 && loop == null) break;
+      if ((surface == null || capturePath != null) && pending.length == 0 && loop == null) break;
       if (capturePath == null) Sys.sleep(1/60);
     }
     if (capturePath != null) {
@@ -102,7 +82,6 @@ class Host {
       surface.capture(capturePath);
     }
     if (surface != null) surface.close();
-    if (window != null) window.close();
   }
 }
 #end

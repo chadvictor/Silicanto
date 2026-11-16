@@ -54,12 +54,6 @@ class MetalSurface {
     } else layer.setDrawableSize(w,h);
   }
 
-  static function floats(values:Array<Float>):Bytes {
-    final bytes = Bytes.alloc(values.length*4);
-    for (i in 0...values.length) bytes.setFloat(i*4,values[i]);
-    return bytes;
-  }
-
   public function draw(scene:Scene, camera:PerspectiveCamera, aa:Bool, w:Int, h:Int) {
     final world = scene.assetId!=null || scene.procedural!=null;
     configure(w,h,aa,world);
@@ -90,9 +84,7 @@ class MetalSurface {
     final bg=world?geometry.background:[0.,0.,0.];
     final pass = cmd.renderEncoder(intermediate, Clear, bg[0],bg[1],bg[2],1);
     if(world){
-      final f=1/Math.tan(camera.fov*Math.PI/360), z=camera.far/(camera.near-camera.far);
-      final p=camera.position, r=camera.right, u=camera.up, b=camera.back;
-      final frame=floats([p.x,p.y,p.z,0,r.x,r.y,r.z,0,u.x,u.y,u.z,0,b.x,b.y,b.z,0,f/camera.aspect,f,z,z*camera.near]);
+      final frame=FrameUniforms.camera(camera);
       pass.setPipeline(scenePipeline);
       pass.setVertexBuffer(geometry.vertices,0,0);
       pass.setVertexBytes(frame,1);
@@ -103,15 +95,10 @@ class MetalSurface {
     }
     final m = scene.mesh;
     if (m != null) {
-      final d = m.geometry.dimensions, r = m.rotation, p = m.position, eye = camera.position;
-      final f = 1/Math.tan(camera.fov*Math.PI/360);
-      final z = camera.far/(camera.near-camera.far);
-      final params = floats([d.x*m.scale.x,d.y*m.scale.y,d.z*m.scale.z,0, r.x,r.y,r.z,0,
-        p.x-eye.x,p.y-eye.y,p.z-eye.z,0, f/camera.aspect,f,z,z*camera.near, camera.right.x,camera.right.y,camera.right.z,0, camera.up.x,camera.up.y,camera.up.z,0, camera.back.x,camera.back.y,camera.back.z,0]);
-      final rgb = m.material.color;
+      final params = FrameUniforms.box(m,camera);
       pass.setPipeline(box);
       pass.setVertexBytes(params,0);
-      pass.setFragmentBytes(floats([((rgb>>16)&255)/255,((rgb>>8)&255)/255,(rgb&255)/255,1]),0);
+      pass.setFragmentBytes(FrameUniforms.color(m.material.color),0);
       pass.draw(Triangle,0,36,1);
     }
     pass.end(); pass.close();

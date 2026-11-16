@@ -29,3 +29,36 @@ jobs:
       - run: npm run setup:c
       - run: npm run test:roundtrip
       - run: npm run test:haxe
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: npm run setup:java
+      - run: npm run test:java
+      - name: Compile the graphical Java application (no GPU needed to build)
+        run: npx --no-install silicanto build examples/nacar/main.js --target java --name Nacar --out dist/ci-java
+      - name: Build portable JVM fixture
+        run: npx --no-install silicanto build tests/fixtures/modules/main.js --target java --out dist/jvm-logic
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portable-jvm-fixture
+          path: dist/jvm-logic/java/Sample.jar
+          retention-days: 1
+
+  portable-java:
+    needs: native
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          name: portable-jvm-fixture
+      - name: Run the Mac-built logic JAR unchanged
+        shell: bash
+        run: test "$(java -jar Sample.jar | tr -d '\r')" = "15.625"

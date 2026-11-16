@@ -2,11 +2,11 @@
 
 **Run Three.js as native code.**
 
-Silicanto is an open-source compiler for turning supported Three.js applications into native Mac apps. Give it a JavaScript entry point and it translates the application and its local modules into editable Haxe. On Apple Silicon, you can compile that Haxe to C or C++ and render the scene with Metal. The resulting app runs without a browser.
+Silicanto is an open-source compiler for turning supported Three.js applications into native Mac apps and Java desktop applications. Give it a JavaScript entry point and it translates the application and its local modules into editable Haxe. On Apple Silicon, choose C, C++ or Java and render the scene with Metal. The resulting app runs without a browser.
 
 ![A frame from the native Metal build of Nácar: a river of molten silicon runs between crystal spires beneath a ringed planet.](docs/nacar-metal.png)
 
-*Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Download the macOS ARM64 demo and verification report](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) · [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
+*Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Download the C/Metal demo for macOS ARM64](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) · [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
 
 ## Build your first native Three.js app
 
@@ -22,6 +22,23 @@ open dist/nacar/Nacar.app
 ```
 
 The setup downloads pinned versions of Haxe, HashLink, hxcpp and the Metal and window bindings into the checkout. The build produces the editable logic in `dist/nacar/haxe/Sample.hx`, generated C in `dist/nacar/c/`, and a self-contained, locally signed macOS app in `dist/nacar/Nacar.app`. The demo's build script runs the same pipeline. [Build script](examples/nacar/build-mac.sh)
+
+## Build Nácar as a Java desktop app
+
+[Download the prebuilt Java app, JAR and frame comparison](https://github.com/chadvictor/Silicanto/releases/tag/v0.2.0). The app includes its own JVM; unzip it and open `Nacar.app`.
+
+On Apple Silicon, install a full **ARM64 JDK 17 or newer** and the Xcode Command Line Tools. From the checkout with npm dependencies installed:
+
+```sh
+npm run setup:mac    # Skip if Haxe 4.3.7 is already installed.
+npm run setup:java
+npx --no-install silicanto build examples/nacar/main.js --target java --name Nacar --out dist/nacar-java
+open dist/nacar-java/Nacar.app
+```
+
+The app bundles its JVM. You also get editable Java sources in `dist/nacar-java/java/src/` and a standalone JAR you can run with `java -jar dist/nacar-java/java/Nacar.jar` on a Metal-capable Apple Silicon Mac with an ARM64 Java 17+ runtime. The JVM runs the terrain, materials and camera code generated from the original modules. Swing handles the window and keyboard; a small JNI library submits buffers to the same Metal shaders as the C and C++ builds. For a reproducible frame without opening a window, append `--time-ms 14000 --capture nacar.ppm` to the JAR command.
+
+A program without graphics produces a portable Java 17 JAR without Swing bindings or native libraries. The Java graphics payload currently supports the cube and procedural scene profiles on macOS ARM64. Windows and Linux graphics, raw WebGL and packed ObjectLoader scenes need additional implementations.
 
 ## Translate JavaScript to Haxe, then choose a target
 
@@ -42,9 +59,10 @@ Run `./dist/nacar-cpp/cpp/Sample` to open the C++ build. For the web build, run 
 | `c` | HashLink/C sources compiled by Clang; macOS app bundle for graphics | Native Metal scenes on Apple Silicon, or command-line logic |
 | `cpp` | C++ sources and an executable built with hxcpp | Native Metal scenes on Apple Silicon, or command-line logic |
 | `js` | JavaScript and, for graphics, an HTML entry point | Browser rendering with Three.js r180 and WebGL 2 |
+| `java` | Generated Java, a runnable JAR and, for graphics, a macOS app with a bundled JVM | Portable Java SE 17 logic; a Swing window with Metal rendering on Apple Silicon |
 | `python` | A Python program | Application logic without a graphics host |
 
-For another Haxe backend, pass `--target NAME --backend FILE.hxml` to `build` or `target`. The HXML file specifies the generator and its output. A graphical application also needs an implementation of its window, input and rendering APIs on that platform. [Haxe compiler targets](https://haxe.org/documentation/introduction/compiler-targets.html)
+Run `npx --no-install silicanto targets` to list available payloads. Select a graphics route explicitly with, for example, `--target java --platform macos-arm64 --graphics metal`. Register new combinations with `--payload FILE.mjs` using the [target extension guide](docs/payloads.md). For another Haxe backend, pass `--target NAME --backend FILE.hxml` to `build` or `target`. The HXML file specifies the generator and its output. A graphical application also needs an implementation of its window, input and rendering APIs on that platform. [Haxe compiler targets](https://haxe.org/documentation/introduction/compiler-targets.html)
 
 ## Will my Three.js project compile?
 
@@ -54,7 +72,7 @@ The frontend reports the first unsupported construct it detects. Arbitrary WebGL
 
 ## How rendering is verified
 
-The test suite compares native output against the original JavaScript. It compiles official Three.js Fundamentals examples and captures the same frames in WebGL and Metal. For Nácar it compares three camera positions at 1280 × 720, at 0, 14 and 35 seconds. A separate test removes the original JavaScript, rebuilds from Haxe in four languages, then edits the Haxe and verifies that the native result changes. [Native and WebGL tests](tests/nacar.mjs) · [Cross-target tests](tests/haxe-targets.mjs)
+The test suite compares native output against the original JavaScript. It compiles official Three.js Fundamentals examples and captures the same frames in WebGL and Metal. For Nácar it compares the C or Java graphics output at three camera positions at 1280 × 720, at 0, 14 and 35 seconds. A separate test removes the original JavaScript, rebuilds from Haxe for multiple languages and verifies that editing the Haxe changes the result. The [Java isolation test](tests/java-target.mjs) runs an edited program from its JAR after removing both source trees. [Native and WebGL tests](tests/nacar.mjs) · [Cross-target tests](tests/haxe-targets.mjs)
 
 ## Contribute and license
 

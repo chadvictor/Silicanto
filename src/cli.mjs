@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { execFileSync } from "node:child_process";
+import { registry, selectPayload, projectProfile } from "./targets.mjs";
 import { createHash } from "node:crypto";
 import {
   cpSync,
@@ -23,10 +23,12 @@ const usage = [
   "Silicanto — Run Three.js as native code.",
   "",
   "silicanto check INPUT",
-  "silicanto emit INPUT --out DIR [--target haxe|c|cpp|js|python]",
-  "silicanto build INPUT --target haxe|c|cpp|js|python --out DIR",
+  "silicanto emit INPUT --out DIR [--target NAME]",
+  "silicanto build INPUT --target NAME --out DIR",
   "silicanto target HAXE_PROJECT --target NAME --out DIR",
   "",
+  "silicanto targets [--payload FILE.mjs]",
+  "Select a platform payload with --platform ID, --graphics ID, or --payload FILE.mjs.",
   "build and target also accept --target NAME --backend FILE.hxml.",
   "emit defaults to editable Haxe. build defaults to native C.",
 ].join("\n");
@@ -41,6 +43,8 @@ try {
       target: { type: "string" },
       graphics: { type: "string" },
       name: { type: "string" },
+      platform: { type: "string" },
+      payload: { type: "string" },
       backend: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
@@ -49,6 +53,20 @@ try {
     console.log(usage);
     process.exit(0);
   }
+  const routes = await registry(values.payload);
+  if (cmd === "targets" && !input) {
+    console.table(
+      routes.map(({ target, platform, graphics, capabilities }) => ({
+        target,
+        platform,
+        graphics,
+        profiles: capabilities.join(", "),
+      })),
+    );
+    process.exit(0);
+  }
+  if (values.backend && values.payload)
+    throw Error("E-PAYLOAD: choose --backend or --payload");
   if (
     !["check", "emit", "build", "target"].includes(cmd) ||
     !input ||
@@ -68,18 +86,8 @@ try {
     throw Error(
       "E-BACKEND: use build INPUT or target HAXE_PROJECT with --target NAME --backend FILE.hxml --out DIR",
     );
-  if (!backend && !["haxe", "c", "cpp", "js", "python"].includes(target))
-    throw Error("E-TARGET: " + target + " has no registered Haxe backend");
   if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name))
     throw Error("E-NAME: use a simple executable name");
-  const expectedGraphics =
-    target === "js"
-      ? "webgl"
-      : ["cpp", "c"].includes(target)
-        ? "metal"
-        : undefined;
-  if (values.graphics && values.graphics !== expectedGraphics)
-    throw Error("E-TARGET: graphics backend unavailable for " + target);
   const source = resolve(input);
   const assets = new Map();
   let hx, metadata;
@@ -103,17 +111,26 @@ try {
       haxe: "4.3.7",
       pipeline: "js-haxe",
       entry: "haxe/Sample.hx",
-      graphicsHost: hx.startsWith("import Three;"),
+      graphicsHost: result.graphicsHost,
       sceneAssets: Object.fromEntries(
         [...assets].map(([p, a]) => [p, a.sha256]),
       ),
       sourceSHA256: sha(readFileSync(source)),
     };
   }
-  if (metadata.graphicsHost && target === "python")
-    throw Error("E-TARGET: Python graphics host pending");
-  if (target === "js" && Object.keys(metadata.sceneAssets).length)
-    throw Error("E-TARGET: static scene asset adapter pending for WebGL");
+  const mode = cmd === "emit" ? "emit" : "build";
+  const profile = projectProfile(metadata);
+  const route =
+    cmd !== "check" || values.target || values.platform || values.graphics
+      ? selectPayload(routes, {
+          target,
+          platform: values.platform,
+          graphics: values.graphics,
+          backend,
+          profile,
+          mode: cmd === "check" ? "check" : mode,
+        })
+      : null;
   if (cmd === "check") {
     console.log("OK JS → Haxe · " + input);
   } else {
@@ -145,6 +162,8 @@ try {
             "three-browser.js",
             "Three.hx",
             "MetalSurface.hx",
+            "DesktopSurface.hx",
+            "FrameUniforms.hx",
             "SceneBuffers.hx",
             "ProcApi.hx",
             "ProcJs.hx",
@@ -168,29 +187,33 @@ try {
       mkdirSync(join(stage, "licenses"));
       cpSync(join(root, "LICENSE"), join(stage, "licenses/silicanto.txt"));
       if (metadata.graphicsHost)
-        cpSync(join(root, "licenses/three.txt"), join(stage, "licenses/three.txt"));
-      if (backend || target !== "haxe") {
-        if (!existsSync(join(root, ".toolchain/haxe/haxe")))
-          throw Error("Run npm run setup:mac to install Haxe");
-        execFileSync(
-          "bash",
-          [
-            join(root, "scripts/haxe-target.sh"),
-            stage,
-            backend ? "external" : target,
-            metadata.graphicsHost ? "graphics" : "logic",
-            cmd === "emit" ? "emit" : "build",
-            name,
-            backend || "",
-          ],
-          { stdio: "inherit" },
+        cpSync(
+          join(root, "licenses/three.txt"),
+          join(stage, "licenses/three.txt"),
         );
-      }
+      const manifest = {
+        ...metadata,
+        target,
+        haxeSHA256: sha(hx),
+        payload: {
+          apiVersion: route.apiVersion,
+          platform: route.platform,
+          graphics: route.graphics,
+          profile,
+        },
+      };
       writeFileSync(
         join(stage, "manifest.json"),
-        JSON.stringify({ ...metadata, target, haxeSHA256: sha(hx) }, null, 2) +
-          "\n",
+        JSON.stringify(manifest, null, 2) + "\n",
       );
+      await route.build({
+        projectDir: stage,
+        manifest,
+        target,
+        mode,
+        name,
+        backend,
+      });
       renameSync(stage, dest);
       console.log(dest);
     } finally {
