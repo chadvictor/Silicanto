@@ -167,6 +167,8 @@ try {
       }
       mkdirSync(join(stage, "licenses"));
       cpSync(join(root, "LICENSE"), join(stage, "licenses/silicanto.txt"));
+      if (metadata.graphicsHost)
+        cpSync(join(root, "licenses/three.txt"), join(stage, "licenses/three.txt"));
       if (backend || target !== "haxe") {
         if (!existsSync(join(root, ".toolchain/haxe/haxe")))
           throw Error("Run npm run setup:mac to install Haxe");

@@ -6,7 +6,7 @@ Silicanto is an open-source compiler for turning supported Three.js applications
 
 ![A frame from the native Metal build of Nácar: a river of molten silicon runs between crystal spires beneath a ringed planet.](docs/nacar-metal.png)
 
-*Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
+*Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Download the macOS ARM64 demo and verification report](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) · [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
 
 ## Build your first native Three.js app
 

@@ -39,7 +39,6 @@ case "$target" in
     haxe "${args[@]}" --js js/program.js
     if [[ "$graphics" == graphics ]]; then
       cp "$root"/node_modules/three/build/{three.module.js,three.core.js} js/
-      cp "$root/node_modules/three/LICENSE" licenses/three.txt
       cat > js/index.html <<'HTML'
 <!doctype html>
 <meta charset="utf-8">
@@ -57,6 +56,5 @@ if [[ "$graphics" == graphics && "$target" == c ]]; then
   for lib in hxn hxn-window hxn-gpu-metal; do cp "$(haxelib libpath "$lib")/LICENSE" "licenses/$lib.txt"; done
 fi
 if [[ "$graphics" == graphics && "$target" == c && "$action" == build ]]; then
-  cp "$root/node_modules/three/LICENSE" licenses/three.txt
   bash "$root/scripts/bundle-hlc.sh" "$stage" "$name"
 fi
