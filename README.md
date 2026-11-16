@@ -6,7 +6,7 @@ Silicanto is an open-source compiler for turning supported Three.js applications
 
 ![A frame from the native Metal build of Nácar: a river of molten silicon runs between crystal spires beneath a ringed planet.](docs/nacar-metal.png)
 
-*Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Download the macOS ARM64 demo and verification report](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) · [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
+*Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Download the C/Metal demo for macOS ARM64](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) · [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
 
 ## Build your first native Three.js app
 
@@ -24,6 +24,8 @@ open dist/nacar/Nacar.app
 The setup downloads pinned versions of Haxe, HashLink, hxcpp and the Metal and window bindings into the checkout. The build produces the editable logic in `dist/nacar/haxe/Sample.hx`, generated C in `dist/nacar/c/`, and a self-contained, locally signed macOS app in `dist/nacar/Nacar.app`. The demo's build script runs the same pipeline. [Build script](examples/nacar/build-mac.sh)
 
 ## Build Nácar as a Java desktop app
+
+[Download the prebuilt Java app, JAR and frame comparison](https://github.com/chadvictor/Silicanto/releases/tag/v0.2.0). The app includes its own JVM; unzip it and open `Nacar.app`.
 
 On Apple Silicon, install a full **ARM64 JDK 17 or newer** and the Xcode Command Line Tools. From the checkout with npm dependencies installed:
 
