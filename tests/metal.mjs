@@ -3,9 +3,11 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdtempSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { jdk } from "./jdk.mjs";
 import { chromium } from "playwright";
 
 const aot = process.argv.includes("--aot");
+const java = process.argv.includes("--java");
 const hlc = process.argv.includes("--haxe-c");
 const root = fileURLToPath(new URL("../", import.meta.url));
 process.chdir(root);
@@ -30,7 +32,13 @@ const report = {
   gpu: JSON.parse(
     run("system_profiler", ["SPDisplaysDataType", "-json"]),
   ).SPDisplaysDataType.map((g) => g.sppci_model),
-  pipeline: hlc ? "js-haxe-c-and-js" : aot ? "static-hermes-c-aot" : "haxe-cpp",
+  pipeline: java
+    ? "js-haxe-java-and-js"
+    : hlc
+      ? "js-haxe-c-and-js"
+      : aot
+        ? "static-hermes-c-aot"
+        : "haxe-cpp",
   captures: [],
 };
 try {
@@ -41,18 +49,35 @@ try {
     const input = "samples/r180/" + sample + ".html",
       project = path.join(output, sample);
     let app, graphics;
-    if (hlc) {
+    if (hlc || java) {
       const cli = (...args) => run(process.execPath, ["src/cli.mjs", ...args]);
       const portable = project + "-haxe";
       cli("emit", input, "--out", portable);
-      cli("target", portable, "--target", "c", "--out", project);
+      cli(
+        "target",
+        portable,
+        "--target",
+        java ? "java" : "c",
+        "--out",
+        project,
+      );
       cli("target", portable, "--target", "js", "--out", project + "-js");
       assert.equal(
         readFileSync(path.join(project, "haxe/Sample.hx"), "utf8"),
         readFileSync(path.join(project + "-js", "haxe/Sample.hx"), "utf8"),
       );
-      app = path.join(project, "c/Sample");
-      graphics = path.join(project, "c/lib/gpu_metal.hdll");
+      if (java) {
+        // Run the bundled JVM launcher. Inspect the actual JNI library carried by the JAR.
+        app = path.join(project, "Sample.app/Contents/MacOS/Sample");
+        const lib = "native/macos-arm64/libsilicanto_metal.dylib";
+        run(jdk("jar"), ["xf", path.join(project, "java/Sample.jar"), lib], {
+          cwd: project,
+        });
+        graphics = path.join(project, lib);
+      } else {
+        app = path.join(project, "c/Sample");
+        graphics = path.join(project, "c/lib/gpu_metal.hdll");
+      }
     } else if (aot) {
       run("node", ["scripts/experimental-hermes.mjs", input, project]);
       app = path.join(project, "Application.app/Contents/MacOS/Application");
@@ -155,7 +180,7 @@ try {
             }, count),
           );
         const reference = await pixels();
-        if (hlc) {
+        if (hlc || java) {
           await page.route("http://compiled.test/**", (route) => {
             const file = path.basename(new URL(route.request().url()).pathname);
             if (

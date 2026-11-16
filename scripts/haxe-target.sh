@@ -1,8 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-source "$root/scripts/tool-env.sh"
 stage=$1 target=$2 graphics=$3 action=$4 name=$5
+if [[ "$target" == c || "$target" == cpp ]]; then
+  [[ -x "$root/.toolchain/haxe/haxe" ]] || { echo 'Run npm run setup:mac first' >&2; exit 1; }
+  source "$root/scripts/tool-env.sh"
+else
+  source "$root/scripts/haxe-env.sh"
+fi
 cd "$stage"
 args=(-cp haxe -main Sample)
 if [[ "$graphics" == graphics && ( "$target" == c || "$target" == cpp ) ]]; then

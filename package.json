@@ -10,7 +10,7 @@
   "scripts": {
     "setup:mac": "bash scripts/setup-mac.sh",
     "samples": "node scripts/samples.mjs",
-    "test": "node --test tests/compiler.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "test:metal": "node tests/metal.mjs",
     "setup:aot": "bash scripts/setup-aot.sh",
     "test:aot": "node tests/native.mjs",
@@ -19,7 +19,11 @@
     "test:haxe": "node tests/haxe-targets.mjs",
     "test:haxe-graphics": "node tests/metal.mjs --haxe-c",
     "test:roundtrip": "node tests/haxe-js-roundtrip.mjs",
-    "test:nacar": "node tests/nacar.mjs"
+    "test:nacar": "node tests/nacar.mjs",
+    "setup:java": "bash scripts/setup-java.sh",
+    "test:java": "node tests/java-target.mjs",
+    "test:nacar-java": "node tests/nacar.mjs --java",
+    "test:java-graphics": "node tests/metal.mjs --java"
   },
   "dependencies": {
     "esbuild": "0.25.12",
@@ -30,7 +34,7 @@
   "devDependencies": {
     "playwright": "1.65.0"
   },
-  "description": "Compile Three.js JavaScript to editable Haxe and native C or C++ for macOS with Metal on Apple Silicon.",
+  "description": "Compile supported Three.js JavaScript to editable Haxe, native C or C++, and Java desktop applications with Metal on Apple Silicon.",
   "license": "MIT",
   "repository": {
     "type": "git",

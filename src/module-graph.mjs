@@ -3,7 +3,7 @@ import ts from "typescript";
 import { SourceMap } from "node:module";
 import { readFileSync } from "node:fs";
 import { basename, dirname, extname, resolve } from "node:path";
-import { compile, moduleInput } from "./compiler.mjs";
+import { compileProject, moduleInput } from "./compiler.mjs";
 
 export async function translate(input, loadScene) {
   const text = readFileSync(input, "utf8");
@@ -23,7 +23,7 @@ export async function translate(input, loadScene) {
         !n.moduleSpecifier.text.endsWith(".json"),
     )
   )
-    return { haxe: compile(input, text, loadScene), inputs: [input] };
+    return { ...compileProject(input, text, loadScene), inputs: [input] };
 
   // Bundle only to resolve static ESM bindings and tree-shake unused library exports.
   // No module initializer runs during translation.
@@ -98,7 +98,7 @@ export async function translate(input, loadScene) {
     );
   };
   return {
-    haxe: compile("program.js", generated, loadScene, {
+    ...compileProject("program.js", generated, loadScene, {
       bundled: true,
       canvas,
       location,
