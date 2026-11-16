@@ -1,0 +1,32 @@
+name: Report a compatibility issue
+description: Share a JavaScript input that fails to compile or behaves differently on a target.
+title: "[Compatibility] "
+body:
+  - type: textarea
+    id: input
+    attributes:
+      label: Smallest input that reproduces the problem
+      description: Include the relevant imports and source, or link to a public reproduction.
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command and target
+      placeholder: silicanto build main.js --target c --out dist/example
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+      description: Include the complete diagnostic. For rendering differences, add the frame time and comparison images.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, architecture, Node version, Three.js revision and Silicanto commit.
+    validations:
+      required: true

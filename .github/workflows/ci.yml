@@ -1,0 +1,31 @@
+name: Compiler checks
+on: [push, pull_request]
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Translate the complete Three.js demo to Haxe
+        run: npx --no-install silicanto emit examples/nacar/main.js --out dist/ci-source
+
+  native:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run setup:c
+      - run: npm run test:roundtrip
+      - run: npm run test:haxe

@@ -1,0 +1,56 @@
+{
+  "name": "silicanto",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "silicanto": "./src/cli.mjs",
+    "threec": "./src/cli.mjs"
+  },
+  "scripts": {
+    "setup:mac": "bash scripts/setup-mac.sh",
+    "samples": "node scripts/samples.mjs",
+    "test": "node --test tests/compiler.test.mjs",
+    "test:metal": "node tests/metal.mjs",
+    "setup:aot": "bash scripts/setup-aot.sh",
+    "test:aot": "node tests/native.mjs",
+    "test:samples:aot": "node tests/metal.mjs --aot",
+    "setup:c": "bash scripts/setup-mac.sh && bash scripts/setup-hlc.sh",
+    "test:haxe": "node tests/haxe-targets.mjs",
+    "test:haxe-graphics": "node tests/metal.mjs --haxe-c",
+    "test:roundtrip": "node tests/haxe-js-roundtrip.mjs",
+    "test:nacar": "node tests/nacar.mjs"
+  },
+  "dependencies": {
+    "esbuild": "0.25.12",
+    "parse5": "7.3.0",
+    "three": "0.180.0",
+    "typescript": "5.9.3"
+  },
+  "devDependencies": {
+    "playwright": "1.65.0"
+  },
+  "description": "Compile Three.js JavaScript to editable Haxe and native C or C++ for macOS with Metal on Apple Silicon.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chadvictor/Silicanto.git"
+  },
+  "homepage": "https://github.com/chadvictor/Silicanto#readme",
+  "bugs": {
+    "url": "https://github.com/chadvictor/Silicanto/issues"
+  },
+  "keywords": [
+    "three.js",
+    "javascript-to-haxe",
+    "javascript-compiler",
+    "native-code",
+    "metal",
+    "apple-silicon",
+    "hxcpp",
+    "hashlink"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
