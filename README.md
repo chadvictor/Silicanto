@@ -1,95 +1,115 @@
-# Silicanto
+<h1 align="center">Silicanto</h1>
+<p align="center"><strong>Run Three.js as native code.</strong></p>
+<p align="center">Compile JavaScript to editable Haxe. Build a native executable or a Java desktop app from the same project.</p>
 
-**Run Three.js as native code.**
+<p align="center">
+  <a href="https://github.com/chadvictor/Silicanto/actions/workflows/ci.yml"><img alt="Compiler checks on main" src="https://github.com/chadvictor/Silicanto/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  &nbsp; <a href="https://github.com/chadvictor/Silicanto/releases">Releases</a>
+  &nbsp; · &nbsp; <a href="#build-on-apple-silicon">Quickstart</a>
+  &nbsp; · &nbsp; <a href="docs/compatibility/native-desktop/README.md">Compatibility</a>
+  &nbsp; · &nbsp; <a href="docs/roadmap-1.0.md">Road to 1.0</a>
+</p>
 
-Silicanto is an open-source compiler for turning supported Three.js applications into native Mac apps and Java desktop applications. Give it a JavaScript entry point and it translates the application and its local modules into editable Haxe. On Apple Silicon, choose C, C++ or Java and render the scene with Metal. The resulting app runs without a browser.
+<p align="center">
+  <a href="docs/nacar-flight.mp4">
+    <picture>
+      <source media="(prefers-reduced-motion: no-preference)" srcset="docs/nacar-flight.webp">
+      <img width="100%" src="docs/nacar-metal.png" alt="Nácar on Metal. A molten silicon river passes between crystal spires beneath a ringed planet. Open the four-second native flythrough.">
+    </picture>
+  </a>
+</p>
 
-**General JavaScript frontend (experimental).** Compile an application's JS and transitive npm dependencies to Haxe with `--frontend generic`. The new path uses standard JavaScript and web APIs without library adapters. [Build and retarget a Canvas app](docs/general-javascript.md) · [Native desktop measurements for WebGL, CSS and 2,061 Phaser examples](docs/compatibility/native-desktop/README.md) · [Reproduce the multi-frame gallery](tests/phaser4/README.md).
+<p align="center"><strong>Nácar · Silicon Sea</strong><br>
+Three JavaScript modules generate the terrain, crystal geometry and HDR reflections in this native Metal scene.<br>
+<a href="docs/nacar-flight.mp4">Watch the native flythrough</a> · <a href="examples/nacar/world.mjs">Explore the scene source</a></p>
 
-### Native desktop support on Apple Silicon
+## Try the native demo
 
-The generic frontend compiles the application's JavaScript and its libraries into editable Haxe. The C++ executable and Java desktop build draw through ANGLE on Metal, play audio through AVFoundation and receive mouse and keyboard input from AppKit or AWT. HTTP, HTTPS and WebSocket traffic uses URLSession. The CSS renderer supports block, flex and grid layout. Local script resources can be compiled ahead of time, including scripts loaded by other scripts.
+On an Apple Silicon Mac, download a ZIP, unzip it and open <code>Nacar.app</code>. Press **Space** to pause or resume the camera flight.
 
-| Native test | Measured result |
+| Download | Inside |
 | --- | --- |
-| Phaser 4.1.0 gallery | Of 2,061 original examples, 1,925 produced frames 1, 4 and 12 on C++ and 1,929 did so on Java. Both targets produced identical pixels at all three marks for 944 examples. |
-| WebGL 1 OGLES | All 178 shader build cases and 775 reference rendering comparisons passed on both targets. |
-| CSS reference pairs | The C++ renderer completed 1,714 pairs. Of these, 630 matched with visible detail, 28 matched uniformly and 1,056 differed. |
+| [Nácar for macOS arm64 · C/Metal](https://github.com/chadvictor/Silicanto/releases/download/v0.1.0/Nacar-macOS-arm64.zip) | Native executable and Metal renderer. [Release and checksums](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) |
+| [Nácar for macOS arm64 · Java/Metal](https://github.com/chadvictor/Silicanto/releases/download/v0.2.0/Nacar-java-macOS-arm64.zip) | Desktop app with its own JVM. A standalone JAR and frame comparison are also available. [Release and checksums](https://github.com/chadvictor/Silicanto/releases/tag/v0.2.0) |
 
-On both C++ and Java, 6 of 21 WebGL 1 context pages and 8 of 9 WebGL 2 context pages passed the original Khronos tests. Full WebGL conformance and complete CSS layout remain open. The gallery records pixels at specific frames. Playability requires input and longer scenarios for each game. [Per-example outcomes, hashes and reproduction commands](docs/compatibility/native-desktop/README.md)
+## What can I compile?
 
-![A frame from the native Metal build of Nácar: a river of molten silicon runs between crystal spires beneath a ringed planet.](docs/nacar-metal.png)
+**Three.js scenes.** The scene compiler handles a supported subset of Three.js r180, including perspective cameras, indexed geometry, opaque metallic-roughness materials, lights, fog and environment reflections. Nácar uses this path. Run `silicanto check` on your entry point to get a source diagnostic. [Scene specification](docs/specification.md)
 
-*Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Download the C/Metal demo for macOS ARM64](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) · [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
+**General JavaScript applications.** On `main`, `--frontend generic` follows the application's statically discoverable imports and installed npm dependencies, then translates their source to Haxe. Native host implementations provide the DOM, Canvas, WebGL, audio, input and network APIs. This experimental path compiles the original Phaser engine along with the application. Each target needs implementations of the APIs that application uses. [JavaScript compiler guide](docs/general-javascript.md) · [Known gaps](docs/roadmap-1.0.md)
 
-## Build your first native Three.js app
+## Build on Apple Silicon
 
-Use an Apple Silicon Mac with Node.js 22 or newer, npm, Python 3 and the Xcode Command Line Tools. Start from a checkout:
+Install Node.js 22+, npm, Python 3 and the Xcode Command Line Tools. From a fresh checkout:
 
 ```sh
 git clone https://github.com/chadvictor/Silicanto.git
 cd Silicanto
 npm ci
 npm run setup:c
-npx --no-install silicanto build examples/nacar/main.js --target c --name Nacar --out dist/nacar
+
+npx --no-install silicanto build examples/nacar/main.js \
+  --target c --name Nacar --out dist/nacar
 open dist/nacar/Nacar.app
 ```
 
-The setup downloads pinned versions of Haxe, HashLink, hxcpp and the Metal and window bindings into the checkout. The build produces the editable logic in `dist/nacar/haxe/Sample.hx`, generated C in `dist/nacar/c/`, and a self-contained, locally signed macOS app in `dist/nacar/Nacar.app`. The demo's build script runs the same pipeline. [Build script](examples/nacar/build-mac.sh)
+The output contains an app bundle, generated C in `dist/nacar/c/` and editable Haxe in `dist/nacar/haxe/`. Use a fresh destination for each build.
 
-## Build Nácar as a Java desktop app
+<details>
+<summary><strong>Build the same scene for Java</strong></summary>
 
-[Download the prebuilt Java app, JAR and frame comparison](https://github.com/chadvictor/Silicanto/releases/tag/v0.2.0). The app includes its own JVM; unzip it and open `Nacar.app`.
-
-On Apple Silicon, install a full **ARM64 JDK 17 or newer** and the Xcode Command Line Tools. From the checkout with npm dependencies installed:
+Install a full arm64 JDK 17+ on the Mac, then run these commands from the configured checkout.
 
 ```sh
-npm run setup:mac    # Skip if Haxe 4.3.7 is already installed.
 npm run setup:java
-npx --no-install silicanto build examples/nacar/main.js --target java --name Nacar --out dist/nacar-java
+npx --no-install silicanto build examples/nacar/main.js \
+  --target java --name Nacar --out dist/nacar-java
 open dist/nacar-java/Nacar.app
 ```
 
-The app bundles its JVM. You also get editable Java sources in `dist/nacar-java/java/src/` and a standalone JAR you can run with `java -jar dist/nacar-java/java/Nacar.jar` on a Metal-capable Apple Silicon Mac with an ARM64 Java 17+ runtime. The JVM runs the terrain, materials and camera code generated from the original modules. Swing handles the window and keyboard; a small JNI library submits buffers to the same Metal shaders as the C and C++ builds. For a reproducible frame without opening a window, append `--time-ms 14000 --capture nacar.ppm` to the JAR command.
+The JVM runs the generated application logic. Swing hosts the window and JNI submits geometry and materials to Metal. The build includes Java sources and `dist/nacar-java/java/Nacar.jar`. Pass `--time-ms 14000 --capture nacar.ppm` to the JAR to capture a fixed camera position.
 
-A program without graphics produces a portable Java 17 JAR without Swing bindings or native libraries. The Java graphics payload currently supports the cube and procedural scene profiles on macOS ARM64. Windows and Linux graphics, raw WebGL and packed ObjectLoader scenes need additional implementations.
+</details>
 
-## Translate JavaScript to Haxe, then choose a target
+## Emit Haxe once, choose the target later
 
-To inspect the translation, only Node.js and the npm dependencies are required. The first two commands below check the input and write a Haxe project. After native setup, the last two commands compile that same project to different targets. Each output path must be new.
+This example starts with an HTML page, ES modules, CommonJS and a PNG. The first command writes the translated sources and dependency manifest. The second compiles that project for C++. At runtime the app reads its image asset and opens a native window.
 
 ```sh
-npx --no-install silicanto check examples/nacar/main.js
-npx --no-install silicanto emit examples/nacar/main.js --out dist/nacar-source
-npx --no-install silicanto target dist/nacar-source --target cpp --out dist/nacar-cpp
-npx --no-install silicanto target dist/nacar-source --target js --out dist/nacar-web
+npx --no-install silicanto emit tests/fixtures/general/index.html \
+  --frontend generic --out dist/source
+npx --no-install silicanto target dist/source --target cpp --out dist/desktop
+dist/desktop/cpp/Sample --asset-root tests/fixtures/general --window
 ```
 
-Run `./dist/nacar-cpp/cpp/Sample` to open the C++ build. For the web build, run `python3 -m http.server 8000 --directory dist/nacar-web/js` and open [localhost:8000](http://localhost:8000). You can edit the emitted Haxe and repeat `target` with another output directory; it only needs the generated project.
+After Java setup, run `npx --no-install silicanto target dist/source --target java --out dist/jvm` to build a JAR from the same Haxe. A desktop integration test moves the source tree offline before running the generated apps with only a WAV in their asset directory. [Integration test](tests/desktop-targets.mjs)
 
-| CLI target | What you get | Tested use |
-| --- | --- | --- |
-| `haxe` | Editable Haxe sources and an input manifest | Inspect, change or hand off a translated application |
-| `c` | HashLink/C sources compiled by Clang; macOS app bundle for graphics | Native Metal scenes on Apple Silicon, or command-line logic |
-| `cpp` | C++ sources and an executable built with hxcpp | Native Metal scenes on Apple Silicon, or command-line logic |
-| `js` | JavaScript and, for graphics, an HTML entry point | Browser rendering with Three.js r180 and WebGL 2 |
-| `java` | Generated Java, a runnable JAR and, for graphics, a macOS app with a bundled JVM | Portable Java SE 17 logic; a Swing window with Metal rendering on Apple Silicon |
-| `python` | A Python program | Application logic without a graphics host |
+| Output | Available uses |
+| --- | --- |
+| **Haxe** | Inspect or edit the translated project and hand it to another Haxe backend. |
+| **C / C++** | Compile with HashLink/C and Clang or with hxcpp. Both have a software Canvas. The Three.js scene path supports Metal on Apple Silicon. The generic desktop WebGL host is available on C++. |
+| **Java** | Generate Java sources and a runnable JAR. Use portable Java 17 logic, Java 2D, or the Metal-backed desktop host on Apple Silicon. |
+| **Neko** | Run application logic and software Canvas programs as Neko VM bytecode. |
+| **JavaScript / Python** | Use the JavaScript scene or logic payload, or generate a Python program for supported application logic. |
 
-Run `npx --no-install silicanto targets` to list available payloads. Select a graphics route explicitly with, for example, `--target java --platform macos-arm64 --graphics metal`. Register new combinations with `--payload FILE.mjs` using the [target extension guide](docs/payloads.md). For another Haxe backend, pass `--target NAME --backend FILE.hxml` to `build` or `target`. The HXML file specifies the generator and its output. A graphical application also needs an implementation of its window, input and rendering APIs on that platform. [Haxe compiler targets](https://haxe.org/documentation/introduction/compiler-targets.html)
+Run `npx --no-install silicanto targets` for the registered target, platform and graphics combinations. Add a payload with `--payload FILE.mjs` or select another Haxe generator with `--backend FILE.hxml`. [Target extension guide](docs/payloads.md)
 
-## Will my Three.js project compile?
+## Native desktop support on Apple Silicon
 
-Start with `silicanto check` on the JavaScript entry point. A supported subset of JavaScript, TypeScript and static ES modules is covered. The reference graphics version is **Three.js r180**. The runtime handles perspective cameras, groups and transforms, opaque basic and metallic-roughness materials, indexed buffer geometry, selected procedural primitives, directional and hemisphere lighting, exponential fog and cube-UV environment reflections.
+The C++ and Java desktop hosts draw through ANGLE on Metal, play audio through AVFoundation, and receive mouse and keyboard events through AppKit or AWT. URLSession handles HTTP(S) and WebSocket traffic. The CSS renderer uses litehtml and Taffy for layout.
 
-The frontend reports the first unsupported construct it detects. Arbitrary WebGL calls, general browser DOM code, custom shaders and transparent materials are outside the current graphics coverage. For a useful compatibility report, share a small reproducer, the Three.js revision and the diagnostic. [Report a compatibility issue](https://github.com/chadvictor/Silicanto/issues/new?template=compatibility.yml)
+| Original workload | Observed result |
+| --- | --- |
+| **2,061 Phaser 4.1.0 examples** | C++ captured frames 1, 4 and 12 for **1,925** entries. Java captured them for **1,929**. Of the 1,925 entries observed on both, **944** matched pixel-for-pixel at all three marks. |
+| **WebGL 1 shaders** | Both targets passed **178/178** OGLES shader build cases and **775/775** reference rendering comparisons. |
+| **WebGL context behavior** | Both targets passed **6/21** WebGL 1 context pages and **8/9** WebGL 2 context pages. Full conformance remains open. |
+| **CSS layout and paint** | C++ completed **1,714** WPT pairs. **630** matched with visible detail, **28** matched uniformly and **1,056** differed. |
+| **Full WebGL page lists** | The compiler emitted Haxe for **964/970** WebGL 1 entries and **2,856/2,865** WebGL 2 entries. This count measures translation only. |
 
-## How rendering is verified
+The report records the compiler and upstream revision for each measurement. It includes individual failures, frame hashes and reproduction commands. Gallery captures measure selected moments. Playability still needs input and longer-running checks for individual games. [Read the native report](docs/compatibility/native-desktop/README.md) · [Browse the gallery matrix](docs/compatibility/native-desktop/phaser4/matrix.tsv) · [Run the gallery](tests/phaser4/README.md)
 
-The test suite compares native output against the original JavaScript. It compiles official Three.js Fundamentals examples and captures the same frames in WebGL and Metal. For Nácar it compares the C or Java graphics output at three camera positions at 1280 × 720, at 0, 14 and 35 seconds. A separate test removes the original JavaScript, rebuilds from Haxe for multiple languages and verifies that editing the Haxe changes the result. The [Java isolation test](tests/java-target.mjs) runs an edited program from its JAR after removing both source trees. [Native and WebGL tests](tests/nacar.mjs) · [Cross-target tests](tests/haxe-targets.mjs)
+## Contribute
 
-## Contribute and license
+Each open work item has a reproduction and an acceptance criterion. Start with a failing original input, fix the language or platform operation it exercises, then retest the original application. [1.0 backlog and GitHub issues](docs/roadmap-1.0.md) · [Contributor guide](CONTRIBUTING.md) · [Report a compatibility issue](https://github.com/chadvictor/Silicanto/issues/new?template=compatibility.yml)
 
-To add a Three.js API, improve JavaScript translation or work on a new backend, start with the [contributor guide](CONTRIBUTING.md). It covers setup, source layout, test commands and what to include in a pull request. The [compiler specification](docs/specification.md) describes the compatibility contract and the roadmap.
-
-Silicanto is distributed under the [MIT License](LICENSE). The geometry and shader code that follows Three.js conventions also carries the [Three.js MIT notice](licenses/three.txt).
+Silicanto is open source under the MIT License. [License](LICENSE) · [Three.js notice](licenses/three.txt)

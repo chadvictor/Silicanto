@@ -1,6 +1,6 @@
 # Silicanto compiler specification
 
-**Run Three.js as native code.** Revision 0.8, November 16, 2026.
+**Run Three.js as native code.** Specification revision 0.8. Compatibility evidence updated November 17, 2026.
 
 Silicanto takes a web JavaScript entry point and emits a readable, editable Haxe project containing the application and the modules it uses. Each target builds from that same project. Three.js applications were the first use case. The 1.0 goal is to compile applications without any prior knowledge of their libraries. The JavaScript frontend owns language semantics and the module graph; target payloads own the web and operating-system services an application uses. The goal does not establish current compatibility.
 
@@ -19,7 +19,7 @@ Silicanto takes a web JavaScript entry point and emits a readable, editable Haxe
 - Use the [upstream Phaser gallery](../tests/phaser4/README.md) as an external consumer. For the pinned catalog, account for every entry on C++ and Java. Each must build, initialize, and demonstrate the behavior of its web reference. A native process that starts, a blank frame, or a source-only compilation is insufficient.
 - For visual scenes, compare real output with the browser. For input, audio, timing or nonvisual logic, add a repeatable scenario with observable assertions. A missing reference or an unavailable service remains an open case. Passing this catalog would establish compatibility for the tested revision and targets; other frameworks still need independent evidence.
 
-The [case-by-case measurements](compatibility/phaser4/README.md) are the current baseline. The 1.0 release criterion **has not been met**.
+The 1.0 release gate is open. The native desktop report contains the current case-by-case baseline, with revisions for each run. The release backlog maps the remaining gaps to issues and acceptance criteria. [Native measurements](compatibility/native-desktop/README.md) · [1.0 release backlog](roadmap-1.0.md)
 
 ## Current evidence
 
@@ -27,7 +27,7 @@ The [case-by-case measurements](compatibility/phaser4/README.md) are the current
 | --- | --- | --- |
 | Application logic with modules | A JavaScript program imports functions from the real Three.js r180 MathUtils module, constructs a class and manipulates vertex data | The original JavaScript and the C, C++, Java, JavaScript and Python outputs agree on the computation. Editing the Haxe changes the result. Custom HXML can select another backend. [Java JAR isolation](../tests/java-target.mjs) · [Other targets](../tests/haxe-targets.mjs) |
 | General web application | Classic script, ES modules, CommonJS, JSON, local XHR and PNG drawn to a Canvas | The original Chromium image matches C, C++, Java and Neko pixel for pixel. [Fixture and test](../tests/generic-targets.mjs) |
-| Unmodified Phaser 4 catalog | The published UMD engine and the original sources and assets | [Native results by example](compatibility/phaser4/README.md); source emission, execution and visual checks are separate. |
+| Unmodified Phaser 4 catalog | The published UMD engine and the original sources and assets | Frames 1, 4 and 12 were captured on each target. [Native results by example](compatibility/native-desktop/phaser4/matrix.tsv) |
 | Haxe-to-JavaScript round trip | A projection calculation compiled by Haxe 4.3.7 to both ES5 and ES6 | Both complete scripts translate back to Haxe and produce the reference result in JS and native C. The corpus includes handwritten JavaScript and the recurrence used by the Nácar terrain. [Test](../tests/haxe-js-roundtrip.mjs) |
 | Official Three.js samples | The static and animated Fundamentals examples from r180 | Compare the original WebGL frames to the regenerated web program and to the C/Metal and Java/Metal programs. Preserve the original dimensions and options. [Test](../tests/metal.mjs) · [Upstream examples](https://github.com/mrdoob/three.js/tree/r180/manual/examples) |
 | Nácar procedural world | Three original JavaScript modules generate the scene and move the camera; Three.js WebGLRenderer supplies the browser reference | The native ARM64 app generates geometry and an HDR environment at startup. At 1280 × 720, compare original WebGL, regenerated WebGL and C/Metal or Java/Metal at 0, 14 and 35 seconds. Metal passes if mean channel error is below 4/255 and more than 92% of pixels have every RGB channel within eight levels of the reference. [Test](../tests/nacar.mjs) |

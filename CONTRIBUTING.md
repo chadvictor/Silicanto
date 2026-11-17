@@ -54,6 +54,8 @@ For a single official scene, `npm run samples` fetches the pinned r180 sources i
 
 ## Propose a change
 
+The 1.0 backlog links current failures to GitHub issues with reproduction commands and acceptance criteria. [Choose an open work item](docs/roadmap-1.0.md)
+
 Open an [issue](https://github.com/chadvictor/Silicanto/issues) with the smallest input that demonstrates the behavior. Include the dependency revisions, target, operating system and architecture, exact command, expected result and actual output. For a visual mismatch, include the camera time and the original and native frames if available.
 
 In a pull request, describe the user-visible change and the checks you ran. For a language feature, exercise its normal JavaScript entry point. For a graphics feature, cover the frontend signature, target implementation and a reference scene. For a target change, verify that it works from an emitted Haxe project after the original JavaScript is removed. Keep generated builds, downloaded dependencies and toolchains out of commits. Changes to supported APIs or targets should update the coverage in the [README](README.md) and [specification](docs/specification.md).

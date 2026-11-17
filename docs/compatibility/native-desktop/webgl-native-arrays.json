@@ -1,0 +1,15 @@
+{
+  "compiler": "d048f3ab210e6984ae9839e68161dbfd432dddf1",
+  "modifiedCompilerOrSuite": false,
+  "revision": "39443210f7f81db4773eb104facadfb85d05dfa4",
+  "version": "2.0.1",
+  "target": "cpp",
+  "selected": 1,
+  "cases": [
+    {
+      "id": "deqp/data/gles3/shaders/arrays.html",
+      "status": "run-failed",
+      "diagnostic": "Error : ReferenceError: modules is not defined"
+    }
+  ]
+}
