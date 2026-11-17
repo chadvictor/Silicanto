@@ -33,7 +33,7 @@ class WebPlatform {
 	}
 
 	static function element(tag:String):JsObject {
-		final o:JsObject = tag == "canvas" ? new WebCanvas(300,
+		final o:JsObject = tag == "script" ? new WebScriptElement() : tag == "canvas" ? new WebCanvas(300,
 			150) : tag == "audio"
 			&& DesktopServices.available() ? new WebAudio() : tag == "img" ? new WebImage(Js.get(Js.global("Image"), "prototype")) : Js.obj();
 		if (!Std.isOfType(o, WebAudio))
@@ -84,6 +84,7 @@ class WebPlatform {
 			children.push(n);
 			Js.put(n, "parentElement", o);
 			Js.put(n, "parentNode", o);
+			WebScriptElement.attached(n);
 			return n;
 		}, false));
 		return o;
@@ -164,6 +165,10 @@ class WebPlatform {
 				case "html": html;
 				default: element(n.tag);
 			};
+			if (Std.isOfType(e, WebScriptElement)) {
+				final script:WebScriptElement = cast e;
+				script.parserInserted(n.attrs);
+			}
 			if (e != head && e != body && e != html) {
 				final parent:JsObject = n.parent != null && n.parent >= 0 && n.parent < built.length ? built[n.parent] : body;
 				Js.call(parent.read("appendChild"), parent, [e]);
@@ -297,6 +302,7 @@ class WebPlatform {
 			}
 		var i = 0;
 		final start = haxe.Timer.stamp();
+		var deadline = start;
 		while (window && !finite || i < frames) {
 			clock = realtime || (window && !finite) ? (haxe.Timer.stamp() - start) * 1000 : i * 1000. / 60.;
 			WebTimers.advance(clock);
@@ -344,8 +350,12 @@ class WebPlatform {
 					WebLayout.pixels()) : WebWindow.present(canvas.width, canvas.height, canvas.surface())))
 					break;
 			}
-			if (window || realtime)
-				Sys.sleep(Math.max(0, (i + 1) / 60. - (haxe.Timer.stamp() - start)));
+			if (window || realtime) {
+				// Drop missed presentations after a stall instead of replaying frames in a burst.
+				final now = haxe.Timer.stamp();
+				deadline = Math.max(deadline + 1.0 / 60.0, now);
+				if (deadline > now) Sys.sleep(deadline - now);
+			}
 			i++;
 		}
 		if (window)

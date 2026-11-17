@@ -12,12 +12,14 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
     ? readDocument(entry, webRoot ?? dir)
     : null;
   const scripts = document?.scripts ?? [{ path: entry, kind: "entry" }];
+  const resources = document?.resources ?? [];
+  const entries = [...resources, ...scripts];
   const canonical = (script) =>
     script.source === undefined && existsSync(script.path)
       ? realpathSync(script.path)
       : script.path;
   const byPath = new Map(
-    scripts.flatMap((s) => [
+    entries.flatMap((s) => [
       [s.path, s],
       [canonical(s), s],
     ]),
@@ -29,7 +31,7 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
   try {
     result = await build({
       absWorkingDir: dir,
-      entryPoints: [...new Set(scripts.map((s) => s.path))],
+      entryPoints: [...new Set(entries.map((s) => s.path))],
       outdir: ".silicanto-analysis",
       entryNames: "[dir]/[name]-[hash]",
       bundle: true,
@@ -138,7 +140,14 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
     );
   if (roots.some((r) => !r))
     throw Error("E-MODULE: missing graph entry " + entry);
+  const scriptModules = resources.map((resource) => ({
+    aliases: resource.aliases,
+    module:
+      byId.get(relative(dir, resource.path)) ??
+      byId.get(relative(dir, canonical(resource))),
+  }));
   return {
+    scriptModules,
     entry: roots[0],
     roots,
     modules,
@@ -155,6 +164,14 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
     manifest: {
       entry: relative(dir, entry),
       scripts: roots.map((r) => r.id),
+      ...(scriptModules.length
+        ? {
+            scriptResources: scriptModules.map((r) => ({
+              urls: r.aliases,
+              module: r.module.id,
+            })),
+          }
+        : {}),
       modules: modules.map(({ id, format, edges }) => ({
         id,
         format,

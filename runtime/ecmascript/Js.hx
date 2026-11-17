@@ -35,6 +35,12 @@ class Js {
 		return module.read("exports");
 	}
 
+	/** A newly inserted classic script runs again even if its URL was previously used. */
+	public static function runClassic(id:Int, body:Void->Dynamic):Void {
+		cache.remove(id);
+		body();
+	}
+
 	public static function constantWrite(value:Dynamic):Dynamic {
 		throw construct(global("TypeError"), ["Assignment to constant variable."]);
 	}

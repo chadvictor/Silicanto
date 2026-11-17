@@ -40,14 +40,14 @@ export async function batchSuite({
     try {
       const graph = await resolveGraph(documentFor(c), { webRoot: out });
       for (const m of graph.modules) m.index = next++;
-      const { sources } = emitModules(graph);
+      const { sources, scriptBindings } = emitModules(graph);
       jobs.push({
         c,
         index,
         sources,
-        start: graph.roots
-          .map((m) => "JsModule" + m.index + ".load();")
-          .join("\n"),
+        start:
+          scriptBindings +
+          graph.roots.map((m) => "JsModule" + m.index + ".load();").join("\n"),
       });
     } catch (err) {
       report.cases.push({

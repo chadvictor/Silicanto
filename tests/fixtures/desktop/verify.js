@@ -184,6 +184,21 @@ check(
     end.height === 80,
   "named grid areas and fractional track geometry",
 );
+window.dynamicScriptCalls = 0;
+const delayed = document.createElement("script");
+delayed.src = "local-module.js";
+const nested = document.createElement("div");
+nested.appendChild(delayed);
+check(window.dynamicScriptCalls === 0, "detached classic script");
+document.body.appendChild(nested);
+const dataBlock = document.getElementById("metadata");
+check(
+  dataBlock.type === "application/json" &&
+    JSON.parse(dataBlock.text).label === "a < b",
+  "HTML script data blocks preserve their text and media type",
+);
+dataBlock.text = "updated";
+check(dataBlock.textContent === "updated", "HTMLScriptElement text reflection");
 const tokenElement = document.createElement("div");
 const tokens = tokenElement.classList;
 tokenElement.setAttribute("class", "first second first");
@@ -387,6 +402,10 @@ function animate() {
     );
   }
   if (frame === 45) {
+    check(
+      window.dynamicScriptCalls === 1 && window.childScriptCalls === 1,
+      "recursively loaded native scripts",
+    );
     check(
       loaded === 1 && played === 1 && ended === 1,
       "native audio lifecycle " + loaded + " " + played + " " + ended,

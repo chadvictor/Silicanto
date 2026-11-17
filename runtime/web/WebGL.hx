@@ -323,8 +323,8 @@ class WebGL extends JsObject {
 		this.attributes = attrs;
 		premultiplied = Js.truth(attrs.read("premultipliedAlpha"));
 		getters.set("canvas", () -> canvas);
-		getters.set("drawingBufferWidth", () -> lost ? 0 : canvas.width);
-		getters.set("drawingBufferHeight", () -> lost ? 0 : canvas.height);
+		getters.set("drawingBufferWidth", () -> lost ? 0 : Std.int(Math.max(1, canvas.width)));
+		getters.set("drawingBufferHeight", () -> lost ? 0 : Std.int(Math.max(1, canvas.height)));
 	}
 
 	public function resize() {

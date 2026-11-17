@@ -81,6 +81,10 @@ The generic test checks exact pixels on C, C++, Java and Neko. The Khronos runne
 
 The [native desktop report](compatibility/native-desktop/README.md) contains the C++ and Java gallery timelines, the CSS reference pairs and the Khronos results. Use the [gallery runner](../tests/phaser4/README.md) to reproduce the timelines. The [historical report](compatibility/phaser4/README.md) preserves the earlier fourth-frame comparison.
 
+### HTML script elements
+
+HTML data blocks retain their text and MIME type in the native document. An application can read a GLSL shader or JSON payload through `script.text` or `textContent`. Classic script elements created by JavaScript can select local native modules through `src`. The compiler follows literal local filenames and filename suffixes beside the referring script or document, including scripts loaded by another such module. The application dispatches the load event after native execution. An unresolved URL dispatches an error event. The compiler does not download and execute arbitrary JavaScript at runtime.
+
 ### Async JavaScript
 
 The compiler lowers ordinary async functions and methods to Promise continuations before generating Haxe. The emitted project includes the native Promise scheduler. Plain ECMAScript applications drain their microtask queue after the entry modules finish. Desktop applications also drain it between event callbacks. The `test:async` command builds and runs the same module on C, C++, Java and Neko and checks the order of continuations, thrown values, `finally`, `Promise.all` and `Promise.race`. [Build-time transform](https://github.com/rpetrich/babel-plugin-transform-async-to-promises)

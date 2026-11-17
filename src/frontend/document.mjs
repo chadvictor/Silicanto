@@ -1,7 +1,41 @@
+import { scriptResources } from "./script-resources.mjs";
 import { buildSync } from "esbuild";
 import { parse } from "parse5";
 import { basename, dirname, resolve } from "node:path";
 import { readFileSync } from "node:fs";
+
+const classicTypes = new Set([
+  "",
+  "application/ecmascript",
+  "application/javascript",
+  "application/x-ecmascript",
+  "application/x-javascript",
+  "text/ecmascript",
+  "text/javascript",
+  "text/javascript1.0",
+  "text/javascript1.1",
+  "text/javascript1.2",
+  "text/javascript1.3",
+  "text/javascript1.4",
+  "text/javascript1.5",
+  "text/jscript",
+  "text/livescript",
+  "text/x-ecmascript",
+  "text/x-javascript",
+]);
+
+function scriptType(node) {
+  return (node.attrs?.find((a) => a.name === "type")?.value ?? "")
+    .trim()
+    .toLowerCase();
+}
+
+function storesScriptText(node) {
+  if (!node.tagName) return false;
+  if (node.tagName !== "script") return true;
+  const type = scriptType(node);
+  return type !== "module" && type !== "importmap" && !classicTypes.has(type);
+}
 
 export function readDocument(path, webRoot = dirname(path)) {
   const text = readFileSync(path, "utf8"),
@@ -23,7 +57,7 @@ export function readDocument(path, webRoot = dirname(path)) {
     const attrs = Object.fromEntries(
       (n.attrs ?? []).map((a) => [a.name, a.value]),
     );
-    if (n.tagName && n.tagName !== "script") {
+    if (n.tagName) {
       const index = elements.length;
       let sheet;
       if (
@@ -60,9 +94,12 @@ export function readDocument(path, webRoot = dirname(path)) {
       const fragments = [];
       let at = 0;
       for (const child of n.childNodes ?? []) {
-        if (child.nodeName === "#text")
+        if (
+          child.nodeName === "#text" &&
+          (n.tagName !== "script" || storesScriptText(n))
+        )
           fragments.push({ at, text: child.value });
-        else if (child.tagName && child.tagName !== "script") at++;
+        else if (child.tagName) at++;
       }
       elements.push({
         attrs,
@@ -77,7 +114,7 @@ export function readDocument(path, webRoot = dirname(path)) {
       parent = index;
     }
     if (n.tagName === "script") {
-      const type = (attrs.type ?? "").toLowerCase(),
+      const type = scriptType(n),
         raw = (n.childNodes ?? []).map((c) => c.value ?? "").join("");
       if (type === "importmap") {
         const map = JSON.parse(raw);
@@ -87,11 +124,7 @@ export function readDocument(path, webRoot = dirname(path)) {
           );
         for (const [k, v] of Object.entries(map.imports ?? {}))
           imports[k] = local(v);
-      } else if (
-        ["", "module", "application/javascript", "text/javascript"].includes(
-          type,
-        )
-      ) {
+      } else if (type === "module" || classicTypes.has(type)) {
         if ("async" in attrs || "nomodule" in attrs)
           throw Error(
             path +
@@ -125,6 +158,7 @@ export function readDocument(path, webRoot = dirname(path)) {
       ...scripts.filter((s) => !s.deferred),
       ...scripts.filter((s) => s.deferred),
     ],
+    resources: scriptResources(scripts, dir, webRoot),
     elements,
     styleInputs,
     imports,

@@ -13,7 +13,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve } from "node:path";
-import { parseArgs } from "node:util";
+import { parseArgs, stripVTControlCharacters } from "node:util";
 import { resolveGraph } from "../src/frontend/graph.mjs";
 import { emitModules } from "../src/frontend/modules.mjs";
 import { revision, root, sourceTree } from "./khronos-source.mjs";
@@ -212,11 +212,14 @@ for (const id of selected) {
               ...args,
             ]);
       const results = [...output.matchAll(/^SILICANTO_KHRONOS_RESULT=(.+)$/gm)];
-      if (results.length !== 1)
-        throw Error(
+      if (results.length !== 1) {
+        const failure = Error(
           "Expected exactly one completion notification, received " +
             results.length,
         );
+        failure.stdout = output;
+        throw failure;
+      }
       row.assertions = JSON.parse(results[0][1]);
       row.status = row.assertions.fail
         ? "assertion-failed"
@@ -231,16 +234,35 @@ for (const id of selected) {
       ...stdout.matchAll(/^SILICANTO_KHRONOS_PROGRESS=(.+)$/gm),
     ].at(-1);
     if (stage === "run" && progress) row.lastProgress = JSON.parse(progress[1]);
-    const details = [
-      stdout.replace(/^SILICANTO_KHRONOS_PROGRESS=.+$/gm, "").trim(),
-      e.stderr?.trim(),
+    const details = stripVTControlCharacters(
+      [
+        e.stderr?.trim(),
+        stdout.replace(/^SILICANTO_KHRONOS_PROGRESS=.+$/gm, "").trim(),
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    );
+    const lines = details.split("\n");
+    const errors =
+      stage === "build"
+        ? lines.filter((line) =>
+            /error|failed|characters? \d+|no space/i.test(line),
+          )
+        : [];
+    const reason =
+      e.stdout !== undefined && e.message.startsWith("Expected exactly")
+        ? e.message
+        : "";
+    row.diagnostic = [
+      reason,
+      errors.join("\n") || details || e.signal || e.message,
     ]
       .filter(Boolean)
-      .join("\n");
-    row.diagnostic = String(details || e.signal || e.message)
-      .slice(0, 1000)
+      .join("\n")
       .replaceAll(checkout + "/", "")
-      .replaceAll(root, "");
+      .replaceAll(root, "")
+      .replaceAll(work ? work + "/" : "\0", "<work>/")
+      .slice(0, 1400);
   } finally {
     if (work) rmSync(work, { recursive: true, force: true });
   }
