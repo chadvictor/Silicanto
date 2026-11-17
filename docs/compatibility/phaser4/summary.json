@@ -1,5 +1,5 @@
 {
-  "compiler": "8e4ef6bc75476b059c9e5552f49ea00fee51db0d",
+  "compiler": "90d2d105403377788bdd5b28e0368b8e49ec0135",
   "engine": "4.1.0",
   "engineSHA256": "71d92687457da59f1233c75827df628ba173e2ad329d3c75f4e4b92d27c9dd1e",
   "examplesCommit": "eb87db8355861ae222d0c5cd13aae54c2d7d72ae",
@@ -8,7 +8,7 @@
   "frontend": {
     "haxe-emitted": 2061
   },
-  "matchedOnBoth": 927,
+  "matchedOnBoth": 973,
   "engineBootstrap": {
     "cpp": "passed",
     "java": "passed"
@@ -16,29 +16,27 @@
   "targets": {
     "cpp": {
       "attempted": 2061,
-      "returnedFrame": 1792,
-      "matched": 955,
-      "exact": 272,
+      "returnedFrame": 1895,
+      "matched": 999,
+      "exact": 281,
       "stages": {
-        "compare": 837,
-        "run": 269,
-        "matched": 955
+        "compare": 896,
+        "run": 166,
+        "matched": 999
       },
       "reasons": {
-        "different pixels": 753,
-        "property write: beforeUpdate": 82,
-        "uniform reference; needs behavior test": 63,
+        "different pixels": 810,
+        "uniform reference; needs behavior test": 65,
         "GLSL compilation": 27,
-        "missing global: dat": 26,
-        "property read: data": 26,
+        "missing global: dat": 27,
         "no target canvas": 17,
         "property write: zIndex": 16,
         "missing or unpinned reference resource": 15,
         "property read: type": 15,
-        "run diagnostic": 10,
+        "run diagnostic": 12,
         "different dimensions": 4,
+        "missing call: ctx.createPattern": 4,
         "property read: insertRule": 4,
-        "missing call: ctx.createPattern": 3,
         "missing global: $": 3,
         "property read: create": 3,
         "compare diagnostic": 2,
@@ -52,7 +50,7 @@
         "E-CANVAS: unsupported fill style #000c": 1,
         "E-CANVAS: unsupported fill style aqua": 1,
         "E-CANVAS: unsupported fill style hsl(0,100%,50%)": 1,
-        "E-CANVAS: unsupported fill style rgb(0.392689208984375, 0.392689208984375, 0.392689208984375)": 1,
+        "E-CANVAS: unsupported fill style rgb(0.40478759765625, 0.40478759765625, 0.40478759765625)": 1,
         "E-CANVAS: unsupported fill style yellow": 1,
         "missing call: console.assert": 1,
         "missing call: console.dir": 1,
@@ -64,11 +62,12 @@
         "missing global: localStorage": 1,
         "missing global: Symbol": 1,
         "missing global: WebFont": 1,
+        "property read: 0": 1,
         "property read: addEventListener": 1,
         "property read: addTiltShift": 1,
         "property read: config": 1,
+        "property read: data": 1,
         "property read: duration": 1,
-        "property read: getElementsByTagName": 1,
         "property read: getUserMedia": 1,
         "property read: loadLocal": 1,
         "property read: name": 1
@@ -76,29 +75,27 @@
     },
     "java": {
       "attempted": 2061,
-      "returnedFrame": 1795,
-      "matched": 955,
-      "exact": 292,
+      "returnedFrame": 1899,
+      "matched": 999,
+      "exact": 295,
       "stages": {
-        "matched": 955,
-        "run": 266,
-        "compare": 840
+        "compare": 900,
+        "run": 162,
+        "matched": 999
       },
       "reasons": {
-        "different pixels": 758,
-        "property write: beforeUpdate": 82,
-        "uniform reference; needs behavior test": 60,
+        "different pixels": 813,
+        "uniform reference; needs behavior test": 64,
         "GLSL compilation": 27,
-        "missing global: dat": 26,
-        "property read: data": 26,
+        "missing global: dat": 27,
         "no target canvas": 17,
         "property write: zIndex": 16,
         "missing or unpinned reference resource": 15,
         "property read: type": 15,
-        "run diagnostic": 7,
+        "run diagnostic": 8,
         "different dimensions": 4,
+        "missing call: ctx.createPattern": 4,
         "property read: insertRule": 4,
-        "missing call: ctx.createPattern": 3,
         "missing global: $": 3,
         "property read: create": 3,
         "compare diagnostic": 2,
@@ -109,10 +106,11 @@
         "missing global: THREE": 2,
         "property read: getNames": 2,
         "property read: spritemap": 2,
+        "time limit": 2,
         "E-CANVAS: unsupported fill style #000c": 1,
         "E-CANVAS: unsupported fill style aqua": 1,
         "E-CANVAS: unsupported fill style hsl(0,100%,50%)": 1,
-        "E-CANVAS: unsupported fill style rgb(0.5950000000000001, 0.5950000000000001, 0.5950000000000001)": 1,
+        "E-CANVAS: unsupported fill style rgb(0.6799999999999999, 0.6799999999999999, 0.6799999999999999)": 1,
         "E-CANVAS: unsupported fill style yellow": 1,
         "missing call: console.assert": 1,
         "missing call: console.dir": 1,
@@ -124,15 +122,15 @@
         "missing global: localStorage": 1,
         "missing global: Symbol": 1,
         "missing global: WebFont": 1,
+        "property read: 0": 1,
         "property read: addEventListener": 1,
         "property read: addTiltShift": 1,
         "property read: config": 1,
+        "property read: data": 1,
         "property read: duration": 1,
-        "property read: getElementsByTagName": 1,
         "property read: getUserMedia": 1,
         "property read: loadLocal": 1,
-        "property read: name": 1,
-        "time limit": 1
+        "property read: name": 1
       }
     }
   },
@@ -142,21 +140,21 @@
     "targets": {
       "cpp": {
         "previous": 145,
-        "gained": 810,
-        "lost": 0,
-        "retained": 145
+        "gained": 855,
+        "lost": 1,
+        "retained": 144
       },
       "java": {
         "previous": 144,
-        "gained": 811,
+        "gained": 855,
         "lost": 0,
         "retained": 144
       },
       "both": {
         "previous": 144,
-        "gained": 783,
-        "lost": 0,
-        "retained": 144
+        "gained": 830,
+        "lost": 1,
+        "retained": 143
       }
     }
   }
