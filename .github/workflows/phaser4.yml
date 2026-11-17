@@ -1,0 +1,37 @@
+name: Phaser 4 compatibility
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v1.0.0-rc.*", "v1.0.0"]
+permissions:
+  contents: read
+jobs:
+  catalog:
+    runs-on: macos-15
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [java, cpp]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: npm ci
+      - run: npm ci --prefix tests/phaser4
+      - run: npm run setup:c
+      - if: matrix.target == 'java'
+        run: npm run setup:java
+      - run: npx playwright install chromium
+      - run: npm run test:phaser4 -- --target ${{ matrix.target }} --out dist/phaser4
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phaser4-${{ matrix.target }}
+          path: dist/phaser4/report.json

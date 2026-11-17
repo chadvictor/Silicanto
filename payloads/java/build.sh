@@ -7,18 +7,20 @@ source "$root/scripts/haxe-env.sh"
 [[ -e "$root/.toolchain/lib/hxjava/.dev" ]] || { echo 'Run npm run setup:java first' >&2; exit 1; }
 cd "$stage"
 args=(-cp haxe -main Sample)
+if [[ -f haxe/WebWindow.hx ]]; then args+=(-D silicanto_window); fi
 if [[ "$profile" == graphics ]]; then
   mkdir -p java/host java/resources/shaders
   cp "$payload/haxe/DesktopSurface.hx" java/host/
   # Projects emitted before the desktop host contract used a Metal-only Host.
   if [[ ! -f haxe/DesktopSurface.hx ]]; then
-    cp "$root/runtime/"{Host,FrameUniforms}.hx java/host/
+    cp "$root/runtime/legacy/three/"{Host,FrameUniforms}.hx java/host/
   fi
   args+=(-cp java/host)
   cp haxe/{box,scene}.metal java/resources/shaders/
 fi
 haxe "${args[@]}" --java java -D no-compilation
 rm -f java/hxjava_build.txt
+if [[ -f haxe/WebWindow.hx ]]; then cp -R "$root/payloads/canvas/java/org" java/src/; fi
 cp "$root/.toolchain/hxjava-4.2.0/LICENSE" licenses/hxjava.txt
 cp "$root/licenses/haxe-std.txt" licenses/haxe-std.txt
 if [[ "$profile" == graphics ]]; then

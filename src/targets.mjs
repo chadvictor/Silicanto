@@ -10,7 +10,8 @@ export const buildHost =
     process.platform) +
   "-" +
   process.arch;
-const all = ["logic", "scene", "packed-scene"];
+const nativeProfiles = ["logic", "scene", "packed-scene"];
+const all = [...nativeProfiles, "canvas"];
 const script = (path, args) =>
   execFileSync("bash", [join(root, path), ...args], { stdio: "inherit" });
 
@@ -52,10 +53,27 @@ const payload = (
 const builtins = [
   payload("haxe", "portable", "deferred", all, () => {}),
   ...["c", "cpp"].map((t) =>
-    payload(t, mac, "metal", all, haxeBackend, { buildHosts: [mac] }),
+    payload(t, mac, "metal", nativeProfiles, haxeBackend, {
+      buildHosts: [mac],
+    }),
+  ),
+  ...["c", "cpp"].map((t) =>
+    payload(t, mac, "raster", ["canvas"], haxeBackend, { buildHosts: [mac] }),
   ),
   payload("js", "web", "webgl", ["logic", "scene"], haxeBackend),
+  payload("neko", "neko", "none", ["logic"], haxeBackend),
+  payload("neko", "neko", "raster", ["canvas"], haxeBackend),
   payload("python", "portable", "none", ["logic"], haxeBackend),
+  payload("java", "jvm", "raster", ["canvas"], java, {
+    compatiblePlatforms: [
+      "macos-arm64",
+      "macos-x64",
+      "linux-arm64",
+      "linux-x64",
+      "windows-arm64",
+      "windows-x64",
+    ],
+  }),
   payload("java", "jvm", "none", ["logic"], java, {
     // Class files use the Java SE 17 API and carry no host-specific libraries.
     compatiblePlatforms: [
@@ -71,6 +89,7 @@ const builtins = [
 ];
 
 export function projectProfile(manifest) {
+  if (manifest.webHost) return "canvas";
   return Object.keys(manifest.sceneAssets ?? {}).length
     ? "packed-scene"
     : manifest.graphicsHost

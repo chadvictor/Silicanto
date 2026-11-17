@@ -40,7 +40,7 @@ export async function buildNative(filename, output, name = "Application") {
       moduleInput(input, readFileSync(input, "utf8"));
     const prelude = [
       join(toolchain, "constructors.js"),
-      join(root, "runtime/aot/platform.js"),
+      join(root, "runtime/legacy/three/aot/platform.js"),
     ];
     const init = html?.canvas
       ? "globalThis.__nativeCanvas.id = " +
