@@ -73,7 +73,7 @@ if (
   git(
     "status",
     "--porcelain",
-    "--untracked-files=no",
+    "--untracked-files=normal",
     "public/src",
     "public/assets",
     "public/libs",
@@ -134,7 +134,27 @@ const out = options.out
 mkdirSync(out, { recursive: true });
 if (existsSync(join(out, "report.json")) || existsSync(join(out, "bootstrap")))
   throw Error("Choose a fresh output directory");
+// A developer may test a dirty checkout. Only publish results for an identifiable compiler.
+const compilerGit = (...args) =>
+  spawnSync("git", ["-C", root, ...args], { encoding: "utf8" });
+const compilerRevision = compilerGit("rev-parse", "HEAD");
+const compilerChanges = compilerGit(
+  "status",
+  "--porcelain",
+  "--",
+  "src",
+  "runtime",
+  "payloads",
+  "scripts",
+  "package.json",
+  "package-lock.json",
+  "tests/phaser4",
+);
 const report = {
+  compiler:
+    compilerRevision.status === 0 ? compilerRevision.stdout.trim() : null,
+  modifiedCompilerOrSuite:
+    compilerChanges.status !== 0 || Boolean(compilerChanges.stdout.trim()),
   stage: options.stage,
   oracle: "fourth-frame-foreground-v2",
   engine: version,
