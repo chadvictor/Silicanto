@@ -16,7 +16,7 @@ The generic frontend compiles the application's JavaScript and its libraries int
 | WebGL 1 OGLES | All 178 shader build cases and 775 reference rendering comparisons passed on both targets. |
 | CSS reference pairs | The C++ renderer completed 1,714 pairs. Of these, 630 matched with visible detail, 28 matched uniformly and 1,056 differed. |
 
-WebGL 2 has a native ES 3 context. Full WebGL conformance and complete CSS layout remain open. The gallery records pixels at specific frames. Playability requires input and longer scenarios for each game. [Per-example outcomes, hashes and reproduction commands](docs/compatibility/native-desktop/README.md)
+On both C++ and Java, 6 of 21 WebGL 1 context pages and 8 of 9 WebGL 2 context pages passed the original Khronos tests. Full WebGL conformance and complete CSS layout remain open. The gallery records pixels at specific frames. Playability requires input and longer scenarios for each game. [Per-example outcomes, hashes and reproduction commands](docs/compatibility/native-desktop/README.md)
 
 ![A frame from the native Metal build of Nácar: a river of molten silicon runs between crystal spires beneath a ringed planet.](docs/nacar-metal.png)
 
