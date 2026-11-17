@@ -93,7 +93,7 @@ class WebLayout {
 			styled = true;
 	}
 
-	static function render(op:String, ?scope:JsObject, ?selector:String):Dynamic {
+	static function render(op:String, ?scope:JsObject, ?selector:String, ?point:Array<Float>):Dynamic {
 		if (root == null)
 			return null;
 		nodes = [];
@@ -160,8 +160,9 @@ class WebLayout {
 			width,
 			height,
 			images,
-			scope == null ? -1 : nodes.indexOf(scope),
-			selector
+			scope == null ? -1 : (nodes.contains(scope) ? nodes.indexOf(scope) : -2),
+			selector,
+			point
 		]);
 	}
 
@@ -209,15 +210,10 @@ class WebLayout {
 	}
 
 	public static function hit(x:Float, y:Float):JsObject {
-		boxes = render("boxes");
-		var i = nodes.length;
-		while (i > 0) {
-			--i;
-			final p:Array<Dynamic> = Reflect.field(boxes, Std.string(i));
-			if (p != null && x >= p[0] && y >= p[1] && x < p[0] + p[2] && y < p[1] + p[3])
-				return nodes[i];
-		}
-		return null;
+		if (!DesktopServices.available())
+			return null;
+		final index:Int = render("hit", null, null, [x, y]);
+		return index < 0 ? null : nodes[index];
 	}
 
 	public static function pixels():Bytes

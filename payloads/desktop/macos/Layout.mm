@@ -2,6 +2,7 @@
 #import <CoreText/CoreText.h>
 #include <litehtml.h>
 #include <litehtml/el_image.h>
+#include <litehtml/render_item.h>
 
 using namespace litehtml;
 static CGRect rect(const position &p) {
@@ -292,9 +293,22 @@ id sil_layout(NSString *op, NSArray *args) {
     boxes(page.doc->root(), result);
     return result;
   }
+  if ([op isEqual:@"hit"]) {
+    float x = [args[6][0] floatValue], y = [args[6][1] floatValue];
+    for (auto el =
+             page.doc->root_render()->get_element_by_point(x, y, x, y, nullptr);
+         el; el = el->parent()) {
+      const char *id = el->get_attr("data-silicanto-node", nullptr);
+      if (id)
+        return @(atoi(id));
+    }
+    return @(-1);
+  }
   if ([op isEqual:@"query"] || [op isEqual:@"computed"]) {
     auto root = page.doc->root();
     int index = [args[4] intValue];
+    if (index == -2)
+      return [op isEqual:@"query"] ? (id) @[] : (id) @{};
     auto scope = index <= 0 ? root
                             : root->select_one("[data-silicanto-node=\"" +
                                                std::to_string(index) + "\"]");

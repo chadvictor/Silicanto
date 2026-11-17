@@ -1,5 +1,8 @@
 import haxe.io.Bytes;
 
+#if (cpp && silicanto_webgl)
+@:cppFileCode('#include <CommonCrypto/CommonDigest.h>')
+#end
 class WebPlatform {
 	static final ids:Map<String, JsObject> = [];
 	static var canvas:WebCanvas;
@@ -206,6 +209,36 @@ class WebPlatform {
 		}, false));
 	}
 
+	static function fingerprint(b:Bytes):String {
+		#if (cpp && silicanto_webgl)
+		final digest = Bytes.alloc(32);
+		untyped __cpp__("CC_SHA256({0}->GetBase(), {1}, reinterpret_cast<unsigned char*>({2}->GetBase()))", b.getData(), b.length, digest.getData());
+		return digest.toHex();
+		#elseif java
+		return Bytes.ofData(java.security.MessageDigest.getInstance("SHA-256").digest(b.getData())).toHex();
+		#else
+		return haxe.crypto.Sha256.make(b).toHex();
+		#end
+	}
+
+	#if sys
+	static function drain(waitForNetwork:Bool) {
+		var count = 0;
+		do {
+			WebNetwork.poll();
+			WebPromise.checkpoint();
+			while (tasks.length > 0) {
+				if (++count > 100000)
+					throw "E-EVENT: task queue did not settle";
+				tasks.shift()();
+				WebPromise.checkpoint();
+			}
+			if (waitForNetwork && WebNetwork.busy())
+				Sys.sleep(.001);
+		} while (waitForNetwork && WebNetwork.busy());
+	}
+	#end
+
 	public static function run() {
 		#if sys
 		final args = Sys.args();
@@ -263,37 +296,17 @@ class WebPlatform {
 			if (window)
 				for (event in WebWindow.events())
 					WebInput.dispatch(event, canvas, document);
-			WebNetwork.poll();
 			WebSocketClient.poll();
 			WebAudio.poll();
-			WebPromise.checkpoint();
-			var count = 0;
-			while (tasks.length > 0) {
-				if (++count > 100000)
-					throw "E-EVENT: task queue did not settle";
-				tasks.shift()();
-				WebPromise.checkpoint();
-				if (i == frames - 1 && (!window || finite))
-					while (WebNetwork.busy()) {
-						WebNetwork.poll();
-						WebPromise.checkpoint();
-						if (WebNetwork.busy())
-							Sys.sleep(.001);
-					}
-			}
-			if (i == frames - 1 && (!window || finite))
-				while (WebNetwork.busy()) {
-					WebNetwork.poll();
-					WebPromise.checkpoint();
-					if (WebNetwork.busy())
-						Sys.sleep(.001);
-				}
+			drain(false);
 			final frame = callbacks;
 			callbacks = [];
 			for (cb in frame) {
 				Js.call(cb.fn, Js.realm, [clock]);
 				WebPromise.checkpoint();
 			}
+			if (i == frames - 1 && (!window || finite))
+				drain(true);
 			if (timelinePath != null && marks.contains(i + 1)) {
 				if (canvas == null)
 					throw "E-CANVAS: no timeline canvas";
@@ -309,7 +322,7 @@ class WebPlatform {
 					frame: i + 1,
 					width: w,
 					height: h,
-					sha256: haxe.crypto.Sha256.make(b).toHex(),
+					sha256: fingerprint(b),
 					uniform: !changed
 				});
 			}

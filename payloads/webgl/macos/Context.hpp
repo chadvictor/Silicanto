@@ -2,8 +2,10 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <EGL/eglext_angle.h>
-#include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
+
+// Khronos extension declarations require the core GL types above.
+#include <GLES2/gl2ext.h>
 #include <memory>
 #include <unordered_map>
 
