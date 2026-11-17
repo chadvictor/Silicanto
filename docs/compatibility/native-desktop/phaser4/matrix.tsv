@@ -1,0 +1,2062 @@
+source	cpp	java	identical_rgba_at_all_marks
+src/actions/add effect bloom.js	changing	changing	no
+src/actions/add effect shine default.js	failed at run	failed at run	unobserved
+src/actions/add effect shine displaced.js	failed at run	failed at run	unobserved
+src/actions/add effect shine options.js	failed at run	failed at run	unobserved
+src/actions/add mask shape.js	still	still	no
+src/actions/add mask shape soft.js	changing	changing	yes
+src/actions/align to.js	still	still	yes
+src/actions/align to base.js	still	still	yes
+src/actions/align to offset.js	changing	changing	yes
+src/actions/angle.js	changing	changing	no
+src/actions/angle with step.js	changing	changing	yes
+src/actions/fit to region.js	changing	changing	no
+src/actions/fit to region without known size.js	changing	changing	no
+src/actions/get first.js	still	still	no
+src/actions/grid align animations.js	changing	changing	yes
+src/actions/grid align group.js	still	still	yes
+src/actions/grid align overlap.js	still	still	no
+src/actions/grid align sprites.js	still	still	no
+src/actions/inc x.js	changing	changing	no
+src/actions/inc x and y.js	changing	changing	no
+src/actions/inc y.js	changing	changing	no
+src/actions/place on a circle multi.js	still	still	yes
+src/actions/place on a circle reversed.js	changing	changing	yes
+src/actions/place on circle.js	still	still	yes
+src/actions/place on ellipse.js	still	still	yes
+src/actions/place on line.js	still	still	yes
+src/actions/place on part of a circle.js	changing	changing	yes
+src/actions/place on rectangle.js	still	still	yes
+src/actions/place on rectangle shift.js	changing	changing	yes
+src/actions/place on triangle.js	still	still	yes
+src/actions/place sprites on circle.js	still	still	yes
+src/actions/place sprites on part of a circle.js	still	still	yes
+src/actions/random circle.js	still	still	no
+src/actions/random ellipse.js	still	still	no
+src/actions/random line.js	still	still	no
+src/actions/random rectangle.js	still	still	no
+src/actions/random triangle.js	still	still	no
+src/actions/rotate around.js	changing	changing	no
+src/actions/rotate around distance.js	changing	changing	yes
+src/actions/rotate around x y.js	changing	changing	no
+src/actions/rotate container facing point.js	changing	changing	no
+src/actions/set alpha.js	still	still	yes
+src/actions/set x y.js	still	still	yes
+src/actions/shift position.js	still	still	yes
+src/actions/shift position snake.js	changing	changing	yes
+src/actions/spread.js	still	still	yes
+src/actions/wrap in camera bounds.js	changing	changing	no
+src/actions/wrap in rectangle.js	changing	changing	no
+src/actions/wrap in rectangle with padding.js	changing	changing	yes
+src/animation/60fps animation test.js	changing	changing	yes
+src/animation/add animation event.js	still	still	no
+src/animation/add frames to existing animation.js	changing	changing	no
+src/animation/animation from png sequence.js	changing	changing	yes
+src/animation/animation get progress.js	changing	changing	yes
+src/animation/animation repeat event.js	changing	changing	no
+src/animation/aseprite animation.js	changing	changing	no
+src/animation/chained animation.js	changing	changing	no
+src/animation/create animation from canvas texture.js	changing	changing	no
+src/animation/create animation from sprite sheet.js	changing	changing	no
+src/animation/create animation from texture atlas.js	changing	changing	no
+src/animation/create animation on sprite.js	changing	changing	no
+src/animation/create animation without frame names.js	changing	changing	yes
+src/animation/create from sprite config.js	changing	changing	no
+src/animation/cubes.js	changing	changing	yes
+src/animation/export json.js	changing	changing	no
+src/animation/from animation json.js	changing	changing	no
+src/animation/from json.js	changing	changing	no
+src/animation/generate frame names.js	changing	changing	no
+src/animation/generate frame numbers.js	changing	changing	no
+src/animation/gif to animation.js	changing	changing	no
+src/animation/hide on complete.js	still	still	no
+src/animation/mixed animation.js	changing	changing	no
+src/animation/multi atlas animation.js	changing	changing	yes
+src/animation/muybridge.js	changing	changing	yes
+src/animation/on complete event.js	still	still	no
+src/animation/on repeat event.js	still	still	no
+src/animation/on start event.js	changing	changing	no
+src/animation/on stop event.js	changing	changing	no
+src/animation/on update event.js	still	still	no
+src/animation/pause all animations.js	still	still	no
+src/animation/pause animation instances.js	changing	changing	no
+src/animation/play after delay.js	changing	changing	no
+src/animation/play after random delay.js	changing	changing	no
+src/animation/play after repeat.js	changing	changing	no
+src/animation/play animation with config.js	changing	changing	yes
+src/animation/random delay.js	changing	changing	no
+src/animation/remove animation event.js	changing	changing	no
+src/animation/reverse animation.js	still	still	no
+src/animation/show animation play through.js	still	still	no
+src/animation/show on start.js	still	still	no
+src/animation/sprite animation events.js	still	still	no
+src/animation/stagger play 1.js	still	still	yes
+src/animation/stagger play 2.js	changing	changing	yes
+src/animation/start from random frame.js	still	still	no
+src/animation/tween timescale.js	changing	changing	no
+src/animation/yoyo.js	changing	changing	no
+src/audio/HTML5 Audio/audiosprite.js	still	still	no
+src/audio/HTML5 Audio/basic playback and events.js	still	still	no
+src/audio/HTML5 Audio/disable pause on blur.js	still	still	no
+src/audio/HTML5 Audio/loop delay.js	failed at run	failed at run	unobserved
+src/audio/HTML5 Audio/markers pause resume.js	still	still	yes
+src/audio/HTML5 Audio/markers play.js	still	still	yes
+src/audio/HTML5 Audio/play audio file.js	still	still	yes
+src/audio/HTML5 Audio/play audio from child scene.js	still	still	yes
+src/audio/HTML5 Audio/seek.js	failed at run	failed at run	unobserved
+src/audio/HTML5 Audio/volume mute rate detune.js	failed at run	failed at run	unobserved
+src/audio/No Audio/audiosprite.js	still	still	no
+src/audio/No Audio/basic playback and events.js	still	still	no
+src/audio/No Audio/loop delay.js	failed at run	failed at run	unobserved
+src/audio/No Audio/markers pause resume.js	still	still	yes
+src/audio/No Audio/markers play.js	still	still	yes
+src/audio/No Audio/seek.js	failed at run	failed at run	unobserved
+src/audio/No Audio/volume mute rate detune.js	failed at run	failed at run	unobserved
+src/audio/SID/c64 sid player.js	failed at run	failed at run	unobserved
+src/audio/Web Audio/audiosprite.js	still	still	no
+src/audio/Web Audio/basic playback and events.js	still	still	no
+src/audio/Web Audio/loop delay.js	failed at run	failed at run	unobserved
+src/audio/Web Audio/markers pause resume.js	still	still	yes
+src/audio/Web Audio/markers play.js	still	still	yes
+src/audio/Web Audio/play audio file.js	still	still	yes
+src/audio/Web Audio/play audio from child scene.js	still	still	yes
+src/audio/Web Audio/play audio from file pack.js	still	still	yes
+src/audio/Web Audio/play movement sound.js	changing	changing	yes
+src/audio/Web Audio/play sound on keypress.js	still	still	no
+src/audio/Web Audio/reuse audio context.js	changing	changing	yes
+src/audio/Web Audio/seek.js	failed at run	failed at run	unobserved
+src/audio/Web Audio/spatial audio move with player.js	still	still	no
+src/audio/Web Audio/spatial with destination coordinates.js	failed at run	failed at run	unobserved
+src/audio/Web Audio/using same audio file.js	uniform	uniform	yes
+src/audio/Web Audio/volume mute rate detune.js	failed at run	failed at run	unobserved
+src/cache/json file.js	still	still	yes
+src/cache/text file.js	still	still	yes
+src/cache/xml file.js	still	still	yes
+src/camera/multi camera/main.js	still	still	no
+src/camera/16 camera shader test.js	changing	changing	no
+src/camera/16 camera test.js	changing	changing	yes
+src/camera/32 camera test.js	changing	changing	yes
+src/camera/add camera on click.js	changing	changing	yes
+src/camera/background color.js	changing	changing	yes
+src/camera/background color interpolate.js	changing	changing	no
+src/camera/basics.js	failed at run	failed at run	unobserved
+src/camera/bounds at zero.js	still	still	no
+src/camera/camera alpha.js	still	still	no
+src/camera/camera blur shader.js	still	still	yes
+src/camera/camera center on.js	still	still	no
+src/camera/camera effect callbacks.js	changing	changing	yes
+src/camera/camera effects.js	changing	changing	no
+src/camera/camera fade in and out.js	changing	changing	no
+src/camera/camera fade out and in.js	changing	changing	no
+src/camera/camera filter.js	changing	changing	no
+src/camera/cameras from state config.js	changing	changing	yes
+src/camera/change camera shader.js	changing	changing	no
+src/camera/cross scene object placement.js	still	still	no
+src/camera/fade.js	still	still	no
+src/camera/fixed to camera.js	failed at run	failed at run	unobserved
+src/camera/flash.js	still	still	no
+src/camera/follow offset.js	still	still	no
+src/camera/follow sprite.js	changing	changing	yes
+src/camera/follow sprite small bounds.js	still	still	yes
+src/camera/follow sprite with deadzone.js	still	still	no
+src/camera/follow user controlled sprite.js	still	still	no
+src/camera/follow zoom.js	still	still	yes
+src/camera/follow zoom tilemap.js	still	still	yes
+src/camera/game shader test 1.js	changing	changing	no
+src/camera/game shader test 2.js	changing	changing	no
+src/camera/game shader test 3.js	changing	changing	no
+src/camera/get world point.js	still	still	yes
+src/camera/graphics landscape.js	still	still	no
+src/camera/ignore.js	changing	changing	no
+src/camera/ignore container.js	changing	changing	no
+src/camera/ignore gameobjects.js	still	still	no
+src/camera/ignore gameobjects in containers.js	still	still	no
+src/camera/ignore group children.js	changing	changing	no
+src/camera/minimap camera.js	changing	changing	no
+src/camera/move camera with keys.js	failed at run	failed at run	unobserved
+src/camera/multiple cameras.js	changing	changing	yes
+src/camera/origin.js	changing	changing	yes
+src/camera/overlap.js	changing	changing	yes
+src/camera/pan to.js	still	still	no
+src/camera/remove camera on click.js	changing	changing	yes
+src/camera/render to texture.js	still	still	no
+src/camera/render to texture shader.js	changing	changing	yes
+src/camera/render to texture shader 2.js	changing	changing	yes
+src/camera/render to texture shader 3.js	changing	changing	yes
+src/camera/render to texture shader 4.js	changing	changing	no
+src/camera/render to texture shader 5.js	changing	changing	yes
+src/camera/render to texture shader 6.js	changing	changing	yes
+src/camera/rotate camera.js	still	still	no
+src/camera/round pixels.js	still	still	yes
+src/camera/scroll view.js	changing	changing	no
+src/camera/set bounds.js	still	still	no
+src/camera/set scroll factor.js	failed at run	failed at run	unobserved
+src/camera/set small bounds.js	still	still	yes
+src/camera/set viewport.js	changing	changing	yes
+src/camera/shake.js	still	still	no
+src/camera/single small camera.js	still	still	no
+src/camera/tile map with camera shake.js	still	still	yes
+src/camera/world camera.js	failed at run	failed at run	unobserved
+src/camera/world coordinate from another scene.js	still	still	no
+src/camera/world view.js	failed at run	failed at run	unobserved
+src/camera/zoom to.js	still	still	no
+src/components/data/change data event.js	still	still	no
+src/components/data/data values.js	still	still	no
+src/components/data/get and set data values.js	still	still	no
+src/components/data/query data.js	still	still	yes
+src/components/data/set data event.js	still	still	no
+src/components/data/set multiple values.js	still	still	yes
+src/components/data/store scene data.js	still	still	no
+src/demoscene/chunky raster bars.js	still	changing	no
+src/demoscene/raster carpet.js	changing	changing	no
+src/demoscene/raster wave.js	changing	changing	no
+src/demoscene/vertical raster wave.js	changing	changing	no
+src/depth sorting/ball mesh depth sort.js	changing	changing	no
+src/depth sorting/bring to top.js	still	still	yes
+src/depth sorting/get top object.js	still	still	yes
+src/depth sorting/isometric blocks.js	changing	changing	no
+src/depth sorting/isometric map.js	failed at run	failed at run	unobserved
+src/depth sorting/remove from display list.js	still	still	yes
+src/depth sorting/sprite depth index.js	changing	changing	no
+src/depth sorting/z index.js	still	still	yes
+src/display/align/in bottom center.js	still	still	yes
+src/display/align/in bottom left.js	still	still	yes
+src/display/align/in bottom right.js	still	still	yes
+src/display/align/in center.js	still	still	yes
+src/display/align/in left center.js	still	still	yes
+src/display/align/in right center.js	still	still	yes
+src/display/align/in top center.js	still	still	yes
+src/display/align/in top left.js	still	still	yes
+src/display/align/in top right.js	still	still	yes
+src/display/alpha/bottom alpha.js	still	still	no
+src/display/alpha/single alpha.js	still	still	yes
+src/display/alpha/top alpha.js	still	still	no
+src/display/alpha/top left alpha.js	still	still	no
+src/display/alpha/tween alpha.js	changing	changing	no
+src/display/blend modes/blend mode tester.js	still	still	no
+src/display/blend modes/circle cut out.js	still	still	no
+src/display/blend modes/custom blend mode.js	failed at run	failed at run	unobserved
+src/display/blend modes/custom blend mode with graphics.js	failed at run	failed at run	unobserved
+src/display/blend modes/custom separate blend mode.js	failed at run	failed at run	unobserved
+src/display/blend modes/difference.js	changing	changing	no
+src/display/blend modes/graphics blend mode.js	still	still	no
+src/display/blend modes/overlay.js	changing	changing	no
+src/display/blend modes/particle.js	changing	changing	no
+src/display/color/brighten.js	still	still	yes
+src/display/color/darken.js	still	still	yes
+src/display/color/hex to color.js	uniform	uniform	yes
+src/display/color/integer to color.js	uniform	uniform	yes
+src/display/color/interpolate color rgb vs hsv.js	still	still	no
+src/display/color/lighten.js	still	still	yes
+src/display/color/random color.js	still	still	no
+src/display/color/random gray.js	still	still	no
+src/display/color/rgb to color.js	uniform	uniform	yes
+src/display/masks/dynamic texture as bitmap mask.js	still	still	yes
+src/display/masks/geometry mask from shape.js	changing	changing	no
+src/display/masks/graphics bitmap mask.js	still	still	yes
+src/display/masks/nested bitmap mask.js	still	still	yes
+src/display/masks/shared bitmap mask.js	still	still	no
+src/display/shaders/shader test 1.js	changing	changing	no
+src/display/shaders/shader test 2.js	changing	changing	yes
+src/display/shaders/shader test 3.js	changing	changing	yes
+src/display/shaders/shader test 4.js	changing	changing	no
+src/display/shaders/shader test 5.js	changing	changing	yes
+src/display/tint/atlas frame tint.js	changing	changing	yes
+src/display/tint/corner tint.js	still	still	yes
+src/display/tint/multiple images.js	still	still	yes
+src/display/tint/per vertex tint.js	still	still	yes
+src/display/tint/pixel wave.js	changing	changing	no
+src/display/tint/rainbow text.js	changing	changing	no
+src/display/tint/rasters.js	still	still	yes
+src/display/tint/single color tint.js	still	still	yes
+src/display/tint/text tint.js	still	still	no
+src/display/tint/tile sprite tint.js	changing	changing	yes
+src/display/tint/tint and alpha.js	still	still	no
+src/display/tint/tint fill.js	still	still	no
+src/display/tint/tint fill effect.js	still	still	yes
+src/display/tint/tint modes.js	still	still	no
+src/display/tint/tween tint.js	changing	changing	no
+src/events/create event emitter.js	still	still	yes
+src/events/emit scene event.js	still	still	no
+src/events/emit using symbols.js	failed at run	failed at run	unobserved
+src/events/event arguments.js	still	still	yes
+src/events/game object events.js	still	still	yes
+src/events/listen to game object event.js	changing	changing	no
+src/events/once event.js	still	still	no
+src/events/turn off anonymous event handler.js	still	still	no
+src/events/turn off event handler.js	still	still	no
+src/filters/barrel/barrel filter.js	changing	changing	no
+src/filters/barrel/barrel sprite filter.js	still	still	no
+src/filters/barrel/barrel squish filter.js	changing	changing	no
+src/filters/barrel/barrel text.js	changing	changing	no
+src/filters/blend/blend add highlight object.js	changing	changing	no
+src/filters/blocky/blocky pixels.js	changing	changing	no
+src/filters/bloom/destroy planet bloom filter.js	changing	changing	no
+src/filters/blur/blur filter.js	changing	changing	no
+src/filters/blur/container blur.js	changing	changing	no
+src/filters/bokeh/particle bokeh.js	changing	changing	no
+src/filters/bokeh/tiltshift camera.js	changing	changing	no
+src/filters/colormatrix/colormatrix filter.js	still	still	no
+src/filters/colormatrix/colormatrix hue shift filter.js	changing	changing	no
+src/filters/combine color matrix/combine color matrix.js	changing	changing	yes
+src/filters/custom wipe filter/reveal bottom to top.js	failed at run	failed at run	unobserved
+src/filters/custom wipe filter/reveal left to right.js	failed at run	failed at run	unobserved
+src/filters/custom wipe filter/reveal right to left.js	failed at run	failed at run	unobserved
+src/filters/custom wipe filter/reveal text.js	failed at run	failed at run	unobserved
+src/filters/custom wipe filter/reveal top to bottom.js	failed at run	failed at run	unobserved
+src/filters/displacement/displacement circles filter.js	changing	changing	no
+src/filters/displacement/displacement filter.js	changing	changing	no
+src/filters/displacement/displacement skull filter.js	changing	changing	no
+src/filters/glow/double glow post filter.js	still	still	yes
+src/filters/glow/glow bitmaptext.js	changing	changing	no
+src/filters/glow/glow filter.js	changing	changing	no
+src/filters/glow/glow graphics.js	changing	changing	no
+src/filters/glow/glow post filter.js	changing	changing	no
+src/filters/glow/glow rope filter.js	changing	changing	no
+src/filters/glow/glow text.js	changing	changing	no
+src/filters/gradient map/gradient map.js	failed at run	failed at run	unobserved
+src/filters/gradient map/palette swap with gradient map.js	failed at run	failed at run	unobserved
+src/filters/image light/image light animated environment.js	changing	changing	yes
+src/filters/image light/image light from pictures.js	changing	changing	no
+src/filters/image light/image light orbs.js	failed at run	failed at run	unobserved
+src/filters/image light/image light smoothness.js	changing	changing	no
+src/filters/key/isolate key color.js	still	still	yes
+src/filters/key/key.js	changing	changing	no
+src/filters/mask/screen mask.js	changing	changing	no
+src/filters/mask/sprite mask.js	changing	changing	yes
+src/filters/normal tools/normal tools.js	failed at run	failed at run	unobserved
+src/filters/normal tools/normal tools facing power.js	changing	changing	no
+src/filters/normal tools/normal tools ratio.js	changing	changing	yes
+src/filters/panorama blur/panorama blur.js	failed at run	failed at run	unobserved
+src/filters/parallel filters/bloom with parallel filters.js	changing	changing	no
+src/filters/pixelate/pixelate amount.js	still	still	no
+src/filters/pixelate/pixelate filter.js	still	still	no
+src/filters/pixelate/pixelate sprite filter.js	still	still	no
+src/filters/pixelate/pixelate transition scene.js	changing	changing	no
+src/filters/quantize/quantize gradient.js	failed at run	failed at run	unobserved
+src/filters/quantize/quantize image.js	changing	changing	no
+src/filters/sampler/sampler.js	changing	changing	no
+src/filters/shadow/shadow filter.js	changing	changing	no
+src/filters/shadow/text shadow filter.js	still	still	no
+src/filters/threshold/threshold.js	changing	changing	no
+src/filters/auto focus filter demo.js	still	still	no
+src/filters/composite alpha demo.js	still	still	yes
+src/filters/custom filter.js	changing	changing	no
+src/filters/custom filter with image input.js	changing	changing	no
+src/filters/custom shine filter.js	changing	changing	no
+src/filters/custom shine filter with progress control.js	changing	changing	no
+src/filters/vignette/vignette camera.js	changing	changing	no
+src/filters/vignette/vignette color.js	changing	changing	yes
+src/filters/vignette/vignette radius.js	changing	changing	no
+src/filters/vignette/vignette sprite.js	still	still	no
+src/filters/vignette/vignette strength.js	changing	changing	no
+src/filters/vignette/vignette xy.js	still	still	no
+src/filters/wipe/reveal bottom to top.js	changing	changing	no
+src/filters/wipe/reveal left to right.js	changing	changing	no
+src/filters/wipe/reveal right to left.js	changing	changing	no
+src/filters/wipe/reveal text.js	failed at run	failed at run	unobserved
+src/filters/wipe/reveal top to bottom.js	still	changing	no
+src/filters/wipe/wipe bottom to top.js	still	changing	no
+src/filters/wipe/wipe left to right.js	changing	changing	no
+src/filters/wipe/wipe right to left.js	changing	changing	no
+src/filters/wipe/wipe to a scene.js	changing	changing	no
+src/filters/wipe/wipe to pointer.js	still	still	no
+src/filters/wipe/wipe top to bottom.js	changing	changing	no
+src/filters/wipe/wipe width.js	changing	changing	no
+src/game config/background color.js	changing	changing	no
+src/game config/banner colors.js	still	still	no
+src/game config/clear before render.js	changing	changing	no
+src/game config/custom canvas.js	still	still	yes
+src/game config/custom webgl canvas.js	still	still	yes
+src/game config/custom webgl2 canvas.js	still	still	yes
+src/game config/game destroy.js	changing	changing	no
+src/game config/game destroy with multi scenes.js	changing	changing	yes
+src/game config/game rng.js	still	still	no
+src/game config/game title.js	still	still	no
+src/game config/game url.js	still	still	no
+src/game config/game version.js	still	still	no
+src/game config/headless renderer.js	uniform	uniform	yes
+src/game config/hide banner.js	still	still	yes
+src/game config/hide phaser from banner.js	still	still	no
+src/game config/multiple game instances.js	changing	changing	no
+src/game config/pixel art mode.js	still	still	no
+src/game config/round pixels.js	still	still	no
+src/game config/transparent.js	still	still	yes
+src/game objects/bitmaptext/dynamic/canvas text.js	still	still	no
+src/game objects/bitmaptext/dynamic/display callback index effect.js	changing	changing	no
+src/game objects/bitmaptext/dynamic/display callback rotation effect.js	changing	changing	no
+src/game objects/bitmaptext/dynamic/display callback scale effect.js	changing	changing	no
+src/game objects/bitmaptext/dynamic/display callback wibble effect.js	changing	changing	no
+src/game objects/bitmaptext/dynamic/text follow path.js	still	still	yes
+src/game objects/bitmaptext/dynamic/tinted text.js	changing	changing	yes
+src/game objects/bitmaptext/dynamic/vertical scroller.js	changing	changing	no
+src/game objects/bitmaptext/retro font/retro text 1.js	changing	changing	yes
+src/game objects/bitmaptext/retro font/retro text 2.js	changing	changing	yes
+src/game objects/bitmaptext/retro font/retro text mega scroll.js	still	still	yes
+src/game objects/bitmaptext/retro font/retro text scroll.js	still	still	yes
+src/game objects/bitmaptext/retro font/retro text scroll callback.js	still	still	yes
+src/game objects/bitmaptext/retro font/scrolling retro text.js	changing	changing	no
+src/game objects/bitmaptext/retro font/tinted retro text.js	changing	changing	yes
+src/game objects/bitmaptext/static/bitmaptext.js	changing	changing	no
+src/game objects/bitmaptext/static/bitmaptext-atlas.js	still	still	yes
+src/game objects/bitmaptext/static/bitmaptext blend mode.js	changing	changing	no
+src/game objects/bitmaptext/static/bitmaptext-canvas.js	changing	changing	no
+src/game objects/bitmaptext/static/bitmaptext origin and scale.js	still	still	yes
+src/game objects/bitmaptext/static/bitmaptext rotation.js	changing	changing	no
+src/game objects/bitmaptext/static/bitmaptext scale.js	changing	changing	no
+src/game objects/bitmaptext/static/change font.js	still	still	yes
+src/game objects/bitmaptext/static/change font size.js	still	still	yes
+src/game objects/bitmaptext/static/drop shadow.js	still	still	yes
+src/game objects/bitmaptext/static/get bitmaptext bounds.js	still	still	yes
+src/game objects/bitmaptext/static/get text size.js	still	still	no
+src/game objects/bitmaptext/static/get text size multiline.js	still	still	no
+src/game objects/bitmaptext/static/get text size scaled.js	changing	changing	no
+src/game objects/bitmaptext/static/large-text.js	changing	changing	no
+src/game objects/bitmaptext/static/max width.js	changing	changing	no
+src/game objects/bitmaptext/static/max width change content.js	changing	changing	yes
+src/game objects/bitmaptext/static/multi line.js	still	still	no
+src/game objects/bitmaptext/static/multi line alignment.js	still	still	yes
+src/game objects/bitmaptext/static/origin and scale.js	still	still	no
+src/game objects/bitmaptext/static/padding.js	still	still	no
+src/game objects/bitmaptext/static/text origin.js	still	still	yes
+src/game objects/bitmaptext/static/tinted text.js	still	still	yes
+src/game objects/bitmaptext/static/width and height.js	changing	changing	no
+src/game objects/blitter/benchmark test 1.js	still	still	no
+src/game objects/blitter/benchmark test 2.js	still	still	no
+src/game objects/blitter/benchmark test 3.js	changing	changing	no
+src/game objects/blitter/blitter alpha.js	still	still	yes
+src/game objects/blitter/blitter camera test.js	still	still	no
+src/game objects/blitter/blitter camera test canvas.js	still	still	no
+src/game objects/blitter/blitter global alpha.js	still	still	yes
+src/game objects/blitter/bob frame object.js	still	still	yes
+src/game objects/blitter/bobs using a multi atlas.js	changing	changing	no
+src/game objects/blitter/canvas benchmark 1.js	changing	changing	no
+src/game objects/blitter/create from callback.js	still	still	yes
+src/game objects/blitter/multiple atlas frame bobs.js	still	still	yes
+src/game objects/blitter/multiple bobs.js	still	still	yes
+src/game objects/blitter/single atlas frame bob.js	still	still	yes
+src/game objects/blitter/single image bob.js	still	still	yes
+src/game objects/blitter/tween test 1.js	changing	changing	no
+src/game objects/blitter/twist scroller.js	uniform	uniform	yes
+src/game objects/capture frame/better-cameras.js	changing	changing	no
+src/game objects/capture frame/capture underwater.js	changing	changing	no
+src/game objects/container/add array of sprites at index.js	changing	changing	no
+src/game objects/container/add array of sprites to container.js	changing	changing	no
+src/game objects/container/add emitter to container.js	changing	changing	no
+src/game objects/container/add sprite to container.js	changing	changing	no
+src/game objects/container/add tilesprite to container.js	changing	changing	yes
+src/game objects/container/animation test.js	changing	changing	no
+src/game objects/container/arcade physics body test.js	changing	changing	yes
+src/game objects/container/arcade physics sprite test.js	changing	changing	yes
+src/game objects/container/camera transform test.js	failed at run	failed at run	unobserved
+src/game objects/container/child blend mode.js	still	still	no
+src/game objects/container/child order.js	still	still	yes
+src/game objects/container/container alpha.js	changing	changing	no
+src/game objects/container/container and camera zoom.js	failed at run	failed at run	unobserved
+src/game objects/container/container and child input.js	still	still	yes
+src/game objects/container/container as mask.js	changing	changing	yes
+src/game objects/container/container depth.js	changing	changing	no
+src/game objects/container/container hitarea.js	changing	changing	no
+src/game objects/container/container hitarea from size.js	still	still	yes
+src/game objects/container/container ik.js	changing	changing	yes
+src/game objects/container/container input test.js	still	still	no
+src/game objects/container/container mask.js	changing	changing	yes
+src/game objects/container/container placement.js	still	still	yes
+src/game objects/container/container scrollfactor.js	changing	changing	no
+src/game objects/container/create container.js	changing	changing	no
+src/game objects/container/draggable container.js	still	still	yes
+src/game objects/container/get bounds test 1.js	changing	changing	no
+src/game objects/container/get child world position.js	changing	changing	no
+src/game objects/container/girl body sprites.js	still	still	yes
+src/game objects/container/input overlap test.js	still	still	no
+src/game objects/container/inside container vs outside container.js	changing	changing	no
+src/game objects/container/matter physics body test.js	changing	changing	yes
+src/game objects/container/matter physics body test camera.js	changing	changing	yes
+src/game objects/container/matter physics sprite test.js	changing	changing	yes
+src/game objects/container/multi camera input test.js	failed at run	failed at run	unobserved
+src/game objects/container/multi container depth test.js	still	still	yes
+src/game objects/container/multiple non exclusive containers.js	changing	changing	no
+src/game objects/container/nested container input test.js	still	still	yes
+src/game objects/container/nested container visibility.js	still	still	yes
+src/game objects/container/nested get bounds test.js	changing	changing	no
+src/game objects/container/nested input test.js	changing	changing	no
+src/game objects/container/non exclusive containers.js	changing	changing	no
+src/game objects/container/parent matrix.js	changing	changing	no
+src/game objects/container/rotated input test.js	changing	changing	no
+src/game objects/container/rotation.js	changing	changing	no
+src/game objects/container/scaled input test.js	still	still	yes
+src/game objects/container/text and sprite test.js	still	still	no
+src/game objects/container/twirl 1.js	changing	changing	no
+src/game objects/container/twirl 2.js	changing	changing	no
+src/game objects/container/twirl 3.js	changing	changing	no
+src/game objects/container/twirl 4.js	changing	changing	no
+src/game objects/container/twirl 5.js	changing	changing	no
+src/game objects/container/twirl 6.js	changing	changing	no
+src/game objects/display list/add to container.js	still	still	no
+src/game objects/display list/add to display list.js	still	still	no
+src/game objects/display list/display list to container.js	still	still	no
+src/game objects/display list/display list to layer.js	still	still	no
+src/game objects/display list/move container.js	still	still	no
+src/game objects/display list/move layer.js	still	still	no
+src/game objects/display list/remove from display list.js	still	still	no
+src/game objects/display list/swap container.js	still	still	no
+src/game objects/dom element/blend mode.js	still	still	yes
+src/game objects/dom element/css style object.js	uniform	uniform	yes
+src/game objects/dom element/css text.js	uniform	uniform	yes
+src/game objects/dom element/cursors test.js	still	still	yes
+src/game objects/dom element/div depth.js	still	still	yes
+src/game objects/dom element/div position test 1.js	still	still	yes
+src/game objects/dom element/div position test 2.js	still	still	yes
+src/game objects/dom element/div position test 3.js	still	still	yes
+src/game objects/dom element/div position test 4.js	still	still	yes
+src/game objects/dom element/div position test 5.js	still	still	yes
+src/game objects/dom element/form input.js	still	still	no
+src/game objects/dom element/input test.js	still	still	no
+src/game objects/dom element/move camera.js	uniform	uniform	yes
+src/game objects/dom element/physics element.js	still	still	yes
+src/game objects/dom element/rotate3d.js	still	still	yes
+src/game objects/dom element/skew.js	still	still	yes
+src/game objects/dom element/sleeping scene test.js	still	still	yes
+src/game objects/dom element/using a div.js	changing	changing	no
+src/game objects/dom element/video element.js	uniform	uniform	yes
+src/game objects/extern/threejs cube.js	failed at run	failed at run	unobserved
+src/game objects/extern/threejs filters.js	failed at run	failed at run	unobserved
+src/game objects/gradient/animate gradient offset.js	failed at run	failed at run	unobserved
+src/game objects/gradient/create normal map with gradients.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gauge with masked gradient.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient flare.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient repeat mode 0 extend.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient repeat mode 1 truncate.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient repeat mode 2 sawtooth.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient repeat mode 3 triangular.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient shape mode bilinear.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient shape mode conic asymmetric.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient shape mode conic symmetric.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient shape mode linear.js	failed at run	failed at run	unobserved
+src/game objects/gradient/gradient shape mode radial.js	failed at run	failed at run	unobserved
+src/game objects/gradient/weird gradient offsets.js	failed at run	failed at run	unobserved
+src/game objects/graphics/primitives/arc filled.js	still	still	yes
+src/game objects/graphics/primitives/arc gradient filled.js	still	still	yes
+src/game objects/graphics/primitives/arc stroked.js	still	still	yes
+src/game objects/graphics/primitives/line between.js	still	still	yes
+src/game objects/graphics/primitives/line filled.js	still	still	yes
+src/game objects/graphics/primitives/line gradient stroked.js	still	still	yes
+src/game objects/graphics/primitives/path gradient filled.js	still	still	yes
+src/game objects/graphics/primitives/path stroked.js	still	still	yes
+src/game objects/graphics/primitives/rectangle filled.js	still	still	yes
+src/game objects/graphics/primitives/rectangle filled texture.js	still	still	yes
+src/game objects/graphics/primitives/rectangle gradient filled.js	still	still	yes
+src/game objects/graphics/primitives/rectangle stroked.js	still	still	yes
+src/game objects/graphics/primitives/scene stack test.js	still	still	yes
+src/game objects/graphics/primitives/split path filled.js	still	still	yes
+src/game objects/graphics/primitives/triangle gradient filled.js	still	still	yes
+src/game objects/graphics/primitives/triangle gradient stroked.js	still	still	yes
+src/game objects/graphics/primitives/triangle stroked.js	still	still	yes
+src/game objects/graphics/arc.js	still	still	yes
+src/game objects/graphics/arc stroke.js	still	still	yes
+src/game objects/graphics/atari lines.js	still	still	yes
+src/game objects/graphics/circle overlap.js	failed at run	failed at run	unobserved
+src/game objects/graphics/circles test.js	changing	changing	no
+src/game objects/graphics/fill rect.js	still	still	yes
+src/game objects/graphics/fill rounded rectangle.js	still	still	yes
+src/game objects/graphics/generate texture test.js	still	still	yes
+src/game objects/graphics/generate texture to blitter.js	changing	changing	no
+src/game objects/graphics/generate texture to sprite.js	still	still	yes
+src/game objects/graphics/generate texture to tilesprite.js	changing	changing	yes
+src/game objects/graphics/graphics in a container.js	still	still	yes
+src/game objects/graphics/graphics rendering.js	changing	changing	yes
+src/game objects/graphics/graphics styles.js	still	still	yes
+src/game objects/graphics/health bars demo.js	changing	changing	yes
+src/game objects/graphics/line rendering.js	changing	changing	no
+src/game objects/graphics/line thickness.js	still	still	yes
+src/game objects/graphics/many stars.js	changing	changing	yes
+src/game objects/graphics/mouse trail.js	failed at run	failed at run	unobserved
+src/game objects/graphics/multiple cameras.js	changing	changing	no
+src/game objects/graphics/multiple graphic instances.js	changing	changing	no
+src/game objects/graphics/multiple stroke rects.js	changing	changing	yes
+src/game objects/graphics/obj scene.js	changing	changing	no
+src/game objects/graphics/pacman arc.js	still	still	yes
+src/game objects/graphics/pacman arc chomp chomp.js	changing	changing	no
+src/game objects/graphics/phaser logo.js	changing	changing	yes
+src/game objects/graphics/phaser logo 3d.js	changing	changing	yes
+src/game objects/graphics/phaser logo shift.js	changing	changing	yes
+src/game objects/graphics/primitive types.js	still	still	yes
+src/game objects/graphics/rect test.js	still	still	yes
+src/game objects/graphics/spinning cube.js	changing	changing	no
+src/game objects/graphics/star shape.js	still	still	yes
+src/game objects/graphics/stroke circle.js	still	still	yes
+src/game objects/graphics/stroke path.js	still	still	yes
+src/game objects/graphics/stroke rect.js	still	still	yes
+src/game objects/graphics/stroke rounded rectangle.js	still	still	yes
+src/game objects/graphics/stroke triangle.js	still	still	yes
+src/game objects/graphics/teapot.js	failed at run	failed at run	unobserved
+src/game objects/graphics/trace.js	still	still	yes
+src/game objects/graphics/transform.js	changing	changing	no
+src/game objects/group/create child.js	still	still	yes
+src/game objects/group/create invaders.js	still	still	yes
+src/game objects/group/create multiple.js	still	still	yes
+src/game objects/group/create multiple keys.js	still	still	no
+src/game objects/group/destroy child.js	changing	changing	no
+src/game objects/group/multiple adds.js	still	still	yes
+src/game objects/group/random frame.js	still	still	no
+src/game objects/group/set rotation.js	still	still	yes
+src/game objects/group/set scale.js	still	still	yes
+src/game objects/group/set x.js	still	still	yes
+src/game objects/group/set xy.js	still	still	yes
+src/game objects/group/set y.js	still	still	yes
+src/game objects/group/shuffle.js	still	still	yes
+src/game objects/group/sprite pool.js	changing	changing	no
+src/game objects/group/swirl.js	changing	changing	yes
+src/game objects/images/blend test.js	changing	changing	yes
+src/game objects/images/custom game object.js	changing	changing	yes
+src/game objects/images/custom image class.js	still	still	yes
+src/game objects/images/custom image class ES6.js	still	still	yes
+src/game objects/images/destroy an image.js	changing	changing	yes
+src/game objects/images/flip.js	changing	changing	yes
+src/game objects/images/get bounds.js	changing	changing	yes
+src/game objects/images/image alpha.js	still	still	yes
+src/game objects/images/image bounds.js	changing	changing	no
+src/game objects/images/image edge points.js	changing	changing	no
+src/game objects/images/image offset.js	still	still	yes
+src/game objects/images/image rotation.js	changing	changing	yes
+src/game objects/images/make image from config.js	still	still	no
+src/game objects/images/multiple alpha.js	still	still	yes
+src/game objects/images/multiple image rotation.js	changing	changing	yes
+src/game objects/images/single image.js	changing	changing	yes
+src/game objects/layer/add sprite to layer.js	still	still	yes
+src/game objects/layer/create layer.js	still	still	yes
+src/game objects/layer/depth sort layer children.js	changing	changing	no
+src/game objects/layer/layer filter.js	changing	changing	yes
+src/game objects/layer/layer with bitmap mask.js	changing	changing	no
+src/game objects/layer/layer with geometry mask.js	changing	changing	no
+src/game objects/layer/move between layers.js	still	still	no
+src/game objects/layer/nested layers.js	still	still	no
+src/game objects/lights/bitmap text light.js	still	still	yes
+src/game objects/lights/blitter light.js	changing	changing	no
+src/game objects/lights/change max lights.js	changing	changing	no
+src/game objects/lights/change scene.js	still	still	no
+src/game objects/lights/create point light.js	still	still	no
+src/game objects/lights/draw light.js	still	still	yes
+src/game objects/lights/graveyard.js	changing	changing	no
+src/game objects/lights/light culling.js	changing	changing	no
+src/game objects/lights/light follow pointer.js	changing	changing	no
+src/game objects/lights/particles light.js	still	still	yes
+src/game objects/lights/point lights.js	changing	changing	no
+src/game objects/lights/render texture light.js	still	still	no
+src/game objects/lights/rotated sprite.js	changing	changing	yes
+src/game objects/lights/single light.js	changing	changing	no
+src/game objects/lights/spotlight.js	still	still	yes
+src/game objects/lights/sprite sheet light.js	changing	changing	no
+src/game objects/lights/text light.js	still	still	no
+src/game objects/lights/tilemap layer.js	changing	changing	yes
+src/game objects/lights/tilesprite light.js	changing	changing	no
+src/game objects/lights/zoom point light.js	still	still	no
+src/game objects/nine slice/3 slice button.js	changing	changing	no
+src/game objects/nine slice/create nine slice.js	still	still	yes
+src/game objects/nine slice/interactive button.js	still	still	yes
+src/game objects/nine slice/nine slice panel.js	changing	changing	no
+src/game objects/nine slice/nine slice vs scaling.js	changing	changing	no
+src/game objects/nine slice/progress bar.js	changing	changing	no
+src/game objects/nine slice/stress test.js	changing	changing	no
+src/game objects/nine slice/texture packer nine slice.js	still	still	yes
+src/game objects/noise/basic noise.js	still	still	yes
+src/game objects/noise/basic noise colors.js	changing	changing	yes
+src/game objects/noise/basic noise normal.js	still	still	yes
+src/game objects/noise/basic noise power.js	still	still	yes
+src/game objects/noise/basic noise scroll.js	changing	changing	yes
+src/game objects/noise/cellular noise.js	changing	changing	no
+src/game objects/noise/cellular noise cells.js	changing	changing	no
+src/game objects/noise/cellular noise indexed.js	failed at run	failed at run	unobserved
+src/game objects/noise/cellular noise iterations.js	changing	changing	no
+src/game objects/noise/cellular noise normal map.js	changing	changing	yes
+src/game objects/noise/cellular noise scroll.js	changing	changing	no
+src/game objects/noise/cellular noise scroll loop.js	changing	changing	yes
+src/game objects/noise/cellular noise scroll z.js	changing	changing	no
+src/game objects/noise/cellular noise smooth.js	changing	changing	yes
+src/game objects/noise/cellular noise variation.js	changing	changing	no
+src/game objects/noise/cellular noise wrap.js	changing	changing	yes
+src/game objects/noise/clouds with simplex noise.js	failed at run	failed at run	unobserved
+src/game objects/noise/fire with simplex noise.js	failed at run	failed at run	unobserved
+src/game objects/noise/heat haze with simplex noise.js	changing	changing	no
+src/game objects/noise/reflections with simplex noise.js	changing	changing	no
+src/game objects/noise/simplex noise.js	still	still	no
+src/game objects/noise/simplex noise flow.js	changing	changing	no
+src/game objects/noise/simplex noise iteration sculpting.js	changing	changing	no
+src/game objects/noise/simplex noise iterations 2d.js	still	still	no
+src/game objects/noise/simplex noise iterations 3d.js	still	still	no
+src/game objects/noise/simplex noise normal map.js	still	still	yes
+src/game objects/noise/simplex noise offset.js	failed at run	failed at run	unobserved
+src/game objects/noise/simplex noise period.js	still	still	no
+src/game objects/noise/simplex noise warp.js	changing	changing	no
+src/game objects/noise/simplex noise warp iteration sculpting.js	changing	changing	no
+src/game objects/noise/simplex noise warp iterations 2d.js	still	still	no
+src/game objects/noise/simplex noise warp iterations 3d.js	still	still	no
+src/game objects/noise/simplex noise wrap toggle.js	still	still	no
+src/game objects/particle emitter/add emit zone.js	changing	changing	yes
+src/game objects/particle emitter/bring to top.js	still	still	no
+src/game objects/particle emitter/change emitter tint.js	changing	changing	no
+src/game objects/particle emitter/custom callback.js	changing	changing	no
+src/game objects/particle emitter/direct value.js	changing	changing	no
+src/game objects/particle emitter/emit at pointer.js	still	still	no
+src/game objects/particle emitter/emit zone loop.js	changing	changing	no
+src/game objects/particle emitter/emitter alpha.js	changing	changing	no
+src/game objects/particle emitter/emitter duration.js	still	still	no
+src/game objects/particle emitter/emitter events.js	still	still	no
+src/game objects/particle emitter/emitter zone total.js	changing	changing	yes
+src/game objects/particle emitter/explode emitter.js	still	still	no
+src/game objects/particle emitter/fire effects.js	changing	changing	no
+src/game objects/particle emitter/get emitter bounds.js	changing	changing	no
+src/game objects/particle emitter/get particle bounds.js	still	still	no
+src/game objects/particle emitter/gravity processor.js	changing	changing	no
+src/game objects/particle emitter/hold particle.js	still	still	yes
+src/game objects/particle emitter/interpolation ease.js	changing	changing	no
+src/game objects/particle emitter/min max.js	changing	changing	no
+src/game objects/particle emitter/move to.js	changing	changing	no
+src/game objects/particle emitter/move to dynamic.js	changing	changing	no
+src/game objects/particle emitter/multiple death zones.js	changing	changing	no
+src/game objects/particle emitter/onEmit and onUpdate.js	changing	changing	no
+src/game objects/particle emitter/particle bounds.js	changing	changing	no
+src/game objects/particle emitter/particle overlap.js	changing	changing	no
+src/game objects/particle emitter/particle physics body overlap.js	changing	changing	no
+src/game objects/particle emitter/random array.js	changing	changing	no
+src/game objects/particle emitter/random object.js	still	still	yes
+src/game objects/particle emitter/random tint.js	changing	changing	no
+src/game objects/particle emitter/set emitter zone.js	changing	changing	no
+src/game objects/particle emitter/set emitter zone by instance.js	changing	changing	no
+src/game objects/particle emitter/sort order.js	still	still	no
+src/game objects/particle emitter/start end.js	changing	changing	no
+src/game objects/particle emitter/start end ease.js	still	still	yes
+src/game objects/particle emitter/start end random.js	changing	changing	no
+src/game objects/particle emitter/stepped emitter.js	changing	changing	yes
+src/game objects/particle emitter/stepped emitter with yoyo.js	changing	changing	yes
+src/game objects/particle emitter/stop after.js	still	still	no
+src/game objects/particle emitter/tween alpha.js	changing	changing	no
+src/game objects/particle emitter/tween speed.js	changing	changing	no
+src/game objects/particle emitter/tween speed x.js	changing	changing	no
+src/game objects/particle emitter/tween speed y.js	changing	changing	no
+src/game objects/particle emitter/tween xy.js	changing	changing	no
+src/game objects/particle emitter/view bounds.js	changing	changing	no
+src/game objects/render texture/atlas frame to render texture.js	still	still	no
+src/game objects/render texture/batch draw frame.js	still	still	no
+src/game objects/render texture/batch draw sprite.js	still	still	no
+src/game objects/render texture/blitter to render texture.js	changing	changing	no
+src/game objects/render texture/brute force.js	uniform	changing	no
+src/game objects/render texture/capture game object in world.js	changing	changing	no
+src/game objects/render texture/change frame.js	still	still	yes
+src/game objects/render texture/container to render texture.js	changing	changing	yes
+src/game objects/render texture/destroy game with render texture.js	still	still	no
+src/game objects/render texture/destroy render texture.js	still	still	no
+src/game objects/render texture/draw game objects to render texture.js	changing	changing	no
+src/game objects/render texture/draw on texture.js	still	still	no
+src/game objects/render texture/dynamic bitmap text to render texture.js	changing	changing	no
+src/game objects/render texture/dynamic tilemap to render texture.js	changing	changing	yes
+src/game objects/render texture/erase part of render texture.js	still	still	yes
+src/game objects/render texture/erase part of render texture canvas.js	still	still	yes
+src/game objects/render texture/frame fill.js	still	still	yes
+src/game objects/render texture/graphics to render texture.js	changing	changing	yes
+src/game objects/render texture/group to render texture.js	still	still	yes
+src/game objects/render texture/paint.js	uniform	uniform	yes
+src/game objects/render texture/paint interpolated.js	uniform	uniform	yes
+src/game objects/render texture/paint interpolated shadow.js	uniform	uniform	yes
+src/game objects/render texture/paint tinted.js	uniform	uniform	yes
+src/game objects/render texture/particle emitter to render texture.js	changing	changing	no
+src/game objects/render texture/pixel art test.js	still	still	yes
+src/game objects/render texture/render scene to texture.js	changing	changing	yes
+src/game objects/render texture/render texture as a mask.js	uniform	uniform	yes
+src/game objects/render texture/render texture as better camera.js	changing	changing	yes
+src/game objects/render texture/render texture larger than camera.js	still	still	no
+src/game objects/render texture/render texture to render texture.js	still	still	no
+src/game objects/render texture/resize render texture.js	uniform	uniform	yes
+src/game objects/render texture/resize rendertexture.js	still	still	no
+src/game objects/render texture/save texture.js	still	still	no
+src/game objects/render texture/scene to render texture.js	changing	changing	no
+src/game objects/render texture/scene to render texture with crop.js	still	still	yes
+src/game objects/render texture/scratch.js	still	still	yes
+src/game objects/render texture/shape to render texture.js	still	still	yes
+src/game objects/render texture/sprite to render texture.js	still	still	yes
+src/game objects/render texture/static bitmap text to render texture.js	changing	changing	no
+src/game objects/render texture/static tilemap to render texture.js	changing	changing	yes
+src/game objects/render texture/text to render texture.js	changing	changing	no
+src/game objects/render texture/texture key to render texture.js	still	still	yes
+src/game objects/render texture/trail.js	changing	changing	no
+src/game objects/render texture/trail2.js	changing	changing	yes
+src/game objects/render texture/transform draw.js	still	still	yes
+src/game objects/rope/animated rope.js	changing	changing	yes
+src/game objects/rope/draw rope.js	still	still	no
+src/game objects/rope/draw rope gradient.js	uniform	changing	no
+src/game objects/rope/flip rope xy.js	changing	changing	no
+src/game objects/rope/horizontal rope.js	changing	changing	yes
+src/game objects/rope/rope as a mask.js	changing	changing	no
+src/game objects/rope/rope with a mask.js	changing	changing	no
+src/game objects/rope/rope with shader texture.js	changing	changing	no
+src/game objects/rope/single alpha rope.js	changing	changing	no
+src/game objects/rope/split alpha rope.js	changing	changing	yes
+src/game objects/rope/vertex tint rope.js	changing	changing	no
+src/game objects/rope/vertical rope.js	changing	changing	yes
+src/game objects/shader/custom shader perlin noise.js	changing	changing	no
+src/game objects/shader/custom shader random noise.js	changing	changing	yes
+src/game objects/shader/custom shader texture coordinates.js	changing	changing	yes
+src/game objects/shader/gradient bilinear.js	changing	changing	yes
+src/game objects/shader/gradient circle wipe.js	still	still	no
+src/game objects/shader/gradient linear.js	still	still	yes
+src/game objects/shader/gradient linear wipe.js	still	still	no
+src/game objects/shader/gradient ripples.js	changing	changing	no
+src/game objects/shader/gradient shine.js	still	still	yes
+src/game objects/shaders/basic texture shader.js	still	still	yes
+src/game objects/shaders/buffer a.js	uniform	uniform	yes
+src/game objects/shaders/buffer b.js	changing	changing	yes
+src/game objects/shaders/change shader texture.js	changing	changing	no
+src/game objects/shaders/load shader.js	uniform	uniform	yes
+src/game objects/shaders/sandbox.js	still	still	yes
+src/game objects/shaders/save shader as texture.js	changing	changing	no
+src/game objects/shaders/set shader uniform.js	still	still	yes
+src/game objects/shaders/shader arcade physics.js	changing	changing	yes
+src/game objects/shaders/shader as a mask.js	changing	changing	yes
+src/game objects/shaders/shader mass texture test.js	changing	changing	no
+src/game objects/shaders/shader transforms.js	changing	changing	yes
+src/game objects/shaders/shader using a dynamic texture.js	changing	changing	no
+src/game objects/shaders/shader using an updating dynamic texture.js	changing	changing	no
+src/game objects/shaders/using a shader as a buffer.js	changing	changing	yes
+src/game objects/shapes/arc.js	changing	changing	no
+src/game objects/shapes/blend modes.js	still	still	yes
+src/game objects/shapes/circle.js	changing	changing	no
+src/game objects/shapes/curve.js	still	still	yes
+src/game objects/shapes/draw.js	still	still	yes
+src/game objects/shapes/ellipse.js	changing	changing	no
+src/game objects/shapes/grid.js	changing	changing	no
+src/game objects/shapes/iso birdie.js	changing	changing	no
+src/game objects/shapes/iso box.js	changing	changing	no
+src/game objects/shapes/iso draw.js	still	still	yes
+src/game objects/shapes/iso image.js	still	still	yes
+src/game objects/shapes/iso landscape.js	still	still	yes
+src/game objects/shapes/iso triangle.js	changing	changing	no
+src/game objects/shapes/line.js	changing	changing	no
+src/game objects/shapes/polygon.js	changing	changing	no
+src/game objects/shapes/polygon contains.js	still	still	yes
+src/game objects/shapes/polygon with matter physics.js	changing	changing	yes
+src/game objects/shapes/rectangle.js	changing	changing	no
+src/game objects/shapes/rectangle with arcade physics.js	changing	changing	yes
+src/game objects/shapes/spline.js	still	still	yes
+src/game objects/shapes/stacker.js	failed at run	failed at run	unobserved
+src/game objects/shapes/stacker es6.js	failed at run	failed at run	unobserved
+src/game objects/shapes/star.js	changing	changing	no
+src/game objects/shapes/triangle.js	changing	changing	no
+src/game objects/sprite gpu layer/big forest.js	failed at run	changing	unobserved
+src/game objects/sprite gpu layer/bunny dance.js	changing	changing	no
+src/game objects/sprite gpu layer/create sprites incrementally.js	changing	changing	no
+src/game objects/sprite gpu layer/dynamic particle source.js	changing	changing	no
+src/game objects/sprite gpu layer/easing types.js	changing	changing	no
+src/game objects/sprite gpu layer/frame animation data.js	changing	changing	no
+src/game objects/sprite gpu layer/gpu animated sprites.js	changing	changing	no
+src/game objects/sprite gpu layer/gpu animated spritesheet from atlas.js	changing	changing	no
+src/game objects/sprite gpu layer/gpu sprite.js	changing	changing	no
+src/game objects/sprite gpu layer/insert members.js	failed at run	failed at run	unobserved
+src/game objects/sprite gpu layer/layer lighting.js	changing	changing	no
+src/game objects/sprite gpu layer/multiple frames from texture.js	changing	changing	no
+src/game objects/sprite gpu layer/particle fountain.js	changing	changing	no
+src/game objects/sprite gpu layer/pixel sprites 1 million.js	changing	changing	no
+src/game objects/sprite gpu layer/update sprite buffer.js	changing	changing	no
+src/game objects/sprite gpu layer/update sprites.js	changing	changing	no
+src/game objects/sprites/create from config.js	still	still	no
+src/game objects/sprites/custom sprite class ES6.js	changing	changing	yes
+src/game objects/sprites/moving sprite.js	uniform	uniform	yes
+src/game objects/sprites/multiple sprites.js	still	still	yes
+src/game objects/sprites/rotate around a sprite.js	changing	changing	yes
+src/game objects/sprites/single sprite.js	still	still	yes
+src/game objects/sprites/sprite alpha.js	still	still	yes
+src/game objects/sprites/sprite rotation.js	changing	changing	no
+src/game objects/sprites/to json.js	still	still	yes
+src/game objects/stamp/stamp across multiple cameras.js	changing	changing	no
+src/game objects/stamp/stamp hud.js	changing	changing	no
+src/game objects/stamp/stamp with lighting.js	changing	changing	no
+src/game objects/tests/dynamic bitmap text.js	changing	changing	no
+src/game objects/tests/image.js	changing	changing	yes
+src/game objects/tests/single tilesprite.js	still	still	yes
+src/game objects/tests/static bitmap text.js	changing	changing	no
+src/game objects/tests/text.js	changing	changing	no
+src/game objects/tests/tilesprite.js	changing	changing	yes
+src/game objects/text/tests/word wrap.js	failed at run	failed at run	unobserved
+src/game objects/text/align text.js	still	still	no
+src/game objects/text/basic text.js	still	still	no
+src/game objects/text/change text.js	still	still	no
+src/game objects/text/create from config.js	still	still	no
+src/game objects/text/custom webfont.js	failed at run	failed at run	unobserved
+src/game objects/text/emojis.js	still	uniform	no
+src/game objects/text/google webfont.js	failed at run	failed at run	unobserved
+src/game objects/text/italic text.js	still	still	no
+src/game objects/text/line spacing.js	still	still	no
+src/game objects/text/multi line text.js	still	still	no
+src/game objects/text/multi line text with alignment.js	still	still	no
+src/game objects/text/padding from config.js	still	still	no
+src/game objects/text/right origin.js	still	still	no
+src/game objects/text/right to left text.js	uniform	uniform	yes
+src/game objects/text/set test string.js	still	still	no
+src/game objects/text/shadow stroke styles.js	still	still	no
+src/game objects/text/simple text button.js	still	still	no
+src/game objects/text/speech bubble.js	still	still	no
+src/game objects/text/text bounds.js	still	still	no
+src/game objects/text/text gradient.js	failed at run	failed at run	unobserved
+src/game objects/text/text key.js	still	still	no
+src/game objects/text/text metrics.js	still	still	no
+src/game objects/text/text origin.js	changing	changing	no
+src/game objects/text/text padding.js	still	still	no
+src/game objects/text/text with fallback font.js	still	still	no
+src/game objects/text/to json.js	still	still	no
+src/game objects/text/word wrap by callback.js	still	still	no
+src/game objects/text/word wrap by width.js	still	still	no
+src/game objects/tile sprite/atlas.js	changing	changing	yes
+src/game objects/tile sprite/atlas - canvas.js	changing	changing	no
+src/game objects/tile sprite/change frame.js	changing	changing	no
+src/game objects/tile sprite/change frame and size.js	changing	changing	no
+src/game objects/tile sprite/change single frame.js	changing	changing	no
+src/game objects/tile sprite/create from frame.js	changing	changing	no
+src/game objects/tile sprite/example.js	changing	changing	no
+src/game objects/tile sprite/example 2.js	changing	changing	no
+src/game objects/tile sprite/example 2 - canvas.js	changing	changing	no
+src/game objects/tile sprite/example - canvas.js	changing	changing	yes
+src/game objects/tile sprite/flipped.js	still	still	no
+src/game objects/tile sprite/tilesprite pixel art test.js	changing	changing	yes
+src/game objects/video/change video source.js	failed at run	failed at run	unobserved
+src/game objects/video/get first video frame.js	failed at run	failed at run	unobserved
+src/game objects/video/load video from url.js	uniform	uniform	yes
+src/game objects/video/loop video.js	failed at run	failed at run	unobserved
+src/game objects/video/multiple video instances.js	failed at run	failed at run	unobserved
+src/game objects/video/multiple videos.js	failed at run	failed at run	unobserved
+src/game objects/video/on complete event.js	failed at run	failed at run	unobserved
+src/game objects/video/play video.js	failed at run	failed at run	unobserved
+src/game objects/video/stream video from webcam.js	failed at run	failed at run	unobserved
+src/game objects/video/transparent video.js	failed at run	failed at run	unobserved
+src/game objects/video/video as shader texture.js	failed at run	failed at run	unobserved
+src/game objects/video/video controls.js	failed at run	failed at run	unobserved
+src/game objects/video/video set current time.js	failed at run	failed at run	unobserved
+src/game objects/video/video snapshot.js	failed at run	failed at run	unobserved
+src/game objects/video/video snapshot area.js	failed at run	failed at run	unobserved
+src/game objects/video/video to sprites.js	failed at run	failed at run	unobserved
+src/game objects/video/video transition.js	failed at run	failed at run	unobserved
+src/games/avoid the germs/main.js	uniform	changing	no
+src/games/bank panic/main.js	changing	changing	yes
+src/games/breakout/breakout.js	still	still	yes
+src/games/card memory/main.js	uniform	uniform	yes
+src/games/coin clicker/main.js	changing	changing	no
+src/games/emoji match/main.js	still	changing	no
+src/games/firstgame/part1.js	uniform	uniform	yes
+src/games/firstgame/part10.js	changing	changing	no
+src/games/firstgame/part2.js	uniform	uniform	yes
+src/games/firstgame/part3.js	still	still	yes
+src/games/firstgame/part4.js	still	still	yes
+src/games/firstgame/part5.js	changing	changing	yes
+src/games/firstgame/part6.js	changing	changing	yes
+src/games/firstgame/part7.js	changing	changing	yes
+src/games/firstgame/part8.js	changing	changing	yes
+src/games/firstgame/part9.js	changing	changing	no
+src/games/flood fill/flood-fill.js	changing	changing	no
+src/games/minesweeper/minesweeper.js	still	still	yes
+src/games/my first game/gameObjects/Bomb.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Cake.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Chick.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Coin.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Exit.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Hamster.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Key.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/MysteryBox.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Platform.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Player.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Score.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/Star.js	failed at run	failed at run	unobserved
+src/games/my first game/gameObjects/TreasureBox.js	failed at run	failed at run	unobserved
+src/games/my first game/scenes/Boot.js	failed at run	failed at run	unobserved
+src/games/my first game/animationKeys.js	failed at run	failed at run	unobserved
+src/games/my first game/audioKeys.js	failed at run	failed at run	unobserved
+src/games/my first game/game.js	failed at run	failed at run	unobserved
+src/games/my first game/spriteKeys.js	failed at run	failed at run	unobserved
+src/games/sliding puzzle/main.js	failed at run	failed at run	unobserved
+src/games/snake/part1.js	uniform	uniform	yes
+src/games/snake/part2.js	changing	changing	yes
+src/games/snake/part3.js	changing	changing	yes
+src/games/snake/part4.js	changing	changing	yes
+src/games/snake/part5.js	changing	changing	yes
+src/games/snake/part6.js	changing	changing	yes
+src/games/snake/part7.js	changing	changing	yes
+src/games/snowmen attack/main.js	changing	changing	no
+src/games/stacker/stacker.js	failed at run	failed at run	unobserved
+src/games/tom/main.js	failed at run	failed at run	unobserved
+src/geom/circle/area.js	still	still	yes
+src/geom/circle/change size.js	still	still	yes
+src/geom/circle/circumference.js	still	still	yes
+src/geom/circle/circumference point.js	changing	changing	yes
+src/geom/circle/clone.js	changing	changing	yes
+src/geom/circle/contains.js	still	still	yes
+src/geom/circle/contains point.js	changing	changing	yes
+src/geom/circle/contains rect.js	changing	changing	yes
+src/geom/circle/copy from.js	still	still	yes
+src/geom/circle/create.js	still	still	yes
+src/geom/circle/equals.js	still	still	no
+src/geom/circle/get bounds.js	changing	changing	yes
+src/geom/circle/get point at.js	changing	changing	yes
+src/geom/circle/get points.js	still	still	yes
+src/geom/circle/get random point.js	changing	changing	no
+src/geom/circle/is empty.js	changing	changing	no
+src/geom/circle/offset.js	still	still	yes
+src/geom/circle/offset point.js	still	still	yes
+src/geom/circle/properties.js	still	still	yes
+src/geom/circle/set empty.js	still	still	yes
+src/geom/circle/set position.js	still	still	yes
+src/geom/circle/set to.js	still	still	yes
+src/geom/ellipse/adjust size.js	still	still	yes
+src/geom/ellipse/area.js	still	still	no
+src/geom/ellipse/circumference.js	still	still	no
+src/geom/ellipse/circumference point.js	still	still	no
+src/geom/ellipse/clone.js	changing	changing	yes
+src/geom/ellipse/contains.js	still	still	yes
+src/geom/ellipse/contains point.js	changing	changing	yes
+src/geom/ellipse/contains rect.js	still	still	yes
+src/geom/ellipse/copy from.js	uniform	uniform	yes
+src/geom/ellipse/create ellipse.js	still	still	yes
+src/geom/ellipse/equals.js	still	still	no
+src/geom/ellipse/get bounds.js	changing	changing	yes
+src/geom/ellipse/get major radius.js	still	still	yes
+src/geom/ellipse/get minor radius.js	still	still	yes
+src/geom/ellipse/get point at.js	changing	changing	yes
+src/geom/ellipse/get points.js	still	still	yes
+src/geom/ellipse/get random point.js	changing	changing	no
+src/geom/ellipse/is empty.js	changing	changing	no
+src/geom/ellipse/move ellipse.js	still	still	yes
+src/geom/ellipse/offset.js	still	still	yes
+src/geom/ellipse/offset point.js	changing	changing	yes
+src/geom/ellipse/properties.js	still	still	yes
+src/geom/ellipse/set empty.js	still	still	yes
+src/geom/ellipse/set position.js	still	still	yes
+src/geom/ellipse/set size.js	still	still	yes
+src/geom/ellipse/set to.js	still	still	yes
+src/geom/intersects/circle to circle.js	changing	changing	yes
+src/geom/intersects/get rectangle intersection.js	still	still	yes
+src/geom/intersects/line to circle.js	changing	changing	yes
+src/geom/intersects/line to line.js	changing	changing	yes
+src/geom/intersects/line to rectangle.js	changing	changing	yes
+src/geom/intersects/point to line.js	still	still	yes
+src/geom/intersects/point to line segment.js	still	still	yes
+src/geom/intersects/rectangle to circle.js	still	still	yes
+src/geom/intersects/rectangle to rectangle.js	changing	changing	yes
+src/geom/intersects/rectangle to triangle.js	changing	changing	yes
+src/geom/intersects/rectangle to values.js	still	still	yes
+src/geom/intersects/triangle to circle.js	changing	changing	yes
+src/geom/intersects/triangle to line.js	changing	changing	yes
+src/geom/intersects/triangle to triangle.js	changing	changing	yes
+src/geom/line/angle.js	changing	changing	no
+src/geom/line/bresenham points.js	still	still	yes
+src/geom/line/center on.js	changing	changing	yes
+src/geom/line/clone.js	changing	changing	yes
+src/geom/line/copy from.js	uniform	uniform	yes
+src/geom/line/create.js	still	still	yes
+src/geom/line/equals.js	still	still	no
+src/geom/line/get eased points.js	still	still	yes
+src/geom/line/get mid point.js	still	still	yes
+src/geom/line/get normal.js	changing	changing	yes
+src/geom/line/get point ab.js	changing	changing	yes
+src/geom/line/get point at.js	changing	changing	yes
+src/geom/line/get points.js	still	still	yes
+src/geom/line/get random point.js	changing	changing	no
+src/geom/line/height.js	still	still	no
+src/geom/line/inverse line.js	uniform	uniform	yes
+src/geom/line/length.js	still	still	no
+src/geom/line/normal angle.js	still	still	no
+src/geom/line/normal xy.js	still	still	no
+src/geom/line/offset.js	still	still	yes
+src/geom/line/perp slope.js	changing	changing	no
+src/geom/line/point on line.js	still	still	yes
+src/geom/line/properties.js	still	still	yes
+src/geom/line/reflect angle.js	changing	changing	no
+src/geom/line/rotate.js	changing	changing	yes
+src/geom/line/rotate around point.js	changing	changing	yes
+src/geom/line/rotate around xy.js	changing	changing	yes
+src/geom/line/set to.js	still	still	yes
+src/geom/line/set to angle.js	still	still	yes
+src/geom/line/slope.js	changing	changing	no
+src/geom/line/width.js	still	still	no
+src/geom/point/ceil.js	changing	changing	no
+src/geom/point/clone.js	still	still	yes
+src/geom/point/copy from.js	uniform	uniform	yes
+src/geom/point/create.js	still	still	yes
+src/geom/point/cross.js	changing	changing	no
+src/geom/point/equals.js	still	still	no
+src/geom/point/floor.js	changing	changing	no
+src/geom/point/get centroid.js	still	still	no
+src/geom/point/get magnitude.js	still	still	no
+src/geom/point/get magnitude sq.js	changing	changing	no
+src/geom/point/get rectangle from points.js	still	still	no
+src/geom/point/interpolate.js	changing	changing	yes
+src/geom/point/invert.js	still	still	yes
+src/geom/point/negative.js	uniform	uniform	yes
+src/geom/point/negative 2.js	changing	changing	yes
+src/geom/point/project.js	changing	changing	yes
+src/geom/point/project unit.js	changing	changing	yes
+src/geom/point/set to.js	still	still	yes
+src/geom/polygon/area.js	still	still	no
+src/geom/polygon/basic polygon.js	still	still	yes
+src/geom/polygon/clone.js	changing	changing	yes
+src/geom/polygon/complex polygon.js	still	still	yes
+src/geom/polygon/contains.js	changing	changing	yes
+src/geom/polygon/contains point.js	still	still	yes
+src/geom/polygon/get aabb.js	still	still	yes
+src/geom/polygon/get number array.js	still	still	yes
+src/geom/polygon/get points.js	still	still	yes
+src/geom/polygon/polygon edge rays.js	still	still	yes
+src/geom/polygon/set to.js	changing	changing	yes
+src/geom/rectangle/area.js	uniform	uniform	yes
+src/geom/rectangle/ceil.js	changing	changing	yes
+src/geom/rectangle/ceil all.js	changing	changing	yes
+src/geom/rectangle/center on.js	still	still	yes
+src/geom/rectangle/clone.js	changing	changing	yes
+src/geom/rectangle/contains.js	still	still	yes
+src/geom/rectangle/contains point.js	changing	changing	yes
+src/geom/rectangle/contains rect.js	changing	changing	yes
+src/geom/rectangle/copy from.js	changing	changing	yes
+src/geom/rectangle/create.js	still	still	yes
+src/geom/rectangle/decompose.js	uniform	uniform	yes
+src/geom/rectangle/deflate.js	still	still	yes
+src/geom/rectangle/equals.js	still	still	no
+src/geom/rectangle/fit inside.js	still	still	no
+src/geom/rectangle/fit outside.js	still	still	no
+src/geom/rectangle/floor.js	changing	changing	yes
+src/geom/rectangle/floor all.js	changing	changing	yes
+src/geom/rectangle/from points.js	still	still	yes
+src/geom/rectangle/get aspect ratio.js	still	still	yes
+src/geom/rectangle/get center.js	still	still	no
+src/geom/rectangle/get line.js	still	still	yes
+src/geom/rectangle/get point.js	changing	changing	yes
+src/geom/rectangle/get points.js	still	still	yes
+src/geom/rectangle/get random point.js	changing	changing	no
+src/geom/rectangle/get random point outside.js	still	still	no
+src/geom/rectangle/get size.js	still	still	yes
+src/geom/rectangle/inflate.js	still	still	yes
+src/geom/rectangle/intersection.js	still	still	yes
+src/geom/rectangle/is empty.js	changing	changing	yes
+src/geom/rectangle/marching ants.js	still	still	yes
+src/geom/rectangle/merge points.js	still	still	yes
+src/geom/rectangle/merge rect.js	still	still	yes
+src/geom/rectangle/merge xy.js	still	still	yes
+src/geom/rectangle/offset.js	still	still	yes
+src/geom/rectangle/offset point.js	changing	changing	yes
+src/geom/rectangle/overlaps.js	changing	changing	yes
+src/geom/rectangle/perimeter.js	still	still	yes
+src/geom/rectangle/perimeter point.js	changing	changing	yes
+src/geom/rectangle/properties.js	still	still	yes
+src/geom/rectangle/scale.js	still	still	yes
+src/geom/rectangle/set empty.js	still	still	yes
+src/geom/rectangle/set position.js	still	still	yes
+src/geom/rectangle/set size.js	still	still	yes
+src/geom/rectangle/set to.js	still	still	yes
+src/geom/rectangle/sprite to perimeter.js	still	still	yes
+src/geom/rectangle/union.js	still	still	yes
+src/geom/triangle/area.js	still	still	no
+src/geom/triangle/bottom.js	still	still	yes
+src/geom/triangle/build equilateral.js	still	still	yes
+src/geom/triangle/build from polygon.js	still	still	yes
+src/geom/triangle/build right.js	still	still	yes
+src/geom/triangle/center on.js	still	still	yes
+src/geom/triangle/centroid.js	still	still	no
+src/geom/triangle/circumcenter.js	still	still	no
+src/geom/triangle/circumcircle.js	still	still	no
+src/geom/triangle/clone.js	changing	changing	yes
+src/geom/triangle/contains.js	changing	changing	yes
+src/geom/triangle/contains array.js	still	still	yes
+src/geom/triangle/contains point.js	still	still	yes
+src/geom/triangle/copy from.js	uniform	uniform	yes
+src/geom/triangle/create triangle.js	still	still	yes
+src/geom/triangle/decompose.js	still	still	yes
+src/geom/triangle/equals.js	still	still	no
+src/geom/triangle/get line.js	still	still	yes
+src/geom/triangle/get point.js	changing	changing	no
+src/geom/triangle/get points.js	still	still	no
+src/geom/triangle/get random point.js	changing	changing	no
+src/geom/triangle/in center.js	still	still	no
+src/geom/triangle/left.js	still	still	yes
+src/geom/triangle/offset.js	still	still	yes
+src/geom/triangle/perimeter.js	still	still	no
+src/geom/triangle/random.js	still	still	no
+src/geom/triangle/right.js	still	still	yes
+src/geom/triangle/rotate around point.js	changing	changing	yes
+src/geom/triangle/rotate around xy.js	changing	changing	yes
+src/geom/triangle/rotate from center.js	changing	changing	yes
+src/geom/triangle/set to.js	still	still	yes
+src/geom/triangle/top.js	still	still	yes
+src/input/camera/camera container ignore.js	still	still	yes
+src/input/camera/camera ignore.js	still	still	yes
+src/input/camera/graphics contains.js	failed at run	failed at run	unobserved
+src/input/camera/large world high res.js	failed at run	failed at run	unobserved
+src/input/camera/multi cam sprite.js	failed at run	failed at run	unobserved
+src/input/camera/stacked camera test.js	still	still	yes
+src/input/camera/world coordinates.js	still	still	no
+src/input/cursors/custom cursor.js	still	still	yes
+src/input/cursors/cute cursor.js	still	still	yes
+src/input/cursors/sc2 cursors.js	still	still	yes
+src/input/dom events/on canvas out.js	still	still	no
+src/input/dom events/pointer button status.js	still	still	no
+src/input/dragging/bring dragged item to top.js	still	still	no
+src/input/dragging/camera move and rotate.js	changing	changing	no
+src/input/dragging/drag container.js	changing	changing	no
+src/input/dragging/drag distance threshold.js	still	still	no
+src/input/dragging/drag horizontally.js	still	still	no
+src/input/dragging/drag on a fixed axis.js	still	still	no
+src/input/dragging/drag time threshold.js	still	still	yes
+src/input/dragging/drag vertically.js	still	still	no
+src/input/dragging/drag with multiple scenes.js	still	still	yes
+src/input/dragging/enable for drag.js	still	still	no
+src/input/dragging/enable for drag test 2.js	still	still	yes
+src/input/dragging/multi camera stack of cards.js	still	still	no
+src/input/dragging/multiple draggables.js	still	still	no
+src/input/dragging/multiple rotated and scaled.js	changing	changing	no
+src/input/dragging/multiple scene drag.js	still	still	yes
+src/input/dragging/retain index after drag.js	still	still	yes
+src/input/dragging/rotated and scaled.js	still	still	yes
+src/input/dragging/scale during drag.js	still	still	yes
+src/input/dragging/scroll factor drag.js	still	still	yes
+src/input/dragging/scrolling text box.js	still	still	no
+src/input/dragging/snap to grid on drag.js	still	still	no
+src/input/dragging/stack of cards.js	still	still	no
+src/input/game object/change sprite hitarea size.js	changing	changing	no
+src/input/game object/custom shape hit area.js	still	still	yes
+src/input/game object/debug hitarea.js	changing	changing	no
+src/input/game object/destroy sprite on down event.js	still	still	no
+src/input/game object/graphics object example.js	still	still	yes
+src/input/game object/multiple down.js	still	still	no
+src/input/game object/multiple over out.js	still	still	no
+src/input/game object/multiple up.js	still	still	no
+src/input/game object/on down event.js	still	still	no
+src/input/game object/on move event.js	still	still	yes
+src/input/game object/on up event.js	still	still	yes
+src/input/game object/over and out events.js	still	still	yes
+src/input/game object/select and deselect.js	still	still	yes
+src/input/game object/sprite example.js	still	still	yes
+src/input/game object/tilesprite on down.js	still	still	yes
+src/input/game object/top only over out events.js	still	still	no
+src/input/game object/top only up down events.js	still	still	yes
+src/input/game object/use hand cursor.js	still	still	yes
+src/input/game object/world game objects.js	still	still	no
+src/input/gamepad/axes.js	still	still	yes
+src/input/gamepad/gamepad across scenes.js	still	still	no
+src/input/gamepad/gamepad debug.js	still	still	yes
+src/input/gamepad/move sprite.js	still	still	no
+src/input/gamepad/select gamepad.js	still	still	no
+src/input/keyboard/add key.js	still	still	yes
+src/input/keyboard/add key using string.js	still	still	no
+src/input/keyboard/add single key.js	still	still	no
+src/input/keyboard/create key combo.js	uniform	uniform	yes
+src/input/keyboard/cross scene keys.js	still	still	yes
+src/input/keyboard/cursor keys.js	still	still	yes
+src/input/keyboard/cursors time.js	still	still	no
+src/input/keyboard/enter name.js	still	still	yes
+src/input/keyboard/global keydown event.js	uniform	uniform	yes
+src/input/keyboard/just down.js	still	still	no
+src/input/keyboard/key combo max key delay.js	uniform	uniform	yes
+src/input/keyboard/key down delay.js	still	still	yes
+src/input/keyboard/key down duration.js	still	still	no
+src/input/keyboard/key modifier.js	uniform	uniform	yes
+src/input/keyboard/keydown.js	uniform	uniform	yes
+src/input/keyboard/keydown multi scene test.js	changing	changing	no
+src/input/keyboard/konami code key combo.js	uniform	uniform	yes
+src/input/keyboard/numpad.js	still	still	no
+src/input/keyboard/reset key combo on match.js	uniform	uniform	yes
+src/input/keyboard/retro leaderboard.js	changing	changing	no
+src/input/keyboard/single keydown event.js	still	still	no
+src/input/keyboard/text entry.js	still	still	no
+src/input/mouse/check button released.js	still	still	no
+src/input/mouse/circle hit area.js	still	still	yes
+src/input/mouse/click sprite.js	still	still	yes
+src/input/mouse/ellipse hit area.js	still	still	yes
+src/input/mouse/mass scrolling sprite test.js	still	still	no
+src/input/mouse/mass scrolling sprite test no cull.js	still	still	no
+src/input/mouse/mass sprite test.js	still	still	no
+src/input/mouse/mouse down.js	uniform	uniform	yes
+src/input/mouse/mouse wheel.js	still	still	no
+src/input/mouse/mouse wheel over gameobject.js	still	still	no
+src/input/mouse/move event.js	still	still	yes
+src/input/mouse/origin tests.js	still	still	yes
+src/input/mouse/over and out events.js	still	still	yes
+src/input/mouse/pointer lock.js	still	still	no
+src/input/mouse/poll always.js	changing	changing	no
+src/input/mouse/poll only on move.js	changing	changing	no
+src/input/mouse/polygon hit area.js	still	still	yes
+src/input/mouse/right mouse button.js	still	still	no
+src/input/mouse/shape hit tests.js	still	still	yes
+src/input/mouse/single sprite.js	changing	changing	yes
+src/input/mouse/text input test.js	still	still	no
+src/input/mouse/top only.js	still	still	yes
+src/input/mouse/top only over and out events.js	still	still	yes
+src/input/mouse/top only up and down events.js	still	still	yes
+src/input/mouse/triangle hit area.js	still	still	yes
+src/input/multitouch/multi down test.js	still	still	yes
+src/input/multitouch/multi drag.js	still	still	no
+src/input/multitouch/multi over test.js	still	still	no
+src/input/multitouch/multi touch test.js	still	still	yes
+src/input/multitouch/two touch inputs.js	still	still	no
+src/input/pixel perfect/atlas frame.js	still	still	no
+src/input/pixel perfect/image with lots of alpha.js	still	still	yes
+src/input/pixel perfect/large trimmed atlas frame.js	still	still	yes
+src/input/pixel perfect/on down.js	still	still	no
+src/input/pixel perfect/on drag.js	still	still	yes
+src/input/pixel perfect/on move.js	still	still	no
+src/input/pixel perfect/transformed.js	still	still	yes
+src/input/pointer/cards.js	still	still	no
+src/input/pointer/down event.js	still	still	no
+src/input/pointer/drag rectangle.js	uniform	uniform	yes
+src/input/pointer/draw sprites.js	uniform	uniform	yes
+src/input/pointer/event list.js	still	still	no
+src/input/pointer/external link.js	still	still	yes
+src/input/pointer/move event.js	uniform	uniform	yes
+src/input/pointer/multi camera cards.js	still	still	no
+src/input/pointer/multiple scene down event.js	still	still	yes
+src/input/pointer/pointer buttons.js	uniform	uniform	yes
+src/input/pointer/pointer buttons debug.js	uniform	uniform	yes
+src/input/pointer/pointer debug.js	changing	changing	no
+src/input/zones/basic input zone.js	still	still	no
+src/input/zones/circular drop zone.js	still	still	no
+src/input/zones/drop zone.js	still	still	no
+src/input/zones/resize zone.js	changing	changing	no
+src/input/zones/sprite drop zone.js	still	still	no
+src/loader/animation json/load animation json.js	changing	changing	yes
+src/loader/audio/load audio.js	still	still	no
+src/loader/audio/load audio sprite.js	uniform	uniform	yes
+src/loader/audio/load audio sprite resources.js	uniform	uniform	yes
+src/loader/audio/load audio stream.js	still	still	no
+src/loader/audio/load html5 audio.js	still	still	no
+src/loader/base64/base64 bitmap font.js	still	still	yes
+src/loader/base64/base64 image.js	still	still	yes
+src/loader/base64/base64 texture atlas.js	still	still	no
+src/loader/base64/bitmap text.js	still	still	no
+src/loader/binary/load binary data.js	still	still	no
+src/loader/binary/load binary data from object.js	still	still	no
+src/loader/binary/load binary data parse after load.js	still	still	no
+src/loader/bitmap text/load bitmap text.js	changing	changing	no
+src/loader/bitmap text/load bitmap text from pack.js	changing	changing	no
+src/loader/file pack/load file pack.js	changing	changing	no
+src/loader/file pack/load file pack from json.js	still	still	no
+src/loader/file pack/load file pack test 2.js	changing	changing	no
+src/loader/file pack/load file pack test 3.js	changing	changing	no
+src/loader/file pack/load file pack test 4.js	changing	changing	no
+src/loader/file pack/load file pack test 5.js	changing	changing	no
+src/loader/html/load html to texture.js	changing	changing	yes
+src/loader/image/load image.js	still	still	no
+src/loader/image/load image from object.js	still	still	no
+src/loader/image/load image on click.js	still	still	yes
+src/loader/image/load normal map.js	still	still	yes
+src/loader/image/load normal map from object.js	still	still	yes
+src/loader/image/load normal map with light.js	still	still	yes
+src/loader/image/load webp.js	still	still	yes
+src/loader/loader events/add files during load.js	changing	changing	no
+src/loader/loader events/destroy game during load.js	still	still	no
+src/loader/loader events/display file as loaded.js	changing	changing	no
+src/loader/loader events/file complete event.js	still	still	no
+src/loader/loader events/file complete event with key.js	still	still	no
+src/loader/loader events/file progress event.js	still	still	yes
+src/loader/loader events/load 200 image files.js	changing	changing	no
+src/loader/loader events/load from external url.js	uniform	changing	no
+src/loader/loader events/load progress.js	changing	changing	no
+src/loader/loader events/multi file progress event.js	still	still	yes
+src/loader/loader events/play animation during load.js	changing	changing	no
+src/loader/loader events/start loader manually.js	still	still	no
+src/loader/loader events/test loading files already loaded.js	still	still	no
+src/loader/plugin/load plugin.js	failed at run	failed at run	unobserved
+src/loader/scene payload/scene files payload.js	still	still	no
+src/loader/scene/load scene.js	failed at run	failed at run	unobserved
+src/loader/script/load script.js	failed at run	failed at run	unobserved
+src/loader/sprite sheet/load sprite sheet.js	changing	changing	yes
+src/loader/sprite sheet/load sprite sheet from object.js	changing	changing	yes
+src/loader/sprite sheet/load sprite sheet from object array.js	changing	changing	yes
+src/loader/sprite sheet/load sprite sheet from scene payload.js	changing	changing	yes
+src/loader/svg/load svg.js	failed at run	failed at run	unobserved
+src/loader/svg/load svg with fixed size.js	failed at run	failed at run	unobserved
+src/loader/svg/load svg with scale.js	failed at run	failed at run	unobserved
+src/loader/texture atlas json/get atlas custom frame data.js	still	still	yes
+src/loader/texture atlas json/get atlas meta data.js	still	still	no
+src/loader/texture atlas json/load atlas with local json.js	still	still	no
+src/loader/texture atlas json/load remove and reload atlas.js	still	still	no
+src/loader/texture atlas json/load texture atlas.js	still	still	no
+src/loader/texture atlas json/load texture atlas from object.js	still	still	no
+src/loader/texture atlas json/load texture atlas from pack.js	changing	changing	no
+src/loader/texture atlas json/load texture atlas from payload.js	still	still	no
+src/loader/texture atlas json/load texture atlas with normal map.js	still	still	no
+src/loader/texture atlas json/load texture atlas with normal map from object.js	still	still	no
+src/loader/texture atlas json/mixed json test.js	still	still	no
+src/loader/texture atlas multi/load multi texture atlas.js	changing	changing	no
+src/loader/texture atlas multi/load multi texture atlas with normal maps.js	changing	changing	no
+src/loader/texture atlas multi/load webp multi texture atlas.js	uniform	uniform	yes
+src/loader/texture atlas pct/load phaser atlas.js	changing	changing	no
+src/loader/texture atlas phaser/load phaser texture atlas.js	changing	changing	yes
+src/loader/texture atlas unity/load unity spritesheet.js	still	still	yes
+src/loader/texture atlas unity/load unity spritesheet animation.js	changing	changing	no
+src/loader/texture atlas xml/load xml texture atlas.js	failed at run	failed at run	unobserved
+src/loader/tile maps/load tile map from local json.js	still	still	yes
+src/loader/tile maps/load tile map json.js	still	still	yes
+src/loader/tile maps/load tile map json from object.js	still	still	yes
+src/loader/tile maps/load tile map json from scene payload.js	still	still	yes
+src/loader/tile maps/load tile map json with normal map.js	still	still	yes
+src/loader/game load config.js	changing	changing	no
+src/loader/load config tests.js	still	still	yes
+src/loader/load from 404.js	still	still	no
+src/math/distance/distance.js	still	still	yes
+src/math/distance/distance between points.js	still	still	yes
+src/math/distance/get chebyshev distance.js	still	still	yes
+src/math/distance/snake distance.js	still	still	yes
+src/math/hash cell/hash cell landscape.js	failed at run	changing	unobserved
+src/math/hash simplex/hash simplex.js	changing	changing	yes
+src/math/hash simplex/hash simplex landscape.js	still	still	yes
+src/math/hash simplex/hash simplex points.js	failed at run	changing	unobserved
+src/math/hash/hash stability.js	still	still	no
+src/math/vec2/add.js	still	still	yes
+src/math/vec2/divide.js	still	still	yes
+src/math/vec2/dot.js	changing	changing	no
+src/math/vec2/multiply.js	still	still	yes
+src/math/vec2/normalize.js	still	still	no
+src/math/vec2/perp.js	still	still	yes
+src/math/vec2/rperp.js	still	still	yes
+src/math/vec2/set magnitude.js	still	still	no
+src/math/vec2/subtract.js	changing	changing	yes
+src/paths/curves/cubic bezier bounds.js	changing	changing	no
+src/paths/curves/cubic bezier curve.js	changing	changing	no
+src/paths/curves/cubic bezier curve debug.js	changing	changing	no
+src/paths/curves/drag cubic bezier curve.js	changing	changing	no
+src/paths/curves/drag ellipse curve.js	changing	changing	no
+src/paths/curves/drag line curve.js	changing	changing	no
+src/paths/curves/drag quadratic bezier curve.js	changing	changing	no
+src/paths/curves/drag spline curve.js	changing	changing	no
+src/paths/curves/ellipse curve.js	changing	changing	no
+src/paths/curves/ellipse curve bounds.js	changing	changing	no
+src/paths/curves/get distance on line curve.js	still	still	yes
+src/paths/curves/get point from spline curve.js	still	still	yes
+src/paths/curves/get points on cubic bezier curve.js	still	still	yes
+src/paths/curves/get points on line curve.js	still	still	yes
+src/paths/curves/get spaced points on cubic bezier curve.js	still	still	yes
+src/paths/curves/get spaced points on line curve.js	still	still	yes
+src/paths/curves/get spaced points vs get points.js	still	still	no
+src/paths/curves/get tangent vectors on cubic bezier curve.js	still	still	yes
+src/paths/curves/line curve.js	changing	changing	no
+src/paths/curves/line curve bounds.js	changing	changing	no
+src/paths/curves/point types.js	still	still	yes
+src/paths/curves/quadratic bezier curve.js	changing	changing	no
+src/paths/curves/rectangle spline intersection.js	still	still	no
+src/paths/curves/spline between points.js	still	still	yes
+src/paths/curves/spline builder.js	still	still	yes
+src/paths/curves/spline curve.js	changing	changing	no
+src/paths/curves/spline curve bounds.js	changing	changing	no
+src/paths/curves/spline curve distance points.js	still	still	yes
+src/paths/curves/spline curve from array.js	changing	changing	no
+src/paths/followers/basic follower.js	changing	changing	no
+src/paths/followers/change path.js	changing	changing	no
+src/paths/followers/leave path.js	changing	changing	no
+src/paths/followers/mass followers.js	changing	changing	no
+src/paths/followers/multi curve path.js	changing	changing	no
+src/paths/followers/path from json.js	changing	changing	no
+src/paths/followers/path from json all types.js	changing	changing	no
+src/paths/followers/pause and resume.js	changing	changing	no
+src/paths/followers/rotate to path.js	changing	changing	no
+src/paths/followers/rotation offset.js	changing	changing	no
+src/paths/followers/sparkle trail.js	changing	changing	no
+src/paths/followers/start at.js	changing	changing	no
+src/paths/followers/wave path.js	changing	changing	no
+src/paths/followers/yoyo follower.js	changing	changing	no
+src/paths/all types.js	changing	changing	no
+src/paths/circle loop path.js	changing	changing	no
+src/paths/circle path.js	changing	changing	no
+src/paths/complex path bounds.js	changing	changing	no
+src/paths/landscape path.js	changing	changing	no
+src/paths/line to ellipse.js	changing	changing	no
+src/paths/move to.js	changing	changing	no
+src/paths/path add line curve.js	changing	changing	no
+src/paths/path bounds.js	changing	changing	no
+src/paths/path line and bezier.js	changing	changing	no
+src/paths/simple path.js	changing	changing	no
+src/paths/velocity from tangent vectors.js	still	still	yes
+src/paths/zig zag path.js	changing	changing	no
+src/physics/arcade/100 world bodies.js	changing	changing	no
+src/physics/arcade/1000 world bodies.js	changing	changing	no
+src/physics/arcade/10000 world bodies.js	failed at run	changing	unobserved
+src/physics/arcade/40000 world bodies.js	changing	changing	no
+src/physics/arcade/500 colliding bodies.js	changing	changing	no
+src/physics/arcade/accelerate to.js	still	still	no
+src/physics/arcade/add body to shape.js	still	still	yes
+src/physics/arcade/add body to tilesprite.js	changing	changing	yes
+src/physics/arcade/angle from velocity.js	changing	changing	yes
+src/physics/arcade/angular acceleration.js	changing	changing	no
+src/physics/arcade/angular velocity.js	changing	changing	yes
+src/physics/arcade/apply force.js	still	still	no
+src/physics/arcade/asteroids movement.js	still	still	no
+src/physics/arcade/basic platform.js	changing	changing	yes
+src/physics/arcade/blocked faces.js	changing	changing	no
+src/physics/arcade/blocked touching and embedded.js	changing	changing	no
+src/physics/arcade/body controls.js	failed at run	failed at run	unobserved
+src/physics/arcade/body follow path.js	changing	changing	yes
+src/physics/arcade/body on a path.js	changing	changing	yes
+src/physics/arcade/body push blocks.js	changing	changing	no
+src/physics/arcade/bounce test.js	changing	changing	no
+src/physics/arcade/bullets group.js	still	still	yes
+src/physics/arcade/circular body.js	changing	changing	yes
+src/physics/arcade/circular collisions.js	changing	changing	yes
+src/physics/arcade/circular collisions 2.js	changing	changing	yes
+src/physics/arcade/circular collisions 3.js	changing	changing	yes
+src/physics/arcade/closest furthest.js	changing	changing	yes
+src/physics/arcade/collide event.js	changing	changing	yes
+src/physics/arcade/collider 1.js	changing	changing	yes
+src/physics/arcade/collider process callback.js	changing	changing	yes
+src/physics/arcade/collision direction.js	changing	changing	yes
+src/physics/arcade/collision filter.js	still	still	yes
+src/physics/arcade/custom bounds.js	changing	changing	no
+src/physics/arcade/custom debug colors.js	changing	changing	no
+src/physics/arcade/custom separate.js	changing	changing	yes
+src/physics/arcade/custom update.js	failed at run	failed at run	unobserved
+src/physics/arcade/custom world bounds.js	changing	changing	no
+src/physics/arcade/destroy body.js	changing	changing	no
+src/physics/arcade/direct control.js	changing	changing	no
+src/physics/arcade/direct control follow mouse.js	changing	changing	no
+src/physics/arcade/direct control follow path.js	changing	changing	no
+src/physics/arcade/direct control platforms.js	changing	changing	no
+src/physics/arcade/disable collider.js	changing	changing	yes
+src/physics/arcade/drag.js	changing	changing	yes
+src/physics/arcade/drag on both axes.js	changing	changing	yes
+src/physics/arcade/drag scalar.js	changing	changing	yes
+src/physics/arcade/drag with damping.js	changing	changing	yes
+src/physics/arcade/drag with damping on both axes.js	changing	changing	yes
+src/physics/arcade/draggable body.js	changing	changing	yes
+src/physics/arcade/dragon movement.js	changing	changing	yes
+src/physics/arcade/extending arcade sprite.js	changing	changing	no
+src/physics/arcade/final delta.js	changing	changing	yes
+src/physics/arcade/fps test.js	changing	changing	no
+src/physics/arcade/friction.js	changing	changing	yes
+src/physics/arcade/get bodies within circle.js	changing	changing	no
+src/physics/arcade/get bodies within rectangle.js	changing	changing	no
+src/physics/arcade/gravity.js	changing	changing	yes
+src/physics/arcade/group set velocity x.js	changing	changing	yes
+src/physics/arcade/group set velocity y.js	changing	changing	yes
+src/physics/arcade/group vs group.js	changing	changing	no
+src/physics/arcade/group vs self.js	changing	changing	no
+src/physics/arcade/group world bounds event.js	changing	changing	no
+src/physics/arcade/immovable body.js	changing	changing	yes
+src/physics/arcade/interpolate velocity.js	changing	changing	no
+src/physics/arcade/interpolate velocity 2.js	still	still	no
+src/physics/arcade/larger bounding box.js	changing	changing	yes
+src/physics/arcade/mass.js	changing	changing	yes
+src/physics/arcade/mass collision test.js	changing	changing	no
+src/physics/arcade/mass debug.js	changing	changing	yes
+src/physics/arcade/mass debug 2.js	changing	changing	yes
+src/physics/arcade/max speed.js	still	still	no
+src/physics/arcade/move and stop at position.js	still	still	no
+src/physics/arcade/move to.js	still	still	no
+src/physics/arcade/move to pointer.js	still	still	yes
+src/physics/arcade/move to position by duration.js	still	still	no
+src/physics/arcade/non pushable bodies.js	changing	changing	no
+src/physics/arcade/overlap collider.js	changing	changing	yes
+src/physics/arcade/overlap event.js	changing	changing	yes
+src/physics/arcade/overlap process callback.js	changing	changing	no
+src/physics/arcade/overlap process callback 2.js	changing	changing	no
+src/physics/arcade/overlap zone.js	changing	changing	yes
+src/physics/arcade/overlap zone static body.js	changing	changing	yes
+src/physics/arcade/physics body without sprite.js	still	still	yes
+src/physics/arcade/pushable body debug 1.js	still	still	no
+src/physics/arcade/pushable body debug 2.js	still	still	no
+src/physics/arcade/racecar.js	still	still	yes
+src/physics/arcade/random velocity.js	changing	changing	no
+src/physics/arcade/recycle physics body.js	still	still	yes
+src/physics/arcade/remove collider.js	changing	changing	yes
+src/physics/arcade/restart physics scene.js	still	still	yes
+src/physics/arcade/rolling body.js	changing	changing	yes
+src/physics/arcade/rotate to pointer.js	changing	changing	no
+src/physics/arcade/rtree test.js	still	still	no
+src/physics/arcade/scene config.js	changing	changing	no
+src/physics/arcade/set world bounds.js	changing	changing	no
+src/physics/arcade/simple body.js	changing	changing	yes
+src/physics/arcade/simple group.js	changing	changing	yes
+src/physics/arcade/smaller bounding box.js	changing	changing	yes
+src/physics/arcade/smooth stop.js	still	still	no
+src/physics/arcade/space.js	changing	changing	no
+src/physics/arcade/space battle.js	changing	changing	no
+src/physics/arcade/sprite follow physics body.js	changing	changing	yes
+src/physics/arcade/sprite follow physics sprite.js	changing	changing	yes
+src/physics/arcade/sprite overlap group.js	changing	changing	no
+src/physics/arcade/sprite vs group.js	changing	changing	yes
+src/physics/arcade/sprite vs immovable.js	changing	changing	yes
+src/physics/arcade/sprite vs multiple groups.js	changing	changing	no
+src/physics/arcade/sprite vs sprite.js	changing	changing	yes
+src/physics/arcade/static body.js	changing	changing	yes
+src/physics/arcade/static body update.js	changing	changing	yes
+src/physics/arcade/static group.js	changing	changing	yes
+src/physics/arcade/sticky platform.js	changing	changing	yes
+src/physics/arcade/topdown shooter average focus.js	still	still	yes
+src/physics/arcade/topdown shooter combat mechanics.js	still	still	yes
+src/physics/arcade/topdown shooter player focus.js	still	still	yes
+src/physics/arcade/topdown shooter target focus.js	still	still	yes
+src/physics/arcade/touching faces.js	changing	changing	no
+src/physics/arcade/trick platforms.js	changing	changing	yes
+src/physics/arcade/tween body.js	changing	changing	no
+src/physics/arcade/tween velocity.js	changing	changing	no
+src/physics/arcade/tween velocity 2.js	changing	changing	yes
+src/physics/arcade/using collide directly.js	changing	changing	no
+src/physics/arcade/variable step.js	changing	changing	no
+src/physics/arcade/velocity from angle.js	still	still	yes
+src/physics/arcade/velocity from angle 2.js	changing	changing	yes
+src/physics/arcade/vertical friction.js	changing	changing	yes
+src/physics/arcade/world bounds event.js	changing	changing	yes
+src/physics/arcade/world bounds event custom.js	changing	changing	yes
+src/physics/arcade/world controls.js	failed at run	failed at run	unobserved
+src/physics/arcade/world step event.js	still	still	no
+src/physics/arcade/wrap group.js	changing	changing	no
+src/physics/arcade/wrap sprite.js	changing	changing	yes
+src/physics/matterjs/100 world bodies.js	failed at run	failed at run	unobserved
+src/physics/matterjs/add body to bitmap text.js	still	still	yes
+src/physics/matterjs/add body to text.js	changing	changing	no
+src/physics/matterjs/add body to tilesprite.js	changing	changing	yes
+src/physics/matterjs/add body to world.js	still	still	yes
+src/physics/matterjs/advanced shape creation.js	changing	changing	yes
+src/physics/matterjs/attractors.js	changing	changing	yes
+src/physics/matterjs/balls.js	changing	changing	no
+src/physics/matterjs/basic constraint.js	changing	changing	yes
+src/physics/matterjs/body follow path.js	still	still	yes
+src/physics/matterjs/body scale.js	changing	changing	yes
+src/physics/matterjs/body to json.js	still	still	yes
+src/physics/matterjs/body velocity.js	changing	changing	yes
+src/physics/matterjs/bridge.js	changing	changing	yes
+src/physics/matterjs/bullet pool.js	changing	changing	no
+src/physics/matterjs/chain.js	changing	changing	yes
+src/physics/matterjs/chamfer body.js	changing	changing	yes
+src/physics/matterjs/circle body.js	changing	changing	yes
+src/physics/matterjs/circle stack.js	changing	changing	yes
+src/physics/matterjs/circular body.js	changing	changing	yes
+src/physics/matterjs/cloth.js	changing	changing	yes
+src/physics/matterjs/collision event.js	changing	changing	yes
+src/physics/matterjs/collision filter.js	changing	changing	yes
+src/physics/matterjs/collision group.js	changing	changing	yes
+src/physics/matterjs/compound body.js	changing	changing	yes
+src/physics/matterjs/compound body from physics editor.js	changing	changing	no
+src/physics/matterjs/compound sensors.js	still	still	no
+src/physics/matterjs/container collision.js	still	still	yes
+src/physics/matterjs/create sensor.js	still	still	no
+src/physics/matterjs/debug options.js	changing	changing	no
+src/physics/matterjs/destroy body.js	changing	changing	yes
+src/physics/matterjs/drag filter with pointer.js	changing	changing	yes
+src/physics/matterjs/drag through balls.js	changing	changing	no
+src/physics/matterjs/drag with pointer.js	changing	changing	yes
+src/physics/matterjs/draw chain.js	still	still	yes
+src/physics/matterjs/draw smoother stiff line.js	uniform	uniform	yes
+src/physics/matterjs/draw stiff line.js	still	still	yes
+src/physics/matterjs/draw triangles.js	still	still	yes
+src/physics/matterjs/fixed rotation.js	changing	changing	yes
+src/physics/matterjs/get bodies below point.js	changing	changing	no
+src/physics/matterjs/get shape bounds.js	changing	changing	no
+src/physics/matterjs/ignore gravity.js	changing	changing	yes
+src/physics/matterjs/increase body scale.js	changing	changing	yes
+src/physics/matterjs/is point within body.js	still	still	yes
+src/physics/matterjs/mixed bodies.js	changing	changing	no
+src/physics/matterjs/move body with cursors.js	still	still	yes
+src/physics/matterjs/multiple physics scenes.js	changing	changing	no
+src/physics/matterjs/no gravity.js	still	still	yes
+src/physics/matterjs/offset body.js	failed at run	failed at run	unobserved
+src/physics/matterjs/pachinko.js	changing	changing	no
+src/physics/matterjs/particles follow body.js	still	still	no
+src/physics/matterjs/physics editor.js	still	still	yes
+src/physics/matterjs/polygon body.js	changing	changing	yes
+src/physics/matterjs/rectangle body.js	changing	changing	yes
+src/physics/matterjs/restart physics scene.js	still	still	yes
+src/physics/matterjs/rotate body with cursors.js	still	still	yes
+src/physics/matterjs/scene restart.js	changing	changing	no
+src/physics/matterjs/scene transition.js	changing	changing	no
+src/physics/matterjs/simple body.js	changing	changing	yes
+src/physics/matterjs/sleep events.js	uniform	uniform	yes
+src/physics/matterjs/snake.js	changing	changing	yes
+src/physics/matterjs/thrust.js	still	still	yes
+src/physics/matterjs/top down car body.js	still	still	yes
+src/physics/matterjs/trapezoid body.js	changing	changing	yes
+src/physics/matterjs/vertices body.js	changing	changing	yes
+src/physics/matterjs/wrap.js	changing	changing	no
+src/physics/matterjs/wrecking ball.js	changing	changing	yes
+src/physics/multi/arcade and matter.js	changing	changing	yes
+src/plugins/add global plugin.js	still	still	yes
+src/plugins/add scene plugin in config.js	failed at run	failed at run	unobserved
+src/plugins/custom file type.js	still	still	no
+src/plugins/custom game object.js	still	still	yes
+src/plugins/destroy game with plugin.js	failed at run	failed at run	unobserved
+src/plugins/global plugin test 1.js	still	still	no
+src/plugins/global scene plugin.js	uniform	uniform	yes
+src/plugins/install global plugin at runtime.js	still	still	no
+src/plugins/load plugin test 1.js	failed at run	failed at run	unobserved
+src/plugins/load plugin test 2.js	still	still	no
+src/plugins/load scene plugin test 1.js	failed at run	failed at run	unobserved
+src/plugins/load scene plugin test 2.js	failed at run	failed at run	unobserved
+src/plugins/multiple global plugin instances.js	still	still	no
+src/plugins/scene plugin test 1.js	still	still	no
+src/plugins/scene plugin test 2.js	still	still	yes
+src/plugins/scene plugin test 3.js	changing	changing	no
+src/plugins/start and stop a plugin.js	changing	changing	yes
+src/pools/bullets.js	still	still	yes
+src/pools/create pool.js	still	still	no
+src/pools/max size.js	still	still	yes
+src/pools/multi pools.js	still	still	yes
+src/pools/pool using a custom class.js	still	still	no
+src/pools/seeded pool.js	still	still	yes
+src/renderer/tests/32 texture test.js	changing	changing	yes
+src/renderer/tests/batch test.js	still	still	no
+src/renderer/tests/sprite test.js	uniform	uniform	yes
+src/renderer/tests/webgl debug.js	changing	changing	no
+src/renderer/bend shader.js	changing	changing	yes
+src/renderer/color filter.js	changing	changing	yes
+src/renderer/container filter.js	changing	changing	no
+src/renderer/custom batch size.js	still	still	yes
+src/renderer/custom filter.js	changing	changing	yes
+src/renderer/custom shader multi texture es6.js	changing	changing	yes
+src/renderer/custom shader single texture es6.js	changing	changing	yes
+src/renderer/grayscale shader addition.js	still	still	yes
+src/renderer/grayscale shader addition added locally.js	changing	changing	no
+src/renderer/hue rotation shader addition.js	changing	changing	yes
+src/renderer/smooth pixel art.js	changing	changing	yes
+src/renderer/swirl filter.js	changing	changing	no
+src/renderer/webgl context recovery.js	changing	changing	no
+src/renderer/webgl info.js	still	still	no
+src/scalemanager/envelop.js	still	still	yes
+src/scalemanager/envelop min max.js	still	still	yes
+src/scalemanager/fit.js	still	still	yes
+src/scalemanager/fit and snap.js	still	still	yes
+src/scalemanager/fit min max.js	still	still	yes
+src/scalemanager/fit running game.js	changing	changing	no
+src/scalemanager/fit with auto center.js	still	still	yes
+src/scalemanager/full screen game.js	changing	changing	no
+src/scalemanager/height controls width.js	still	still	yes
+src/scalemanager/manually resize.js	still	still	yes
+src/scalemanager/manually resize with zoom.js	still	still	yes
+src/scalemanager/mobile game example.js	changing	changing	no
+src/scalemanager/no scale.js	still	still	yes
+src/scalemanager/no scale with auto center.js	still	still	yes
+src/scalemanager/orientation check.js	still	still	yes
+src/scalemanager/resize.js	still	still	yes
+src/scalemanager/resize and fit.js	still	still	yes
+src/scalemanager/resize min max.js	still	still	yes
+src/scalemanager/resize on click.js	still	still	no
+src/scalemanager/width controls height.js	still	still	yes
+src/scalemanager/world input.js	still	still	no
+src/scalemanager/zoom manual resize.js	still	still	yes
+src/scalemanager/zoom with fit.js	still	still	yes
+src/scalemanager/zoom with no scale.js	still	still	yes
+src/scenes/external scene/Controller.js	uniform	uniform	yes
+src/scenes/moving scenes demo/main.js	changing	changing	no
+src/scenes/multi demo/main.js	still	still	yes
+src/scenes/sub game demo/main.js	still	still	no
+src/scenes/tutorial/change scene order.js	still	still	no
+src/scenes/tutorial/scene controller.js	changing	changing	no
+src/scenes/tutorial/scene order.js	still	still	yes
+src/scenes/add scene after game.js	still	still	yes
+src/scenes/add scene from another scene.js	still	still	no
+src/scenes/boot data.js	still	still	yes
+src/scenes/bring to top.js	still	still	yes
+src/scenes/call function in another scene.js	still	still	no
+src/scenes/call function in another scene es6.js	still	still	no
+src/scenes/change scene from create.js	changing	changing	yes
+src/scenes/change scene from create es6.js	changing	changing	yes
+src/scenes/change scene from objects.js	uniform	uniform	yes
+src/scenes/changing large scene.js	still	still	no
+src/scenes/changing scene.js	still	still	yes
+src/scenes/changing scene es6.js	still	still	yes
+src/scenes/copies of the same scene.js	uniform	uniform	yes
+src/scenes/drag scenes demo.js	still	still	yes
+src/scenes/extend scene from object.js	still	still	yes
+src/scenes/launch parallel scene.js	still	still	yes
+src/scenes/move down list.js	still	still	yes
+src/scenes/move up list.js	still	still	yes
+src/scenes/multiple scenes from classes.js	changing	changing	yes
+src/scenes/multiple scenes from instances.js	changing	changing	yes
+src/scenes/multiple scenes from objects.js	still	still	yes
+src/scenes/multiple scenes with multiple cameras.js	changing	changing	yes
+src/scenes/parallel scenes.js	changing	changing	no
+src/scenes/passing data to a scene.js	still	still	no
+src/scenes/pause and resume.js	changing	changing	yes
+src/scenes/registry data exchange.js	still	still	no
+src/scenes/registry data exchange es6.js	still	still	no
+src/scenes/restart a scene.js	changing	changing	no
+src/scenes/scene add.js	still	still	yes
+src/scenes/scene add manual start.js	still	still	yes
+src/scenes/scene config object.js	still	still	yes
+src/scenes/scene files payload.js	still	still	yes
+src/scenes/scene from class.js	still	still	yes
+src/scenes/scene from es6 class.js	still	still	yes
+src/scenes/scene from function.js	still	still	yes
+src/scenes/scene from instance.js	still	still	yes
+src/scenes/scene from object.js	still	still	yes
+src/scenes/scene injection map.js	still	still	yes
+src/scenes/scene injection map utf8.js	still	still	yes
+src/scenes/send to back.js	still	still	yes
+src/scenes/sleep and wake.js	changing	changing	yes
+src/scenes/swap position.js	changing	changing	yes
+src/scenes/swapping scenes.js	still	still	yes
+src/scenes/test plugin.js	still	still	yes
+src/scenes/transition test 1.js	still	still	yes
+src/scenes/transition test 2.js	changing	still	no
+src/scenes/ui scene.js	still	still	no
+src/scenes/ui scene es6.js	still	still	no
+src/snapshot/snapshot area.js	changing	changing	no
+src/snapshot/snapshot game.js	still	still	no
+src/snapshot/snapshot pixel.js	changing	changing	no
+src/snapshot/snapshot to base64.js	still	still	no
+src/textures/canvas textures/dwitter/5475.js	changing	changing	yes
+src/textures/canvas textures/dwitter/5479.js	changing	changing	yes
+src/textures/canvas textures/dwitter/5500.js	failed at run	failed at run	unobserved
+src/textures/canvas textures/dwitter/test.js	failed at run	failed at run	unobserved
+src/textures/canvas textures/canvas texture composite op.js	still	still	no
+src/textures/canvas textures/canvas texture rotation.js	still	still	yes
+src/textures/canvas textures/create canvas.js	failed at run	failed at run	unobserved
+src/textures/dynamic textures/copy image.js	still	still	yes
+src/textures/dynamic textures/create dynamic texture.js	still	still	no
+src/textures/dynamic textures/dynamic texture camera test.js	still	still	yes
+src/textures/dynamic textures/get pixel from dynamic texture.js	still	still	yes
+src/textures/dynamic textures/masked sprite to dynamic texture.js	still	still	yes
+src/textures/dynamic textures/multiple dynamic textures.js	still	still	no
+src/textures/dynamic textures/nine slice dynamic texture.js	still	still	no
+src/textures/avif test.js	still	still	no
+src/textures/compressed multi texture atlas.js	changing	changing	yes
+src/textures/compressed texture.js	still	still	yes
+src/textures/compressed texture atlas.js	still	still	yes
+src/textures/compressed texture atlas from file config.js	still	still	yes
+src/textures/compressed texture atlas from file pack.js	still	still	yes
+src/textures/compressed texture from file config.js	still	still	yes
+src/textures/compressed texture from file pack.js	still	still	yes
+src/textures/crop animated sprite.js	changing	changing	yes
+src/textures/crop multi frames.js	still	still	no
+src/textures/crop render texture.js	still	still	no
+src/textures/crop text.js	still	still	no
+src/textures/crop texture atlas frame.js	still	still	yes
+src/textures/crop texture atlas frame flip.js	still	still	yes
+src/textures/crop texture atlas frame trimmed.js	still	still	yes
+src/textures/crop texture atlas frame trimmed flip.js	still	still	yes
+src/textures/crop texture image.js	still	still	no
+src/textures/crop texture image flip.js	still	still	no
+src/textures/crop texture image scaled.js	still	still	yes
+src/textures/edit texture hue shift.js	still	still	yes
+src/textures/edit texture silhouette.js	still	still	yes
+src/textures/frames from single atlas.js	still	still	yes
+src/textures/get pixel dynamic.js	still	still	yes
+src/textures/get pixel from image.js	uniform	uniform	yes
+src/textures/get pixels.js	still	still	yes
+src/textures/multi atlas.js	changing	changing	yes
+src/textures/set mipmap filter.js	still	still	yes
+src/textures/set texture source.js	still	still	yes
+src/textures/sprite sheet.js	still	still	yes
+src/textures/sprite sheet from atlas.js	changing	changing	yes
+src/textures/sprite using tilemap texture.js	still	still	yes
+src/textures/text texture.js	changing	changing	no
+src/textures/texture from base64.js	still	still	yes
+src/textures/texture packer atlas.js	changing	changing	yes
+src/textures/trimmed frame from multi atlas.js	changing	changing	yes
+src/textures/trimmed frame from single atlas.js	still	still	yes
+src/tilemap/collision/csv map arcade physics.js	still	still	no
+src/tilemap/collision/custom collide call.js	changing	changing	no
+src/tilemap/collision/matter.js	still	still	no
+src/tilemap/collision/matter destroy tile bodies.js	changing	changing	no
+src/tilemap/collision/matter detect collision with tile.js	still	still	no
+src/tilemap/collision/matter ghost collisions.js	still	still	no
+src/tilemap/collision/matter platformer modify map.js	changing	changing	no
+src/tilemap/collision/matter platformer with wall jumping.js	changing	changing	no
+src/tilemap/collision/multiple tile sizes.js	changing	changing	no
+src/tilemap/collision/simple map.js	changing	changing	no
+src/tilemap/collision/tile callbacks.js	changing	changing	no
+src/tilemap/collision/tilemap spotlight.js	changing	changing	yes
+src/tilemap/isometric/create isometric manually.js	still	still	yes
+src/tilemap/isometric/hexagonal test.js	still	still	yes
+src/tilemap/isometric/isometric test.js	still	still	yes
+src/tilemap/tests/visual culling check.js	still	still	yes
+src/tilemap/tests/visual face test.js	still	still	yes
+src/tilemap/tests/visual flipping test.js	still	still	no
+src/tilemap/tests/visual tile bleed test.js	changing	changing	yes
+src/tilemap/tests/visual tile coords test.js	still	still	no
+src/tilemap/tests/visual worldxy test.js	still	still	no
+src/tilemap/base tile size.js	still	still	no
+src/tilemap/copy tiles.js	still	still	no
+src/tilemap/create from array.js	still	still	yes
+src/tilemap/create from objects.js	changing	changing	yes
+src/tilemap/create from tiles.js	changing	changing	no
+src/tilemap/creating blank layers.js	still	still	no
+src/tilemap/csv map.js	failed at run	failed at run	unobserved
+src/tilemap/danger.js	still	still	yes
+src/tilemap/debug colliding tiles.js	still	still	no
+src/tilemap/dungeon generator.js	failed at run	failed at run	unobserved
+src/tilemap/endless map.js	changing	changing	no
+src/tilemap/fill tiles.js	still	still	no
+src/tilemap/get chebyshev distance.js	still	still	yes
+src/tilemap/get tiles in shape.js	still	still	no
+src/tilemap/grid movement.js	still	still	no
+src/tilemap/layer size.js	still	still	yes
+src/tilemap/layer transform.js	still	still	yes
+src/tilemap/light map.js	changing	changing	yes
+src/tilemap/map vs layer with multiple layers.js	still	still	no
+src/tilemap/map vs layer with one layer.js	still	still	no
+src/tilemap/mario map scroller.js	still	still	yes
+src/tilemap/mouse wheel zoom.js	still	still	no
+src/tilemap/multi camera map.js	still	still	yes
+src/tilemap/multiple tilesets.js	still	still	no
+src/tilemap/paint tiles.js	still	still	no
+src/tilemap/pixel art test.js	still	still	yes
+src/tilemap/put tiles.js	still	still	no
+src/tilemap/randomize tiles.js	still	still	no
+src/tilemap/replace tiles.js	still	still	no
+src/tilemap/set colliding by collision data.js	still	still	no
+src/tilemap/set colliding by property.js	still	still	no
+src/tilemap/set colliding tiles.js	still	still	no
+src/tilemap/set map size.js	still	still	yes
+src/tilemap/shuffle tiles.js	still	still	no
+src/tilemap/snake distance.js	still	still	yes
+src/tilemap/swap tiles.js	still	still	no
+src/tilemap/switching tilesets.js	still	still	no
+src/tilemap/tile draw order.js	still	still	no
+src/tilemap/tile overlap.js	still	still	no
+src/tilemap/tile properties.js	still	still	no
+src/tilemap/tiled json map.js	still	still	no
+src/tilemap/tiled  multi tileset.js	still	still	no
+src/tilemap/tilelayer filter.js	changing	changing	yes
+src/tilemap/tileset collision shapes.js	still	still	no
+src/tilemap/tileset with spacing.js	still	still	yes
+src/tilemap/tint tiles.js	still	still	yes
+src/tilemap/weighted randomize.js	still	still	no
+src/tilemap/zoom.js	changing	changing	no
+src/tilemaps/tilemap gpu layer/animated gpu tiles.js	still	still	yes
+src/tilemaps/tilemap gpu layer/copy gpu tiles.js	still	still	no
+src/tilemaps/tilemap gpu layer/cpu versus gpu.js	still	still	no
+src/tilemaps/animated tiles.js	changing	changing	yes
+src/time/timeline/add event in.js	still	still	no
+src/time/timeline/create timeline.js	still	still	no
+src/time/timeline/from times.js	still	still	no
+src/time/timeline/play timeline on click.js	still	still	no
+src/time/timeline/repeat timeline.js	still	still	no
+src/time/timeline/run timed events.js	still	still	no
+src/time/timeline/set action.js	still	still	no
+src/time/timeline/sound action.js	still	still	no
+src/time/timeline/timeline event.js	still	still	no
+src/time/timeline/tween action.js	still	still	no
+src/time/timestep/delta history.js	changing	changing	no
+src/time/timestep/split timestep.js	changing	changing	yes
+src/time/timestep/ticker loop.js	changing	changing	no
+src/time/timestep/variable smooth step.js	changing	changing	no
+src/time/timestep/world time.js	changing	changing	no
+src/time/clock.js	changing	changing	yes
+src/time/draw clocks.js	changing	changing	yes
+src/time/looped event.js	changing	changing	no
+src/time/multiple timers.js	changing	changing	no
+src/time/pause and resume.js	changing	changing	no
+src/time/remove timer event.js	changing	changing	no
+src/time/repeat count.js	changing	changing	no
+src/time/reuse a timer event.js	changing	changing	no
+src/time/start at.js	changing	changing	no
+src/time/time scale.js	changing	changing	yes
+src/time/timer event.js	changing	changing	no
+src/transform/angle.js	still	still	yes
+src/transform/display size.js	still	still	yes
+src/transform/flip x.js	still	still	yes
+src/transform/flip y.js	still	still	yes
+src/transform/originX.js	still	still	yes
+src/transform/originXY.js	still	still	yes
+src/transform/originY.js	still	still	yes
+src/transform/position.js	still	still	yes
+src/transform/rotation.js	changing	changing	yes
+src/transform/rotation and origin.js	changing	changing	yes
+src/transform/scaleX.js	still	still	yes
+src/transform/scaleXY.js	still	still	yes
+src/transform/scaleY.js	still	still	yes
+src/tweens/chains/basic tween chain.js	changing	changing	no
+src/tweens/chains/bat tween.js	changing	changing	no
+src/tweens/chains/chest sequence.js	changing	changing	no
+src/tweens/chains/debug chained tweens 1.js	changing	changing	no
+src/tweens/chains/multi target chain.js	changing	changing	no
+src/tweens/eases/back.js	changing	changing	no
+src/tweens/eases/back graph.js	changing	changing	no
+src/tweens/eases/bounce.js	changing	changing	no
+src/tweens/eases/bounce graph.js	changing	changing	no
+src/tweens/eases/circular.js	changing	changing	no
+src/tweens/eases/circular graph.js	changing	changing	no
+src/tweens/eases/cubic.js	changing	changing	no
+src/tweens/eases/cubic graph.js	changing	changing	no
+src/tweens/eases/ease equations.js	still	still	no
+src/tweens/eases/ease mixer.js	still	still	no
+src/tweens/eases/ease params.js	still	still	yes
+src/tweens/eases/exponential.js	changing	changing	no
+src/tweens/eases/exponential graph.js	changing	changing	no
+src/tweens/eases/linear.js	changing	changing	no
+src/tweens/eases/quad.js	changing	changing	no
+src/tweens/eases/quad graph.js	changing	changing	no
+src/tweens/eases/quartic.js	changing	changing	no
+src/tweens/eases/quartic graph.js	changing	changing	no
+src/tweens/eases/quintic.js	changing	changing	no
+src/tweens/eases/quintic graph.js	changing	changing	no
+src/tweens/eases/sine.js	changing	changing	no
+src/tweens/eases/sine graph.js	changing	changing	no
+src/tweens/ball circle.js	changing	changing	no
+src/tweens/callbacks.js	changing	changing	no
+src/tweens/change texture.js	still	still	yes
+src/tweens/change texture after scale.js	changing	changing	no
+src/tweens/change texture frame.js	changing	changing	no
+src/tweens/checkerboard 1.js	changing	changing	no
+src/tweens/checkerboard 2.js	changing	changing	no
+src/tweens/checkerboard 3.js	changing	changing	no
+src/tweens/checkerboard 4.js	uniform	uniform	yes
+src/tweens/checkerboard rotate.js	changing	changing	no
+src/tweens/complete delay.js	changing	changing	no
+src/tweens/counter tween.js	changing	changing	no
+src/tweens/custom ease.js	still	still	yes
+src/tweens/delay.js	still	still	yes
+src/tweens/delay function.js	still	still	no
+src/tweens/double tween.js	still	still	yes
+src/tweens/dynamic end property.js	still	still	yes
+src/tweens/dynamic properties.js	changing	changing	no
+src/tweens/dynamic properties multiple.js	changing	changing	no
+src/tweens/elasticity.js	still	still	yes
+src/tweens/flip x.js	changing	changing	no
+src/tweens/flip y.js	still	still	yes
+src/tweens/from and to.js	changing	changing	no
+src/tweens/global time scale.js	changing	changing	no
+src/tweens/interpolation value.js	changing	changing	no
+src/tweens/lag smooth 1.js	still	still	yes
+src/tweens/lag smooth 2.js	still	still	yes
+src/tweens/lag smooth 3.js	changing	changing	yes
+src/tweens/linear bounce.js	changing	changing	no
+src/tweens/loop.js	changing	changing	no
+src/tweens/loop delay.js	changing	changing	no
+src/tweens/multiple delayed properties.js	still	still	yes
+src/tweens/multiple properties.js	changing	changing	no
+src/tweens/multiple properties loop.js	changing	changing	no
+src/tweens/multiple properties yoyo.js	changing	changing	no
+src/tweens/multiple targets.js	changing	changing	no
+src/tweens/multiple targets multiple properties.js	still	still	yes
+src/tweens/number tween.js	still	still	no
+src/tweens/number tween with yoyo.js	changing	changing	no
+src/tweens/on complete callback.js	changing	changing	no
+src/tweens/on start callback.js	still	still	yes
+src/tweens/on yoyo callback.js	still	still	no
+src/tweens/pause and resume.js	still	still	no
+src/tweens/pause and resume all.js	changing	changing	no
+src/tweens/paused tween.js	still	still	yes
+src/tweens/performance test 1.js	uniform	uniform	yes
+src/tweens/performance test 2.js	changing	changing	no
+src/tweens/relative value.js	still	still	yes
+src/tweens/relative value repeating.js	changing	changing	no
+src/tweens/remove tween.js	changing	changing	no
+src/tweens/seek to point in tween.js	changing	changing	no
+src/tweens/sprite angle between.js	changing	changing	no
+src/tweens/stagger delay.js	changing	changing	no
+src/tweens/stagger showcase.js	changing	changing	no
+src/tweens/stop a tween.js	still	still	yes
+src/tweens/tween gauge.js	changing	changing	no
+src/tweens/tween sprite angle.js	changing	changing	no
+src/tweens/tween text size.js	changing	changing	no
+src/utils/array/bring to top.js	still	still	no
+src/utils/array/range.js	still	still	no
+src/utils/array/reverse matrix columns.js	still	still	no
+src/utils/array/reverse matrix rows.js	still	still	no
+src/utils/array/rotate matrix.js	still	still	no
+src/utils/array/rotate matrix 180.js	still	still	no
+src/utils/array/rotate matrix left.js	still	still	no
+src/utils/array/rotate matrix right.js	still	still	no
+src/utils/array/translate matrix.js	still	still	no
+src/utils/array/transpose matrix.js	still	still	no
+src/utils/rbush/rbush 1.js	still	still	no
+src/utils/rbush/rbush 2.js	still	still	no
+src/utils/size/aspect mode envelop.js	still	still	no
+src/utils/size/aspect mode fit.js	still	still	no
+src/utils/size/aspect mode height controls width.js	still	still	no
+src/utils/size/aspect mode none.js	still	still	no
+src/utils/size/aspect mode width controls height.js	still	still	no
+src/utils/size/max size.js	still	still	no
+src/utils/size/min max size.js	still	still	no
+src/utils/size/min size.js	still	still	no
+src/utils/size/snap child.js	still	still	no

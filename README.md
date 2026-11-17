@@ -4,7 +4,7 @@
 
 Silicanto is an open-source compiler for turning supported Three.js applications into native Mac apps and Java desktop applications. Give it a JavaScript entry point and it translates the application and its local modules into editable Haxe. On Apple Silicon, choose C, C++ or Java and render the scene with Metal. The resulting app runs without a browser.
 
-**General JavaScript frontend (experimental).** Compile an application's JS and transitive npm dependencies to Haxe with `--frontend generic`. The new path uses standard JavaScript and web APIs without library adapters. [Build and retarget a Canvas app](docs/general-javascript.md) · [Run the native multi-frame Phaser gallery](tests/phaser4/README.md) · [Historical fourth-frame results](docs/compatibility/phaser4/README.md). The full catalog is not supported yet.
+**General JavaScript frontend (experimental).** Compile an application's JS and transitive npm dependencies to Haxe with `--frontend generic`. The new path uses standard JavaScript and web APIs without library adapters. [Build and retarget a Canvas app](docs/general-javascript.md) · [Native desktop measurements for WebGL, CSS and 2,061 Phaser examples](docs/compatibility/native-desktop/README.md) · [Reproduce the multi-frame gallery](tests/phaser4/README.md).
 
 ![A frame from the native Metal build of Nácar: a river of molten silicon runs between crystal spires beneath a ringed planet.](docs/nacar-metal.png)
 

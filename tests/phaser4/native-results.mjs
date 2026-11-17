@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
@@ -14,18 +20,69 @@ const catalog = readFileSync(
   .trimEnd()
   .split("\n")
   .map((line) => line.split("\t")[1]);
+const workspace = fileURLToPath(new URL("../../", import.meta.url));
+const diagnostic = (value) =>
+  String(value ?? "").replaceAll(workspace, "<checkout>/");
+const infrastructure = (value) =>
+  /ENOSPC|No space left on device|file_open,[^\n]*frames-[0-9]+\.json/i.test(
+    value ?? "",
+  );
 const rows = new Map(catalog.map((file) => [file, { file }]));
 const targets = {};
 let revision, engine, engineSHA256;
 for (const target of ["cpp", "java"]) {
-  const r = JSON.parse(readFileSync(join(input, target, "report.json")));
-  assert.equal(r.stage, "native");
-  assert.equal(r.oracle, "native-rgba-timeline-v1");
-  assert.equal(r.compiler, compiler);
-  assert.equal(r.modifiedCompilerOrSuite, false);
-  assert.equal(r.target, target);
-  assert.equal(r.selected, catalog.length);
+  const dir = join(input, target);
+  const paths = existsSync(join(dir, "report.json"))
+    ? [join(dir, "report.json")]
+    : readdirSync(dir, { withFileTypes: true })
+        .filter((p) => p.isDirectory())
+        .map((p) => join(dir, p.name, "report.json"));
+  assert.ok(paths.length, "No reports for " + target);
+  const reports = paths.map((p) => JSON.parse(readFileSync(p)));
+  const r = { ...reports[0], cases: reports.flatMap((report) => report.cases) };
+  const retryPath = join(input, "retries", target, "report.json");
+  const retry = existsSync(retryPath)
+    ? JSON.parse(readFileSync(retryPath))
+    : null;
+  for (const shard of [...reports, ...(retry ? [retry] : [])]) {
+    assert.equal(shard.stage, "native");
+    assert.equal(shard.oracle, "native-rgba-timeline-v1");
+    assert.equal(shard.compiler, compiler);
+    assert.equal(shard.modifiedCompilerOrSuite, false);
+    assert.equal(shard.target, target);
+    assert.equal(shard.revision, r.revision);
+    assert.equal(shard.engine, r.engine);
+    assert.equal(
+      shard.engineSHA256,
+      "71d92687457da59f1233c75827df628ba173e2ad329d3c75f4e4b92d27c9dd1e",
+    );
+    assert.equal(shard.selected, shard.cases.length);
+  }
   assert.deepEqual(r.cases.map((c) => c.file).sort(), catalog.slice().sort());
+  if (retry) {
+    const byFile = new Map(r.cases.map((c, i) => [c.file, i]));
+    const seen = new Set();
+    for (const c of retry.cases) {
+      const index = byFile.get(c.file);
+      assert.ok(
+        index !== undefined && !seen.has(c.file),
+        "Invalid retry for " + c.file,
+      );
+      seen.add(c.file);
+      const previous = r.cases[index];
+      assert.ok(
+        previous.status === "failed" && infrastructure(previous.diagnostic),
+        "Retry needs a recorded infrastructure failure: " + c.file,
+      );
+      const row = rows.get(c.file);
+      row.infrastructureRetries ??= {};
+      row.infrastructureRetries[target] = {
+        stage: previous.stage,
+        diagnostic: diagnostic(previous.diagnostic),
+      };
+      r.cases[index] = c;
+    }
+  }
   if (revision) {
     assert.equal(r.revision, revision);
     assert.equal(r.engineSHA256, engineSHA256);
@@ -34,7 +91,13 @@ for (const target of ["cpp", "java"]) {
   revision = r.revision;
   engine = r.engine;
   engineSHA256 = r.engineSHA256;
-  const s = { observed: 0, changing: 0, uniformAtEveryMark: 0, failed: 0 };
+  const s = {
+    observed: 0,
+    changing: 0,
+    uniformAtEveryMark: 0,
+    failed: 0,
+    infrastructureRetries: retry?.cases.length ?? 0,
+  };
   for (const c of r.cases) {
     if (c.status === "native-observed") {
       const f = c.measurement.frames;
@@ -55,7 +118,7 @@ for (const target of ["cpp", "java"]) {
       s.failed++;
       rows.get(c.file)[target] = {
         stage: c.stage ?? "bootstrap",
-        diagnostic: c.diagnostic ?? r.bootstrap.diagnostic,
+        diagnostic: diagnostic(c.diagnostic ?? r.bootstrap.diagnostic),
       };
     }
   }
@@ -90,7 +153,7 @@ for (const row of rows.values()) {
       row.file,
       describe(row.cpp),
       describe(row.java),
-      compared ? (same ? "yes" : "no") : "",
+      compared ? (same ? "yes" : "no") : "unobserved",
     ].join("\t"),
   );
 }

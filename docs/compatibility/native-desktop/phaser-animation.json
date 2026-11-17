@@ -1,0 +1,41 @@
+{
+  "source": "animation/animation from png sequence.js",
+  "hash": "SHA-256 of captured RGB with opaque alpha, row-major RGBA8",
+  "frames": [
+    {
+      "frame": 4,
+      "cpp": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3",
+      "width": 800,
+      "height": 600,
+      "java": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3"
+    },
+    {
+      "frame": 12,
+      "cpp": "624518d587bf0c99c727404742275f5313a98c9ea76148b56685e815a3bbf859",
+      "width": 800,
+      "height": 600,
+      "java": "624518d587bf0c99c727404742275f5313a98c9ea76148b56685e815a3bbf859"
+    },
+    {
+      "frame": 20,
+      "cpp": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3",
+      "width": 800,
+      "height": 600,
+      "java": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3"
+    },
+    {
+      "frame": 30,
+      "cpp": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3",
+      "width": 800,
+      "height": 600,
+      "java": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3"
+    },
+    {
+      "frame": 48,
+      "cpp": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3",
+      "width": 800,
+      "height": 600,
+      "java": "2313b22a11510bc607632ccb8206579e6c35597d65dfe3a3133d2968389e45f3"
+    }
+  ]
+}
