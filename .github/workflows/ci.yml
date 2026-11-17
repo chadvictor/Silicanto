@@ -37,6 +37,14 @@ jobs:
       - run: npm run test:java
       - run: npx playwright install chromium
       - run: npm run test:generic
+      - name: Compare native WebGL frames on a Metal device
+        run: |
+          metal=$(xcrun swift -e 'import Metal; print(MTLCreateSystemDefaultDevice() != nil)')
+          if [ "$metal" = true ]; then
+            npm run test:webgl
+          else
+            echo "WebGL pixel tests skipped because the runner exposes no Metal device." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - run: npm ci --prefix tests/phaser4
       - run: npm run test:source-libraries
       - name: Compile the graphical Java application (no GPU needed to build)

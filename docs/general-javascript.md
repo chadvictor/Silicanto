@@ -42,8 +42,8 @@ flowchart LR
 | [Haxe emitter](../src/frontend/javascript.mjs) | Lower expressions, classes, closures and control flow. Preserve receiver bindings and evaluate JS operands in order. |
 | [Compilation units](../src/frontend/units.mjs) | Split large closed functions and literal tables so the JVM and native compilers can consume bundled libraries. |
 | [ECMAScript runtime](../runtime/ecmascript/) | Values, objects and prototypes, properties and descriptors, module initialization, typed arrays and collections. |
-| [Web host](../runtime/web/) | A DOM/Canvas subset, bitmap, animation frames, local XHR, blobs and image decoding. |
-| [Payload registry](../src/targets.mjs) | Select the backend according to the required host capabilities. Canvas uses the software raster payload; Metal is used by the legacy scene payloads. |
+| [Web host](../runtime/web/) | HTML and XML document trees, timers, animation frames, local XHR, blobs, image decoding, Canvas 2D and WebGL 1 bindings. |
+| [Payload registry](../src/targets.mjs) | Select a backend for the requested host capabilities. Desktop C++ and Java support a software 2D surface and, on Apple Silicon, WebGL via ANGLE and Metal. |
 | [Legacy Three.js path](../src/legacy/three/) | Retain previous typed builds, packed scenes and the Metal renderer. `--frontend generic` bypasses this code, including for a package named `three`. |
 
 A library is source code; a browser API is a platform service. New language features belong in the compiler or ECMAScript runtime. New drawing, input and resource APIs belong in the web host. A game, library name or upstream filename does not belong in any of those places.
@@ -52,7 +52,9 @@ The same canvas can run offscreen or in a desktop window. `--window` presents th
 
 On Apple Silicon, `canvas.getContext("webgl")` provides a WebGL 1 interface in Haxe. A native bridge issues GLES calls to ANGLE using Metal. GLSL compilation, linking, texture uploads, draw calls and framebuffer readback happen on that backend. The first desktop build downloads a pinned, checksum-verified ANGLE distribution. C++ executables load the adjacent `webgl/` directory. The macOS-built Java JAR embeds the ARM64 native libraries. Other JVM platforms retain their Java 2D surface. [ANGLE source](https://github.com/google/angle/tree/a96fca8d5ee2ca61e8de419e38cd577579281c9e) · [Binary distribution](https://github.com/yorickreum/angle-libs/releases/tag/a96fca8)
 
-`npm run test:webgl` builds the same unmodified application for C++ and Java and compares its framebuffer with Chromium. The fixture also checks shader status, pixel readback, font metrics, glyph coverage and JavaScript built-ins.
+`npm run test:webgl` builds the same unmodified application for C++ and Java and compares its framebuffer with Chromium. It also checks offscreen framebuffer attachments, typed array offsets, uniforms, font metrics, glyph coverage, XML document traversal and decimal rounding.
+
+The XML host implements read-only element traversal and attributes through `DOMParser` and local `XMLHttpRequest.responseXML`. Malformed XML produces a parser error document.
 
 WebGL 2, complete WebGL 1 conformance, GPU antialiasing and context loss/restoration remain open. The Canvas implementation supports arcs, Bézier curves, platform text and a subset of blending and CSS. Network transport, audio playback, keyboard/pointer input and full CSS layout remain open. The frontend still has gaps in dynamic imports, eval, async functions, generators and ES module cycles.
 

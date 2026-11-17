@@ -1,13 +1,14 @@
 // Convert complete target reports into a portable, reviewable compatibility matrix.
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const [input, out, compiler] = process.argv.slice(2);
+const [input, out, compiler, baselineCommit] = process.argv.slice(2);
 if (!input || !out || !/^[a-f0-9]{40}$/.test(compiler ?? ""))
   throw Error(
-    "Usage: node tests/phaser4/results.mjs REPORT_ROOT OUTPUT_DIR COMPILER_COMMIT",
+    "Usage: node tests/phaser4/results.mjs REPORT_ROOT OUTPUT_DIR COMPILER_COMMIT [BASELINE_REPORT_COMMIT]",
   );
 const suite = fileURLToPath(new URL("./", import.meta.url));
 const catalog = readFileSync(join(suite, "catalog.tsv"), "utf8")
@@ -62,6 +63,9 @@ function reason(c) {
     )
   )
     return "WebGL context";
+  if (/Fragment Shader failed|Vertex Shader failed/i.test(s))
+    return "GLSL compilation";
+  if (/Failed to link (?:the )?program/i.test(s)) return "GLSL program link";
   if (/Uniform reference/.test(s))
     return "uniform reference; needs behavior test";
   if (/Frame mismatch/.test(s)) return "different pixels";
@@ -71,7 +75,9 @@ function reason(c) {
     return "missing or unpinned reference resource";
   if (/timeout|ETIMEDOUT|timed out/i.test(s)) return "time limit";
   if (/E-CANVAS: nothing to capture/.test(s)) return "no target canvas";
-  const cap = s.match(/(E-(?:DOM|CANVAS|IMAGE|XHR|ASSET)):\s*([^\n]{1,90})/);
+  const cap = s.match(
+    /(E-(?:DOM|CANVAS|IMAGE|XHR|ASSET|WEBGL)):\s*([^\n]{1,90})/,
+  );
   if (cap)
     return (
       cap[1] +
@@ -126,6 +132,50 @@ const header = [
     ].map((k) => t + "_" + k),
   ),
 ];
+const comparisonText = [];
+let previous;
+if (baselineCommit) {
+  assert.match(baselineCommit, /^[a-f0-9]{40}$/);
+  const readBaseline = (name) =>
+    execFileSync(
+      "git",
+      ["show", baselineCommit + ":docs/compatibility/phaser4/" + name],
+      { cwd: suite, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 },
+    );
+  const baseline = JSON.parse(readBaseline("summary.json"));
+  for (const key of ["oracle", "engineSHA256", "examplesCommit", "catalog"])
+    assert.equal(baseline[key], stats[key], "incompatible baseline " + key);
+  const [columns, ...data] = readBaseline("matrix.tsv")
+    .trimEnd()
+    .split("\n")
+    .map((row) => row.split("\t"));
+  const indexes = ["cpp_stage", "java_stage"].map((name) =>
+    columns.indexOf(name),
+  );
+  assert.ok(indexes.every((i) => i >= 0));
+  previous = new Map(
+    data.map((row) => [row[0], indexes.map((i) => row[i] === "matched")]),
+  );
+  assert.deepEqual(new Set(previous.keys()), new Set(catalog));
+  stats.comparison = {
+    reportCommit: baselineCommit,
+    compiler: baseline.compiler,
+    targets: {},
+  };
+  for (const [target, matched] of [
+    ["cpp", baseline.targets.cpp.matched],
+    ["java", baseline.targets.java.matched],
+    ["both", baseline.matchedOnBoth],
+  ]) {
+    stats.comparison.targets[target] = {
+      previous: matched,
+      gained: 0,
+      lost: 0,
+      retained: 0,
+    };
+    header.push(target + "_change");
+  }
+}
 const rows = [header.join("\t")];
 for (const target of ["cpp", "java"])
   stats.targets[target] = {
@@ -178,7 +228,49 @@ for (const file of catalog) {
     byFile.java.get(file).status === "frame-matched"
   )
     stats.matchedOnBoth++;
+  if (previous) {
+    const before = previous.get(file),
+      after = ["cpp", "java"].map(
+        (t) => byFile[t].get(file).status === "frame-matched",
+      );
+    before.push(before.every(Boolean));
+    after.push(after.every(Boolean));
+    for (const [i, t] of ["cpp", "java", "both"].entries()) {
+      const change = after[i]
+        ? before[i]
+          ? "retained"
+          : "gained"
+        : before[i]
+          ? "lost"
+          : "unmatched";
+      row.push(change);
+      if (change !== "unmatched") stats.comparison.targets[t][change]++;
+    }
+  }
   rows.push(row.join("\t"));
+}
+if (previous) {
+  comparisonText.push(
+    "## Changes since the previous gallery run",
+    "",
+    "| Target | Previously matched | Newly matched | Previously matched, now failed | Still matched |",
+    "| --- | ---: | ---: | ---: | ---: |",
+  );
+  for (const [target, c] of Object.entries(stats.comparison.targets)) {
+    const current =
+      target === "both" ? stats.matchedOnBoth : stats.targets[target].matched;
+    assert.equal(c.lost + c.retained, c.previous);
+    assert.equal(c.gained + c.retained, current);
+    const label = { cpp: "C++", java: "Java", both: "Both targets" }[target];
+    comparisonText.push(
+      `| ${label} | ${c.previous} | ${c.gained} | ${c.lost} | ${c.retained} |`,
+    );
+  }
+  comparisonText.push(
+    "",
+    `The [baseline matrix](https://github.com/chadvictor/Silicanto/blob/${baselineCommit}/docs/compatibility/phaser4/matrix.tsv) uses the same catalog, engine and fourth-frame comparison. Filter the current matrix by the \`cpp_change\`, \`java_change\` or \`both_change\` column to identify the individual cases.`,
+    "",
+  );
 }
 for (const t of Object.values(stats.targets))
   t.reasons = Object.fromEntries(
@@ -230,9 +322,9 @@ const compilerURL =
 const page = [
   "# Can Silicanto run the Phaser 4 example gallery?",
   "",
-  `Of the ${stats.catalog.toLocaleString("en-US")} entries in the pinned [Phaser ${stats.engine} gallery](https://phaser.io/oss/examples), **${stats.matchedOnBoth} produced a matching fourth frame on both C++ and Java**. This measures a rendered frame, not whether a complete game is playable.`,
+  `Of the ${stats.catalog.toLocaleString("en-US")} entries in the pinned [Phaser ${stats.engine} gallery](https://phaser.io/oss/examples), **${stats.matchedOnBoth} produced a matching fourth frame on both C++ and Java**. This measures the fourth rendered frame. Playability requires interaction and longer-running scenarios.`,
   "",
-  `The compiler emitted editable Haxe from **${stats.frontend["haxe-emitted"] ?? 0}** example source graphs. The original Phaser distribution was compiled from JavaScript as a shared prerequisite. Engine initialization: C++ **${stats.engineBootstrap.cpp}**, Java **${stats.engineBootstrap.java}**. No examples were rewritten and no framework adapter was used.`,
+  `The compiler emitted editable Haxe from **${stats.frontend["haxe-emitted"] ?? 0}** example source graphs. The original Phaser distribution was compiled from JavaScript as a shared prerequisite. Engine initialization **${stats.engineBootstrap.cpp}** on C++ and **${stats.engineBootstrap.java}** on Java. Both targets used the original example sources and the generic web runtime.`,
   "",
   "| Target | Catalog entries | Target process launched | Reached frame comparison | Matched Chromium | Pixel-exact |",
   "| --- | ---: | ---: | ---: | ---: | ---: |",
@@ -240,6 +332,7 @@ const page = [
   "",
   "Each example runs in a fresh process. The reference is the same example and engine in Chromium. A match requires the same dimensions, a nonuniform reference, mean absolute RGB error below 4, and more than 92% agreement within 8 levels per channel on both the full frame and the foreground. Pixel-exact means every channel was identical. A reference without a reproducible frame is not a pass.",
   "",
+  ...comparisonText,
   "## What prevents more examples from passing?",
   "",
   "These are the most frequent first diagnostics in this run. A later problem can be hidden by an earlier one. A uniform reference can be valid for a nonvisual or interactive example; it needs a different behavioral assertion. Differences can also reflect timing, randomness or missing reference assets.",
@@ -251,13 +344,13 @@ const page = [
       `| ${why.replaceAll("|", "/")} | ${count("cpp", why)} | ${count("java", why)} |`,
   ),
   "",
-  "The [case matrix](matrix.tsv) lists every upstream source with its first failing stage or visual result, and pixel measurements for both matches and measurable differences. The [machine-readable summary](summary.json) contains counts for all stages and diagnostics. These are observations for the tested revision, not permanent exclusions.",
+  "The [case matrix](matrix.tsv) lists every upstream source with its first failing stage or visual result, and pixel measurements for both matches and measurable differences. The [machine-readable summary](summary.json) contains counts for all stages and diagnostics. Each diagnostic describes the first observed failure on this revision.",
   "",
   "## Reproduce",
   "",
-  `Use [Silicanto ${stats.compiler.slice(0, 7)}](${compilerURL}), the pinned [upstream examples](${sourceURL}) and the [suite instructions](../../../tests/phaser4/README.md). The engine SHA-256 is \`${stats.engineSHA256}\`. The full matrix covers C++ and Java; it does not establish gallery compatibility on C or Neko.`,
+  `Use [Silicanto ${stats.compiler.slice(0, 7)}](${compilerURL}), the pinned [upstream examples](${sourceURL}) and the [suite instructions](../../../tests/phaser4/README.md). The engine SHA-256 is \`${stats.engineSHA256}\`. The full matrix covers C++ and Java on Apple Silicon.`,
   "",
-  "For a check beyond a still image, the [animation timeline test](../../../tests/phaser4/animation-timeline.mjs) builds on the PNG sequence example's standalone apps, compares five captures with Chromium, and requires the sprite to change. Games that depend on input, audio or external services need scenarios of their own.",
+  "For a check beyond a still image, the [animation timeline test](../../../tests/phaser4/animation-timeline.mjs) compares five captures from the standalone PNG sequence or WebGL texture atlas apps with Chromium and requires visible movement on both targets. Games that depend on input, audio or external services need scenarios of their own.",
   "",
 ];
 writeFileSync(join(out, "README.md"), page.join("\n"));
