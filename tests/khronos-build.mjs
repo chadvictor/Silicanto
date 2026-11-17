@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -9,34 +8,16 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { jdk } from "./jdk.mjs";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
+import { sourceTree, root, revision } from "./khronos-source.mjs";
 const { values } = parseArgs({
   options: { checkout: { type: "string" }, out: { type: "string" } },
 });
-const revision = "39443210f7f81db4773eb104facadfb85d05dfa4";
-const checkout = resolve(
-  values.checkout ?? join(root, ".toolchain/khronos-webgl"),
-);
 const group = "sdk/tests/conformance/ogles/GL/build";
-mkdirSync(checkout, { recursive: true });
-const git = (...args) =>
-  execFileSync("git", ["-C", checkout, ...args], { encoding: "utf8" }).trim();
-if (!existsSync(join(checkout, ".git"))) {
-  git("init", "-q");
-  git("remote", "add", "origin", "https://github.com/KhronosGroup/WebGL.git");
-  git("sparse-checkout", "init", "--cone");
-  git("sparse-checkout", "set", dirname(group));
-  git("fetch", "--filter=blob:none", "--depth=1", "origin", revision);
-  git("checkout", "--detach", "FETCH_HEAD");
-}
-assert.equal(git("rev-parse", "HEAD"), revision);
-assert.equal(git("status", "--porcelain", "--", dirname(group)), "");
-const folder = join(checkout, group);
+const folder = join(sourceTree(values.checkout), "ogles/GL/build");
 const cases = readdirSync(folder)
   .filter((name) => name.endsWith(".html"))
   .sort()

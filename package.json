@@ -29,7 +29,9 @@
     "test:phaser4": "node tests/phaser4/run.mjs",
     "test:generic": "node tests/generic-targets.mjs",
     "test:source-libraries": "node tests/phaser4/library-logic.mjs",
-    "test:webgl-conformance": "node tests/khronos-build.mjs"
+    "test:webgl-conformance": "node tests/khronos-build.mjs",
+    "test:webgl-render": "node tests/khronos-render.mjs",
+    "test:css": "node tests/css-reftests.mjs"
   },
   "dependencies": {
     "esbuild": "0.25.12",

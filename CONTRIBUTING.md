@@ -39,9 +39,9 @@ The older Static Hermes experiment is available through `scripts/experimental-he
 | Command | What it checks | Environment |
 | --- | --- | --- |
 | `npm test` | Translation, diagnostics and simple scene semantics | Node.js |
-| `npm run test:generic` | Mixed modules, local assets and pixel output on C, C++, Java and Neko | Native setup, JDK, Chromium |
+| `npm run test:generic` | Mixed modules, local assets and analytic pixel output on C, C++, Java and Neko | Native setup, JDK |
 | `npm run test:source-libraries` | Computations in original library sources on C++, Java and Neko | Native setup, JDK, pinned test dependencies |
-| [Full upstream suite](tests/phaser4/README.md) | Original engine, all catalog entries and browser reference | Native setup, JDK, Chromium, pinned sources and assets |
+| [Full upstream suite](tests/phaser4/README.md) | Original engine and native RGBA timelines for 2,061 entries | Native setup, JDK, pinned sources and assets |
 | `npm run test:roundtrip` | ES5 and ES6 inputs plus handwritten JS through Haxe to JS and C | Native setup |
 | `npm run test:haxe` | Source removal, code edits and custom HXML backends across C, C++, JS and Python | Native setup |
 | `npm run test:haxe-graphics` | Official Three.js sample frames against WebGL and the native C/Metal backend | Native setup, Metal, Chromium and network for initial sample download |

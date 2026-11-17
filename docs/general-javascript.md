@@ -42,7 +42,7 @@ flowchart LR
 | [Haxe emitter](../src/frontend/javascript.mjs) | Lower expressions, classes, closures and control flow. Preserve receiver bindings and evaluate JS operands in order. |
 | [Compilation units](../src/frontend/units.mjs) | Split large closed functions and literal tables so the JVM and native compilers can consume bundled libraries. |
 | [ECMAScript runtime](../runtime/ecmascript/) | Values, objects and prototypes, properties and descriptors, module initialization, typed arrays and collections. |
-| [Web host](../runtime/web/) | HTML and XML document trees, timers, animation frames, local XHR, blobs, image decoding, Canvas 2D and WebGL 1 bindings. |
+| [Web host](../runtime/web/) | ECMAScript events, DOM and CSS layout, timers and animation frames, resources, audio, input, Canvas 2D and WebGL bindings. |
 | [Payload registry](../src/targets.mjs) | Select a backend for the requested host capabilities. Desktop C++ and Java support a software 2D surface and, on Apple Silicon, WebGL via ANGLE and Metal. |
 | [Legacy Three.js path](../src/legacy/three/) | Retain previous typed builds, packed scenes and the Metal renderer. `--frontend generic` bypasses this code, including for a package named `three`. |
 
@@ -52,12 +52,31 @@ The same canvas can run offscreen or in a desktop window. `--window` presents th
 
 On Apple Silicon, `canvas.getContext("webgl")` provides a WebGL 1 interface in Haxe. A native bridge issues GLES calls to ANGLE using Metal. GLSL compilation, linking, texture uploads, draw calls and framebuffer readback happen on that backend. The first desktop build downloads a pinned, checksum-verified ANGLE distribution. C++ executables load the adjacent `webgl/` directory. The macOS-built Java JAR embeds the ARM64 native libraries. Other JVM platforms retain their Java 2D surface. [ANGLE source](https://github.com/google/angle/tree/a96fca8d5ee2ca61e8de419e38cd577579281c9e) · [Binary distribution](https://github.com/yorickreum/angle-libs/releases/tag/a96fca8)
 
-`npm run test:webgl` builds the same unmodified application for C++ and Java and compares its framebuffer with Chromium. It also checks offscreen framebuffer attachments, typed array offsets, uniforms, font metrics, glyph coverage, XML document traversal and decimal rounding.
+### Native desktop APIs on Apple Silicon
 
-The XML host implements read-only element traversal and attributes through `DOMParser` and local `XMLHttpRequest.responseXML`. Malformed XML produces a parser error document.
+Both the C++ executable and the Java desktop JAR implement the following interfaces. The translations share the same Haxe host. Native libraries supply the GPU, media, network and layout operations.
 
-WebGL 2, complete WebGL 1 conformance, GPU antialiasing and context loss/restoration remain open. The Canvas implementation supports arcs, Bézier curves, platform text and a subset of blending and CSS. Network transport, audio playback, keyboard/pointer input and full CSS layout remain open. The frontend still has gaps in dynamic imports, eval, async functions, generators and ES module cycles.
+| Interface | Implementation and verification |
+| --- | --- |
+| WebGL 1 | ANGLE on Metal compiles GLSL, draws to framebuffer attachments, negotiates multisampling and recreates lost contexts. The test compares all 1,536 pixels of a triangle with an analytic result. Upstream OGLES rendering tests compare reference and test shaders at 500 × 500 pixels. It checks context loss events, resource invalidation and restoration. |
+| WebGL 2 | A separate EGL ES 3 context exposes the WebGL 2 core methods. The integration test exercises GLSL ES 3.00, instancing-related state, unsigned uniform reflection, vertex arrays, buffer subranges, samplers, queries, synchronization, 3D texture storage and framebuffer-layer readback. |
+| CSS and DOM | litehtml computes block, inline, flex and table layout. Core Graphics and Core Text paint the page. Local stylesheets and their imports are build inputs. Selectors, layout rectangles, a subset of resolved CSS properties, inline style changes and media queries use the native document. |
+| Input | AppKit and Swing feed pointer, wheel, key and resize events into Haxe. DOM listeners implement capture, bubbling, cancellation and pointer capture. Window-queue tests post AppKit and AWT events. A frame-indexed input trace also exercises DOM dispatch inside the application. |
+| Media | HTML Audio decodes and plays supported files through AVFoundation. A generated WAV exercises loading, actual playback and the ended event. |
+| Network | URLSession handles HTTP and HTTPS for fetch, XHR and image/audio resources. The desktop test starts a loopback server and checks response status, headers, payloads, errors and cancellation. WebSocket uses the native URLSession task for WS/WSS and supports subprotocol negotiation, text and binary messages and close frames. The test exercises WS over loopback. |
 
-Run `npm run test:generic` after installing the [native tools](../README.md) and `npx playwright install chromium`. The test bundles only the browser reference. The native builds consume the original classic script, ES modules, CommonJS and JSON through the general compiler. A local PNG is loaded through XHR, turned into a blob URL and drawn into the scene. All four targets are compared with Chromium byte for byte.
+For pixel evidence from an application's own process, pass `--timeline frames.json 1,4,12 --frames 12`. Each record contains dimensions, a SHA-256 of the RGBA framebuffer and a uniform-color flag. Use `--capture-page page.ppm` to include DOM and CSS, `--input events.json` to replay events and `--realtime` for wall-clock media tests. With `--window`, AppKit or Swing presents an interactive window.
 
-The [Phaser 4 compatibility report](compatibility/phaser4/README.md) measures the full upstream gallery on C++ and Java and records the first failing stage per target.
+```sh
+npm run test:generic
+npm run test:webgl
+npm run test:webgl-conformance
+npm run test:webgl-render -- --target cpp
+npm run test:webgl-render -- --target java
+npm run test:css -- --out dist/css-results.json
+npm run test:desktop
+```
+
+The generic test checks exact pixels on C, C++, Java and Neko. The Khronos runners cover 178 shader build cases and 775 pixel comparisons in the WebGL 1 OGLES group. The CSS runner compares static self-contained WPT HTML pages against their paired references on the native C++ target. It reports uniform references separately and returns a nonzero status on differences. The complete WebGL conformance suites cover additional validation, rendering, robustness and browser lifecycle behavior. Full CSS coverage also remains open, including Grid and complete CSSOM support. The desktop audio interface covers media elements. Web Audio graphs and streaming fetch bodies are separate APIs. Unsupported ECMAScript features include general dynamic imports, eval, async functions and generators. The existing C and Neko software canvases have a smaller host surface.
+
+The [gallery runner](../tests/phaser4/README.md) records multiple native frames per entry. The [historical visual report](compatibility/phaser4/README.md) has the original fourth-frame measurements and their compiler revision.

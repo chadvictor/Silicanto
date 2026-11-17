@@ -104,6 +104,61 @@ function run(exe, args) {
   });
 }
 try {
+  const nativeTest = join(work, "appkit-events");
+  await run("xcrun", [
+    "clang++",
+    "-std=c++17",
+    "-fobjc-arc",
+    "tests/fixtures/input/AppKitEvents.mm",
+    "payloads/canvas/macos/CanvasWindow.mm",
+    "-framework",
+    "AppKit",
+    "-framework",
+    "QuartzCore",
+    "-o",
+    nativeTest,
+  ]);
+  await run(jdk("javac"), [
+    "-d",
+    work,
+    "tests/fixtures/input/AwtEvents.java",
+    "payloads/canvas/java/org/silicanto/canvas/CanvasInput.java",
+  ]);
+  for (const [target, command, args] of [
+    ["AppKit", nativeTest, []],
+    [
+      "AWT",
+      jdk("java"),
+      [
+        "-Djava.awt.headless=true",
+        "-cp",
+        work,
+        "org.silicanto.canvas.AwtEvents",
+      ],
+    ],
+  ]) {
+    const output = await run(command, args),
+      events = JSON.parse(
+        output
+          .trim()
+          .split("\n")
+          .find((line) => line.startsWith("[")),
+      );
+    for (const type of ["pointerdown", "pointerup"]) {
+      const event = events.find((e) => e.type === type);
+      assert.ok(event, target + " " + type);
+      assert.equal(event.x, 12);
+      assert.equal(event.y, 14);
+      assert.equal(event.button, 0);
+    }
+    const key = events.find((e) => e.type === "keydown");
+    assert.equal(key.code, "KeyA");
+    assert.equal(key.key, "A");
+    assert.ok(key.shiftKey);
+    console.log(
+      target + " window input queue delivered click and keyboard events",
+    );
+  }
   for (const t of ["cpp", "java"]) {
     const dir = join(work, t),
       trace = join(dir, "trace.json"),
