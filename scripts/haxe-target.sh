@@ -40,12 +40,12 @@ case "$target" in
           if [[ "$action" == build ]]; then bash "$root/payloads/webgl/macos/build.sh" platform/webgl; fi
         fi
         mkdir -p platform
-        cp "$root/payloads/canvas/macos/CanvasWindow.mm" platform/
+        cp "$root/payloads/canvas/macos/"{CanvasWindow.mm,CanvasInput.hpp} platform/
         if [[ "$action" == build ]]; then
-          xcrun clang++ -O2 -fobjc-arc -c platform/CanvasWindow.mm -o platform/canvas.o
+          xcrun clang++ -std=c++17 -mmacosx-version-min=12.0 -O2 -fobjc-arc -c platform/CanvasWindow.mm -o platform/canvas.o
           if [[ -f haxe/WebText.hx ]]; then
             cp "$root/payloads/canvas/macos/CanvasText.mm" platform/
-            xcrun clang++ -std=c++17 -O2 -fobjc-arc -c platform/CanvasText.mm -o platform/text.o
+            xcrun clang++ -std=c++17 -mmacosx-version-min=12.0 -O2 -fobjc-arc -c platform/CanvasText.mm -o platform/text.o
           fi
           ar rcs platform/libcanvas.a platform/*.o
         fi

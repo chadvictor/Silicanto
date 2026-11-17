@@ -3,6 +3,11 @@ import haxe.io.Bytes;
 class WebPlatform {
 	static final ids:Map<String, JsObject> = [];
 	static var canvas:WebCanvas;
+	static var document:JsObject;
+
+	public static function now():Float
+		return clock;
+
 	static var callbacks:Array<{id:Int, fn:Dynamic}> = [];
 	static var next = 0;
 	static var clock:Float = 0.;
@@ -23,41 +28,27 @@ class WebPlatform {
 	}
 
 	static function element(tag:String):JsObject {
-		final o:JsObject = tag == "canvas" ? new WebCanvas(300, 150) : Js.obj();
-		new WebEvents(o);
-		final style = Js.obj();
-		style.values.set("setProperty", Js.fn((_, a) -> {
-			style.define(Js.str(a[0]), Js.str(a[1]));
-			return Js.u;
-		}, false));
-		style.values.set("getPropertyValue", Js.fn((_, a) -> {
-			final v = style.read(Js.str(a[0]));
-			return v == Js.u ? "" : Js.str(v);
-		}, false));
-		o.define("style", style);
+		final o:JsObject = tag == "canvas" ? new WebCanvas(300,
+			150) : tag == "audio"
+			&& DesktopServices.available() ? new WebAudio() : tag == "img" ? new WebImage(Js.get(Js.global("Image"), "prototype")) : Js.obj();
+		if (!Std.isOfType(o, WebAudio))
+			new WebEvents(o);
+		WebLayout.attach(o, tag);
+		WebInput.attach(o);
 		o.define("parentNode", null);
 		o.define("parentElement", null);
 		o.define("nodeName", tag.toUpperCase());
 		o.define("nodeType", 1);
 		o.define("tagName", tag.toUpperCase());
-		o.define("getBoundingClientRect", Js.fn((_, a) -> {
-			final box = Js.obj(), w = Std.isOfType(o,
-				WebCanvas) ? (cast o : WebCanvas).width : 800, h = Std.isOfType(o, WebCanvas) ? (cast o : WebCanvas).height : 600;
-			for (k in ["x", "y", "top", "left"])
-				box.define(k, 0);
-			for (k in ["width", "right"])
-				box.define(k, w);
-			for (k in ["height", "bottom"])
-				box.define(k, h);
-			return box;
-		}, false));
 		final children:Array<Dynamic> = [];
 		o.define("children", children);
 		o.define("childNodes", children);
 		o.getters.set("firstChild", () -> children.length == 0 ? null : children[0]);
 		o.getters.set("lastChild", () -> children.length == 0 ? null : children[children.length - 1]);
 		o.define("setAttribute", Js.fn((_, a) -> {
-			Js.put(o, Js.str(a[0]), Js.str(a[1]));
+			final k = Js.str(a[0]), v = Js.str(a[1]);
+			(cast o.read("style") : WebStyle).attributes.set(k, v);
+			Js.put(o, k == "class" ? "className" : k, v);
 			return Js.u;
 		}, false));
 		o.define("getAttribute", Js.fn((_, a) -> {
@@ -88,7 +79,11 @@ class WebPlatform {
 	}
 
 	public static function init(markup:String) {
+		WebEvents.install();
 		WebResources.install();
+		WebNetwork.install();
+		WebSocketClient.install();
+		WebAudio.install();
 		WebGL.install();
 		WebTimers.install();
 		WebXml.install();
@@ -109,6 +104,11 @@ class WebPlatform {
 		final html = element("html"), head = element("head");
 		dom.define("documentElement", html);
 		dom.define("head", head);
+		WebLayout.root = html;
+		document = dom;
+		WebInput.setup(dom, body);
+		html.define("parentNode", dom);
+		dom.define("defaultView", Js.realm);
 		for (child in [head, body])
 			Js.call(html.read("appendChild"), html, [child]);
 		dom.define("createElementNS", Js.fn((_, a) -> element(Js.str(Js.at(a, 1)).toLowerCase()), false));
@@ -156,6 +156,9 @@ class WebPlatform {
 				Js.call(parent.read("appendChild"), parent, [e]);
 			}
 			built.push(e);
+			WebLayout.initial(e, n);
+			if (n.attrs != null && Reflect.hasField(n.attrs, "src") && (Std.isOfType(e, WebImage) || Std.isOfType(e, WebAudio)))
+				Js.put(e, "src", n.attrs.src);
 			e.define("id", n.id);
 			if (n.id != "")
 				ids.set(n.id, e);
@@ -179,6 +182,10 @@ class WebPlatform {
 				return ids.get(query.substr(1));
 			throw "E-DOM: unsupported selector " + query;
 		}, false));
+		if (DesktopServices.available()) {
+			WebLayout.selectors(dom);
+			Js.realm.define("getComputedStyle", Js.fn((_, a) -> WebLayout.computed(Js.at(a, 0)), false));
+		}
 		final nav = Js.obj();
 		nav.define("userAgent", "Silicanto");
 		nav.define("platform", #if sys Sys.systemName() #else "Web" #end);
@@ -202,10 +209,29 @@ class WebPlatform {
 	public static function run() {
 		#if sys
 		final args = Sys.args();
-		var frames = 1, path:String = null, window = false;
+		var inputs:Array<Dynamic> = [];
+		var timelinePath:String = null;
+		var marks:Array<Int> = [];
+		final trace:Array<Dynamic> = [];
+		var frames = 1, path:String = null, pagePath:String = null, window = false, realtime = false;
 		final finite = args.indexOf("--frames") >= 0;
 		while (args.length > 0)
 			switch args.shift() {
+				case "--input":
+					inputs = haxe.Json.parse(sys.io.File.getContent(args.shift()));
+				case "--timeline":
+					timelinePath = args.shift();
+					marks = [];
+					for (s in args.shift().split(",")) {
+						final n = Std.parseInt(s);
+						if (n == null || n < 1)
+							throw "Invalid timeline frame";
+						marks.push(n);
+					}
+					if (timelinePath == null || marks.length == 0)
+						throw "Expected timeline file and positive frame numbers";
+				case "--realtime":
+					realtime = true;
 				case "--window":
 					window = true;
 				case "--asset-root":
@@ -215,6 +241,10 @@ class WebPlatform {
 					if (count == null || count < 1)
 						throw "Expected a positive frame count";
 					frames = count;
+				case "--capture-page":
+					pagePath = args.shift();
+					if (pagePath == null)
+						throw "Expected a page capture path";
 				case "--capture":
 					path = args.shift();
 					if (path == null)
@@ -225,29 +255,88 @@ class WebPlatform {
 		var i = 0;
 		final start = haxe.Timer.stamp();
 		while (window && !finite || i < frames) {
-			clock = window && !finite ? (haxe.Timer.stamp() - start) * 1000 : i * 1000. / 60.;
+			clock = realtime || (window && !finite) ? (haxe.Timer.stamp() - start) * 1000 : i * 1000. / 60.;
 			WebTimers.advance(clock);
+			for (event in inputs)
+				if (event.frame == i + 1)
+					WebInput.dispatch(event, canvas, document);
+			if (window)
+				for (event in WebWindow.events())
+					WebInput.dispatch(event, canvas, document);
+			WebNetwork.poll();
+			WebSocketClient.poll();
+			WebAudio.poll();
+			WebPromise.checkpoint();
 			var count = 0;
 			while (tasks.length > 0) {
 				if (++count > 100000)
 					throw "E-EVENT: task queue did not settle";
 				tasks.shift()();
+				WebPromise.checkpoint();
+				if (i == frames - 1 && (!window || finite))
+					while (WebNetwork.busy()) {
+						WebNetwork.poll();
+						WebPromise.checkpoint();
+						if (WebNetwork.busy())
+							Sys.sleep(.001);
+					}
 			}
+			if (i == frames - 1 && (!window || finite))
+				while (WebNetwork.busy()) {
+					WebNetwork.poll();
+					WebPromise.checkpoint();
+					if (WebNetwork.busy())
+						Sys.sleep(.001);
+				}
 			final frame = callbacks;
 			callbacks = [];
-			for (cb in frame)
+			for (cb in frame) {
 				Js.call(cb.fn, Js.realm, [clock]);
-			if (window) {
-				if (canvas == null || canvas.width == 0 || canvas.height == 0)
-					throw "E-CANVAS: no display canvas";
-				if (!WebWindow.present(canvas.width, canvas.height, canvas.surface()))
-					break;
-				Sys.sleep(Math.max(0, (i + 1) / 60. - (haxe.Timer.stamp() - start)));
+				WebPromise.checkpoint();
 			}
+			if (timelinePath != null && marks.contains(i + 1)) {
+				if (canvas == null)
+					throw "E-CANVAS: no timeline canvas";
+				final b = canvas.surface(), w = canvas.width, h = canvas.height;
+				var changed = false;
+				if (w * h > 0)
+					for (pixel in 1...w * h)
+						if (b.getInt32(pixel * 4) != b.getInt32(0)) {
+							changed = true;
+							break;
+						}
+				trace.push({
+					frame: i + 1,
+					width: w,
+					height: h,
+					sha256: haxe.crypto.Sha256.make(b).toHex(),
+					uniform: !changed
+				});
+			}
+			if (window) {
+				final page = DesktopServices.available() && (WebLayout.styled || canvas == null);
+				if (!page && canvas == null)
+					throw "E-CANVAS: no display canvas";
+				if (!(page ? WebWindow.present(WebLayout.width, WebLayout.height,
+					WebLayout.pixels()) : WebWindow.present(canvas.width, canvas.height, canvas.surface())))
+					break;
+			}
+			if (window || realtime)
+				Sys.sleep(Math.max(0, (i + 1) / 60. - (haxe.Timer.stamp() - start)));
 			i++;
 		}
 		if (window)
 			WebWindow.close();
+		if (timelinePath != null)
+			sys.io.File.saveContent(timelinePath, haxe.Json.stringify(trace));
+		if (pagePath != null) {
+			final b = WebLayout.pixels(), f = sys.io.File.write(pagePath, true), rgb = Bytes.alloc(WebLayout.width * WebLayout.height * 3);
+			for (i in 0...WebLayout.width * WebLayout.height)
+				rgb.blit(i * 3, b, i * 4, 3);
+			f.writeString("P6\n" + WebLayout.width + " " + WebLayout.height + "\n255\n");
+			f.write(rgb);
+			f.close();
+		}
 		if (path != null) {
 			if (canvas == null || canvas.width == 0 || canvas.height == 0)
 				throw "E-CANVAS: nothing to capture";

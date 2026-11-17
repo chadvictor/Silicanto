@@ -25,12 +25,12 @@ class WebImage extends JsObject {
 	function assign(value:Dynamic) {
 		url = Js.str(value);
 		final src = url, current = ++generation;
-		WebPlatform.enqueue(() -> {
+		WebNetwork.load(src, blob -> {
 			if (current != generation)
 				return;
 			var event = "load", failure = "";
 			try {
-				final data = WebResources.read(src).bytes;
+				final data = blob.bytes;
 				final jpeg = data.length >= 2 && data.get(0) == 255 && data.get(1) == 216;
 				final png = data.length >= 8 && data.get(0) == 137 && data.getString(1, 3) == "PNG";
 				if (!png && !jpeg)
@@ -71,6 +71,18 @@ class WebImage extends JsObject {
 				Js.call(cb, this, [e]);
 			} else if (event == "error")
 				throw "E-IMAGE: " + failure;
+		}, error -> {
+			if (current != generation)
+				return;
+			pixels = null;
+			width = height = 0;
+			final cb = read("onerror");
+			if (cb != null && cb != Js.u) {
+				final e = Js.obj();
+				e.define("type", "error");
+				Js.call(cb, this, [e]);
+			} else
+				throw "E-IMAGE: " + error;
 		});
 	}
 }

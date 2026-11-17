@@ -30,6 +30,13 @@ export function emitModules(graph) {
       "document",
       "requestAnimationFrame",
       "cancelAnimationFrame",
+      "Audio",
+      "XMLHttpRequest",
+      "fetch",
+      "WebGL2RenderingContext",
+      "Image",
+      "AudioContext",
+      "WebSocket",
     ].some((k) => globals.has(k));
   const init = web
     ? "WebPlatform.init(" +

@@ -69,9 +69,9 @@ class WebCanvas extends JsObject {
 				mode = name;
 				return ctx;
 			}
-			if (name == "webgl") {
+			if (name == "webgl" || name == "webgl2") {
 				if (gl == null)
-					gl = WebGL.create(this, Js.at(a, 1));
+					gl = WebGL.create(this, Js.at(a, 1), name == "webgl2" ? 2 : 1);
 				if (gl != null)
 					mode = name;
 				return (gl : JsObject);

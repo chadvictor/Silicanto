@@ -1,0 +1,17 @@
+@import "./reset.css";
+#stage {
+  display: flex;
+  width: 240px;
+  height: 80px;
+  background: #112233;
+}
+#scene {
+  width: 48px;
+  height: 32px;
+}
+#panel {
+  flex: 1;
+  height: 40px;
+  background-color: #fa640a;
+  color: black;
+}

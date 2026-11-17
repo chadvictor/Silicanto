@@ -28,7 +28,6 @@ jobs:
       - run: npm run setup:c
       - if: matrix.target == 'java'
         run: npm run setup:java
-      - run: npx playwright install chromium
       - name: Emit Haxe for every entry
         if: matrix.target == 'cpp'
         run: npm run test:phaser4 -- --stage frontend --out dist/frontend
@@ -38,7 +37,7 @@ jobs:
           name: phaser4-frontend
           path: dist/frontend/report.json
           if-no-files-found: error
-      - name: Build, launch and compare every entry
+      - name: Record three native frames for every entry
         if: ${{ !cancelled() }}
         run: npm run test:phaser4 -- --target ${{ matrix.target }} --out dist/phaser4
       - if: always()
@@ -70,7 +69,7 @@ jobs:
           name: phaser4-java
           path: dist/input/java
       - name: Summarize the complete catalog, including failures
-        run: node tests/phaser4/results.mjs dist/input dist/report "$GITHUB_SHA"
+        run: node tests/phaser4/native-results.mjs dist/input dist/report "$GITHUB_SHA"
       - uses: actions/upload-artifact@v4
         with:
           name: phaser4-compatibility

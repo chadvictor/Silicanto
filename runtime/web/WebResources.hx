@@ -12,12 +12,12 @@ class WebBlob extends JsObject {
 	}
 }
 
-/** Local assets have an explicit origin. Network access is never implicit. */
+/** Resolve mounted paths, data URLs and blob URLs. HTTP transport lives in WebNetwork. */
 class WebResources {
 	static var root:String;
 	static var next = 0;
 	static final blobs:Map<String, WebBlob> = [];
-	static var blobPrototype:JsObject;
+	public static var blobPrototype:JsObject;
 
 	public static function mount(path:String) {
 		#if sys

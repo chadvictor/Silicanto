@@ -19,12 +19,6 @@ import { jdk } from "../jdk.mjs";
 import { batchSuite } from "./batch.mjs";
 import { resolveGraph } from "../../src/frontend/graph.mjs";
 import { emitModules } from "../../src/frontend/modules.mjs";
-import {
-  referenceFrame,
-  compareFrame,
-  closeReferenceBrowser,
-} from "./reference.mjs";
-
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const suite = fileURLToPath(new URL("./", import.meta.url));
 const rev = "eb87db8355861ae222d0c5cd13aae54c2d7d72ae";
@@ -156,7 +150,7 @@ const report = {
   modifiedCompilerOrSuite:
     compilerChanges.status !== 0 || Boolean(compilerChanges.stdout.trim()),
   stage: options.stage,
-  oracle: "fourth-frame-foreground-v2",
+  oracle: "native-rgba-timeline-v1",
   engine: version,
   revision: rev,
   target: optionsTarget,
@@ -309,26 +303,35 @@ async function execute(project, args, index) {
     throw Error(output.slice(0, 4000));
   }
 }
-async function compareCase(c, ppm) {
-  const scripts = scriptsFor(c.file);
-  const rootFile = scripts.find((s) => s.rootModule)?.file;
-  const reference = await referenceFrame({
-    html: html(scripts, (p) =>
-      p === engine
-        ? "/engine.js"
-        : p === rootFile
-          ? "/gallery-entry.mjs"
-          : "/" + relative(pub, p).split(sep).map(encodeURIComponent).join("/"),
-    ),
-    reuse: true,
-    rootFile,
-    pub,
-    checkout,
-    rev,
-    engine,
-    frames: 4,
-  });
-  return compareFrame(readFileSync(ppm), reference);
+const marks = [1, 4, 12];
+async function observe(project, path, index) {
+  await execute(
+    project,
+    ["--frames", String(marks.at(-1)), "--timeline", path, marks.join(",")],
+    index,
+  );
+  const frames = JSON.parse(readFileSync(path, "utf8"));
+  if (
+    !Array.isArray(frames) ||
+    frames.length !== marks.length ||
+    frames.some(
+      (f, i) =>
+        f.frame !== marks[i] ||
+        !Number.isInteger(f.width) ||
+        f.width < 1 ||
+        !Number.isInteger(f.height) ||
+        f.height < 1 ||
+        !/^[0-9a-f]{64}$/.test(f.sha256) ||
+        typeof f.uniform !== "boolean",
+    )
+  )
+    throw Error("Incomplete native frame trace");
+  return {
+    frames,
+    distinct: new Set(
+      frames.map((f) => f.width + "x" + f.height + ":" + f.sha256),
+    ).size,
+  };
 }
 function save() {
   writeFileSync(
@@ -453,8 +456,7 @@ if (report.bootstrap.status === "failed") {
         ],
         1200000,
       ),
-    execute,
-    compare: compareCase,
+    observe,
   });
 } else {
   for (const [index, c] of cases.entries()) {
@@ -464,13 +466,10 @@ if (report.bootstrap.status === "failed") {
       const scripts = scriptsFor(c.file),
         project = emit(folder, scripts);
       phase = "run";
-      const ppm = join(folder, "native.ppm");
-      await execute(project, ["--frames", "4", "--capture", ppm]);
-      phase = "reference";
-      const measurement = await compareCase(c, ppm);
+      const measurement = await observe(project, join(folder, "frames.json"));
       report.cases.push({
         ...c,
-        status: "frame-matched",
+        status: "native-observed",
         executed: true,
         measurement,
       });
@@ -486,7 +485,7 @@ if (report.bootstrap.status === "failed") {
     save();
   }
 }
-await closeReferenceBrowser();
+
 report.counts = Object.fromEntries(
   [...new Set(report.cases.map((c) => c.status))].map((status) => [
     status,
@@ -504,5 +503,5 @@ console.log(
     counts: report.counts,
   }),
 );
-if (report.cases.some((c) => c.status !== "frame-matched"))
+if (report.cases.some((c) => c.status !== "native-observed"))
   process.exitCode = 1;

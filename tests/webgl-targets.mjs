@@ -3,39 +3,21 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium } from "playwright";
+
 import { jdk } from "./jdk.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const source = join(root, "tests/fixtures/webgl");
 mkdirSync(join(root, "dist"), { recursive: true });
 const out = mkdtempSync(join(root, "dist/webgl-test-"));
-const browser = await chromium.launch({
-  args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
-});
+const expected = [];
+// The triangle occupies x/48 + (31-y)/32 < 1, evaluated at pixel centers.
+for (let y = 0; y < 32; y++)
+  for (let x = 0; x < 48; x++) {
+    const red = (x + 0.5) / 48 + (31.5 - y) / 32 < 1;
+    expected.push(red ? 255 : 0, 0, red ? 0 : 255);
+  }
 try {
-  const page = await browser.newPage();
-  const errors = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("about:blank");
-  await page.setContent('<canvas id="view" width="48" height="32"></canvas>');
-  await page.addScriptTag({ path: join(source, "draw.js") });
-  await page.addScriptTag({ path: join(source, "resources.js") });
-  assert.deepEqual(errors, []);
-  const expected = await page.evaluate(() => {
-    const c = document.querySelector("canvas"),
-      gl = c.getContext("webgl"),
-      rgba = new Uint8Array(c.width * c.height * 4);
-    gl.readPixels(0, 0, c.width, c.height, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
-    const rgb = [];
-    for (let y = c.height - 1; y >= 0; y--)
-      for (let x = 0; x < c.width; x++) {
-        const i = (y * c.width + x) * 4;
-        rgb.push(rgba[i], rgba[i + 1], rgba[i + 2]);
-      }
-    return rgb;
-  });
-  assert.equal(new Set(expected).size, 2);
   for (const target of ["cpp", "java"]) {
     const dir = join(out, target),
       ppm = join(out, target + ".ppm");
@@ -69,10 +51,9 @@ try {
     );
     console.log(
       target +
-        ": linked GLSL program, readPixels, framebuffer and browser RGB match; text and ECMAScript assertions passed",
+        ": linked GLSL program, readPixels, framebuffer and analytic RGB match; text and ECMAScript assertions passed",
     );
   }
 } finally {
-  await browser.close();
   rmSync(out, { recursive: true, force: true });
 }

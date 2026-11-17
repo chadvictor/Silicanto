@@ -94,3 +94,45 @@ if (
     .getElementsByTagName("parsererror").length
 )
   throw new Error("quoted XML delimiters");
+
+const spare = document.createElement("canvas");
+const surface = spare.getContext("webgl", { antialias: true });
+const ms = surface.getContextAttributes().antialias;
+if (surface.getParameter(surface.SAMPLES) > 0 !== ms)
+  throw Error("sample count and context attributes disagree");
+surface.clearColor(1, 0, 0, 1);
+surface.clear(surface.COLOR_BUFFER_BIT);
+const color = new Uint8Array(4);
+surface.readPixels(0, 0, 1, 1, surface.RGBA, surface.UNSIGNED_BYTE, color);
+if (color.join(",") !== "255,0,0,255")
+  throw Error("default framebuffer readback");
+const oldBuffer = surface.createBuffer();
+surface.bindBuffer(surface.ARRAY_BUFFER, oldBuffer);
+const loss = surface.getExtension("WEBGL_lose_context");
+let losses = 0,
+  restores = 0;
+spare.addEventListener("webglcontextlost", function (e) {
+  losses++;
+  e.preventDefault();
+  loss.restoreContext();
+});
+spare.addEventListener("webglcontextrestored", function () {
+  restores++;
+  if (surface.isContextLost() || surface.isBuffer(oldBuffer))
+    throw Error("stale restored resource");
+  const fresh = surface.createBuffer();
+  surface.bindBuffer(surface.ARRAY_BUFFER, fresh);
+  if (!surface.isBuffer(fresh) || surface.getError() !== surface.NO_ERROR)
+    throw Error("restored GL state");
+});
+loss.loseContext();
+if (
+  !surface.isContextLost() ||
+  surface.getError() !== surface.CONTEXT_LOST_WEBGL ||
+  surface.getError() !== surface.NO_ERROR ||
+  surface.createBuffer() !== null
+)
+  throw Error("context loss");
+requestAnimationFrame(function () {
+  if (losses !== 1 || restores !== 1) throw Error("context restoration events");
+});

@@ -1,19 +1,23 @@
+import { buildSync } from "esbuild";
 import { parse } from "parse5";
 import { basename, dirname, resolve } from "node:path";
 import { readFileSync } from "node:fs";
 
-export function readDocument(path) {
+export function readDocument(path, webRoot = dirname(path)) {
   const text = readFileSync(path, "utf8"),
     dir = dirname(path),
     scripts = [],
     elements = [],
-    imports = {};
+    imports = {},
+    styleInputs = [];
   const local = (url) => {
-    if (!url || /^(?:[a-z]+:|\/\/|\/)/i.test(url))
+    if (!url || /^(?:[a-z]+:|\/\/)/i.test(url))
       throw Error(
         path + " E-MODULE: expected a local script URL, found " + url,
       );
-    return resolve(dir, decodeURIComponent(url));
+    return url.startsWith("/")
+      ? resolve(webRoot, "." + decodeURIComponent(url))
+      : resolve(dir, decodeURIComponent(url));
   };
   function walk(n, parent = -1) {
     const attrs = Object.fromEntries(
@@ -21,7 +25,49 @@ export function readDocument(path) {
     );
     if (n.tagName && n.tagName !== "script") {
       const index = elements.length;
+      let sheet;
+      if (
+        n.tagName === "link" &&
+        (attrs.rel ?? "").toLowerCase().split(/\s+/).includes("stylesheet") &&
+        attrs.href &&
+        !/^(?:[a-z]+:|\/\/)/i.test(attrs.href)
+      ) {
+        const file = local(attrs.href);
+        const bundle = buildSync({
+          absWorkingDir: dir,
+          entryPoints: [file],
+          bundle: true,
+          write: false,
+          metafile: true,
+          logLevel: "silent",
+          loader: {
+            ".png": "dataurl",
+            ".jpg": "dataurl",
+            ".jpeg": "dataurl",
+            ".svg": "dataurl",
+            ".gif": "dataurl",
+            ".woff": "dataurl",
+            ".woff2": "dataurl",
+          },
+        });
+        sheet = bundle.outputFiles[0].text;
+        styleInputs.push(
+          ...Object.keys(bundle.metafile.inputs).map((input) =>
+            resolve(dir, input),
+          ),
+        );
+      }
+      const fragments = [];
+      let at = 0;
+      for (const child of n.childNodes ?? []) {
+        if (child.nodeName === "#text")
+          fragments.push({ at, text: child.value });
+        else if (child.tagName && child.tagName !== "script") at++;
+      }
       elements.push({
+        attrs,
+        fragments,
+        sheet,
         parent,
         tag: n.tagName,
         id: attrs.id ?? "",
@@ -80,6 +126,7 @@ export function readDocument(path) {
       ...scripts.filter((s) => s.deferred),
     ],
     elements,
+    styleInputs,
     imports,
   };
 }

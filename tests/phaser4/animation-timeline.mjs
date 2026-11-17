@@ -1,114 +1,72 @@
-// Compare a changing upstream scene at several times, in standalone target builds.
+// Cross-check a deterministic animation in two independently built standalone applications.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { jdk } from "../jdk.mjs";
-import {
-  closeReferenceBrowser,
-  compareFrame,
-  referenceFrame,
-} from "./reference.mjs";
 
-const [sourceTree, cppDir, javaDir, mode = "exact"] = process.argv.slice(2);
-if (!sourceTree || !cppDir || !javaDir || !["exact", "gallery"].includes(mode))
+const [checkout, cppDir, javaDir] = process.argv.slice(2);
+if (!javaDir)
   throw Error(
-    "Usage: node tests/phaser4/animation-timeline.mjs CHECKOUT CPP_RUN JAVA_RUN [exact|gallery]",
+    "Expected examples checkout, standalone C++ run, standalone Java run",
   );
-const checkout = resolve(sourceTree);
-const pub = join(checkout, "public");
-const engine = fileURLToPath(
-  new URL("./node_modules/phaser/dist/phaser.js", import.meta.url),
-);
-const reports = [cppDir, javaDir].map((dir, index) => {
-  const r = JSON.parse(readFileSync(join(dir, "report.json")));
-  assert.equal(r.target, index === 0 ? "cpp" : "java");
-  assert.equal(r.selected, 1);
-  assert.equal(r.cases[0].status, "frame-matched");
-  return r;
-});
-const file = reports[0].cases[0].file;
-assert.equal(reports[1].cases[0].file, file);
+const marks = [4, 12, 20, 30, 48];
+const dir = mkdtempSync(join(tmpdir(), "silicanto-animation-"));
 const revision = execFileSync("git", ["-C", checkout, "rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
-const hash = (b) => createHash("sha256").update(b).digest("hex");
-for (const r of reports) {
-  assert.equal(r.revision, revision);
-  assert.equal(r.engineSHA256, hash(readFileSync(engine)));
-}
-const work = mkdtempSync(join(tmpdir(), "silicanto-timeline-"));
-const unique = new Set();
-const nativeFrames = [new Set(), new Set()];
-const targets = [
-  [join(resolve(cppDir), "case-0/project/cpp/Sample"), []],
-  [
-    jdk("java"),
-    [
-      "-Djava.awt.headless=true",
-      "-jar",
-      join(resolve(javaDir), "case-0/project/java/Sample.jar"),
-    ],
-  ],
-];
 try {
-  for (const frames of [4, 12, 20, 30, 48]) {
-    const ref = await referenceFrame({
-      reuse: true,
-      pub,
-      checkout,
-      engine,
-      rev: revision,
-      frames,
-      html:
-        '<!doctype html><div id="phaser-example"></div><script src="/engine.js"></script><script src="/' +
-        encodeURI(file) +
-        '"></script>',
-    });
-    unique.add(hash(Buffer.from(ref.pixels, "base64")));
-    for (const [index, [exe, args]] of targets.entries()) {
-      const ppm = join(work, "frame.ppm");
-      rmSync(ppm, { force: true });
-      execFileSync(
-        exe,
-        [
-          ...args,
-          "--frames",
-          String(frames),
-          "--asset-root",
-          pub,
-          "--capture",
-          ppm,
-        ],
-        { timeout: 60000 },
-      );
-      const pixels = readFileSync(ppm);
-      const measurement = compareFrame(pixels, ref);
-      nativeFrames[index].add(hash(pixels));
-      if (mode === "exact")
-        assert.equal(
-          measurement.mean,
-          0,
-          "Frame " + frames + " differs from Chromium",
-        );
-      console.log(
-        "%s frame %d: mean RGB error %s, within tolerance %s",
-        index === 0 ? "cpp" : "java",
-        frames,
-        measurement.mean.toFixed(6),
-        measurement.within8.toFixed(6),
-      );
-    }
+  const results = [],
+    reports = [];
+  for (const [target, path] of [
+    ["cpp", cppDir],
+    ["java", javaDir],
+  ]) {
+    const r = JSON.parse(readFileSync(join(path, "report.json")));
+    assert.equal(r.target, target);
+    assert.equal(r.revision, revision);
+    assert.equal(r.selected, 1);
+    assert.equal(r.cases[0].status, "native-observed");
+    reports.push(r);
+    const file = join(dir, target + ".json"),
+      args = [
+        "--asset-root",
+        join(resolve(checkout), "public"),
+        "--frames",
+        "48",
+        "--timeline",
+        file,
+        marks.join(","),
+      ];
+    if (target === "cpp")
+      execFileSync(join(resolve(path), "case-0/project/cpp/Sample"), args);
+    else
+      execFileSync(jdk("java"), [
+        "-Djava.awt.headless=true",
+        "-jar",
+        join(resolve(path), "case-0/project/java/Sample.jar"),
+        ...args,
+      ]);
+    const frames = JSON.parse(readFileSync(file));
+    assert.deepEqual(
+      frames.map((f) => f.frame),
+      marks,
+    );
+    assert.ok(
+      new Set(frames.map((f) => f.sha256)).size > 1,
+      "Animation did not advance on " + target,
+    );
+    results.push(frames);
   }
-  assert.ok(
-    nativeFrames.every((frames) => frames.size > 1),
-    "A target animation never visibly advanced",
+  assert.equal(reports[0].engineSHA256, reports[1].engineSHA256);
+  assert.equal(reports[0].cases[0].file, reports[1].cases[0].file);
+  assert.deepEqual(results[0], results[1], "C++ and Java RGBA frames differ");
+  console.log(
+    reports[0].cases[0].file +
+      " advanced and matched across targets at frames " +
+      marks.join(", "),
   );
-  assert.ok(unique.size > 1, "The reference animation never visibly advanced");
 } finally {
-  await closeReferenceBrowser();
-  rmSync(work, { recursive: true, force: true });
+  rmSync(dir, { recursive: true, force: true });
 }

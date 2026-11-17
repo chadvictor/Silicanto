@@ -2,8 +2,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <EGL/eglext_angle.h>
-#include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
 #include <memory>
 #include <unordered_map>
 
@@ -13,7 +13,9 @@ struct Context {
   EGLConfig config = nullptr;
   EGLContext context = EGL_NO_CONTEXT;
   EGLSurface surface = EGL_NO_SURFACE;
-  int width = 0, height = 0;
+  int width = 0, height = 0, version = 1;
+  GLuint nextSync = 1;
+  std::unordered_map<GLuint, GLsync> syncs;
   bool alpha = true, depth = true, stencil = false;
 
   explicit Context(EGLDisplay display) : display(display) {}
@@ -65,36 +67,43 @@ inline EGLDisplay metalDisplay() {
   return display;
 }
 inline std::unique_ptr<Context> createContext(int w, int h, bool alpha,
-                                              bool depth, bool stencil) {
+                                              bool depth, bool stencil,
+                                              int version, bool antialias) {
   auto d = metalDisplay();
   if (!d || !eglBindAPI(EGL_OPENGL_ES_API))
     return {};
   auto c = std::make_unique<Context>(d);
+  c->version = version;
   c->alpha = alpha;
   c->depth = depth;
   c->stencil = stencil;
   EGLint n = 0;
-  const EGLint config[] = {EGL_SURFACE_TYPE,
-                           EGL_PBUFFER_BIT,
-                           EGL_RENDERABLE_TYPE,
-                           EGL_OPENGL_ES2_BIT,
-                           EGL_RED_SIZE,
-                           8,
-                           EGL_GREEN_SIZE,
-                           8,
-                           EGL_BLUE_SIZE,
-                           8,
-                           EGL_ALPHA_SIZE,
-                           alpha ? 8 : 0,
-                           EGL_DEPTH_SIZE,
-                           depth ? 16 : 0,
-                           EGL_STENCIL_SIZE,
-                           stencil ? 8 : 0,
-                           EGL_NONE};
-  if (!eglChooseConfig(d, config, &c->config, 1, &n) || !n)
-    return {};
+  EGLint config[] = {EGL_SURFACE_TYPE,
+                     EGL_PBUFFER_BIT,
+                     EGL_RENDERABLE_TYPE,
+                     version == 2 ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT,
+                     EGL_RED_SIZE,
+                     8,
+                     EGL_GREEN_SIZE,
+                     8,
+                     EGL_BLUE_SIZE,
+                     8,
+                     EGL_ALPHA_SIZE,
+                     alpha ? 8 : 0,
+                     EGL_DEPTH_SIZE,
+                     depth ? 16 : 0,
+                     EGL_STENCIL_SIZE,
+                     stencil ? 8 : 0,
+                     EGL_SAMPLES,
+                     antialias ? 4 : 0,
+                     EGL_NONE};
+  if (!eglChooseConfig(d, config, &c->config, 1, &n) || !n) {
+    config[sizeof(config) / sizeof(config[0]) - 2] = 0;
+    if (!eglChooseConfig(d, config, &c->config, 1, &n) || !n)
+      return {};
+  }
   const EGLint attr[] = {EGL_CONTEXT_CLIENT_VERSION,
-                         2,
+                         version == 2 ? 3 : 2,
                          EGL_CONTEXT_WEBGL_COMPATIBILITY_ANGLE,
                          EGL_TRUE,
                          EGL_CONTEXT_BIND_GENERATES_RESOURCE_CHROMIUM,

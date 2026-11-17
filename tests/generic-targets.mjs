@@ -1,4 +1,4 @@
-// Compare the emitted programs with the browser using a mixed ESM/CommonJS/JSON application.
+// Check a mixed ESM/CommonJS/JSON application against its specified fourth frame.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import {
@@ -10,8 +10,6 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { build } from "esbuild";
-import { chromium } from "playwright";
 import { jdk } from "./jdk.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -26,55 +24,24 @@ function run(exe, args, opts = {}) {
     ...opts,
   });
 }
-const bundled = await build({
-  entryPoints: [join(source, "main.mjs")],
-  bundle: true,
-  write: false,
-  format: "iife",
-});
-const browser = await chromium.launch();
-let expected;
-try {
-  const page = await browser.newPage();
-  await page.route("http://fixture.test/**", (route) =>
-    route.request().url().endsWith("/tile.png")
-      ? route.fulfill({
-          contentType: "image/png",
-          body: readFileSync(join(source, "tile.png")),
-        })
-      : route.fulfill({
-          contentType: "text/html",
-          body: '<canvas id="screen" width="24" height="16"></canvas>',
-        }),
-  );
-  await page.goto("http://fixture.test/");
-  await page.evaluate(() => {
-    let callbacks = [];
-    window.requestAnimationFrame = (f) => callbacks.push(f);
-    window.hasFrame = () => callbacks.length > 0;
-    window.advance = (t) => {
-      const frame = callbacks;
-      callbacks = [];
-      for (const f of frame) f(t);
-    };
-  });
-  await page.addScriptTag({ path: join(source, "palette.js") });
-  await page.addScriptTag({ content: bundled.outputFiles[0].text });
-  await page.waitForFunction(() => window.hasFrame(), null, {
-    polling: 25,
-    timeout: 5000,
-  });
-  expected = await page.evaluate(() => {
-    const canvas = document.querySelector("canvas");
-    for (let n = 0; n < 4; n++) window.advance((n * 1000) / 60);
-    const rgba = canvas
-      .getContext("2d")
-      .getImageData(0, 0, canvas.width, canvas.height).data;
-    return Array.from(rgba).filter((_, i) => i % 4 !== 3);
-  });
-} finally {
-  await browser.close();
-}
+const expected = [];
+const tile = [
+  [255, 0, 210],
+  [0, 80, 250],
+  [90, 40, 16],
+  [255, 220, 30],
+];
+for (let y = 0; y < 16; y++)
+  for (let x = 0; x < 24; x++) {
+    const sprite = x >= 1 && x <= 2 && y >= 1 && y <= 2;
+    expected.push(
+      ...(sprite
+        ? tile[(y - 1) * 2 + x - 1]
+        : x >= 4 && x < 9 && y >= 3 && y < 9
+          ? [71, 168, 110]
+          : [35, 43, 57]),
+    );
+  }
 assert.deepEqual(expected.slice(3 * (24 + 1), 3 * (24 + 1) + 3), [255, 0, 210]);
 const native = Buffer.concat([
   Buffer.from("P6\n24 16\n255\n"),
@@ -121,7 +88,10 @@ try {
       ]);
     else run(join(dest, target, "Sample"), args);
     assert.deepEqual(readFileSync(ppm), native, target);
-    console.log(target + ": four frames, 384 pixels match Chromium exactly");
+    console.log(
+      target +
+        ": four frames, 384 pixels match the expected RGBA drawing exactly",
+    );
   }
 } finally {
   rmSync(out, { recursive: true, force: true });

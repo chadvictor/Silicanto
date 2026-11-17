@@ -18,7 +18,8 @@ class JsTypedArray extends JsObject {
 	public final length:Int;
 
 	final kind:String;
-	final stride:Int;
+
+	public final stride:Int;
 
 	static function integer(v:Dynamic):Int {
 		final n = Js.num(v);

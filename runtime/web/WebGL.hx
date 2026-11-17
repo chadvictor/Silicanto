@@ -20,6 +20,10 @@ private class GLResource extends JsObject {
 /** WebGL objects belong to one context. EGL and GLES operations live in the target payload. */
 class WebGL extends JsObject {
 	static var proto:JsObject;
+	static var proto2:JsObject;
+
+	public final version:Int;
+
 	public static final resourceTypes:Map<String, JsObject> = [];
 	static final methods = [
 		"activeTexture",
@@ -171,13 +175,15 @@ class WebGL extends JsObject {
 	final objects:Map<String, GLResource> = [];
 	final extObjects:Map<String, JsObject> = [];
 	final canvas:WebCanvas;
-	final driver:Int;
+	var driver:Int;
 	final attributes:JsObject;
 	final premultiplied:Bool;
 	var unpackFlip = false;
 	var unpackPremultiply = false;
 	var colorSpace = 0x9244;
 	var pendingError = 0;
+	var lost = false;
+	var canRestore = false;
 	var currentProgram:GLResource;
 	var unpackAlignment = 4;
 
@@ -190,6 +196,15 @@ class WebGL extends JsObject {
 		proto = ctor.read("prototype");
 		Js.realm.define("WebGLRenderingContext", ctor);
 		WebGLEnums.install(proto, ctor);
+		final ctor2 = Js.fn((_, _) -> {
+			throw "TypeError: illegal WebGL2 constructor";
+		}, true);
+		proto2 = ctor2.read("prototype");
+		Js.realm.define("WebGL2RenderingContext", ctor2);
+		WebGLEnums.install(proto2, ctor2);
+		WebGL2Bindings.install(proto2, ctor2);
+		for (name in methods.concat(WebGL2Bindings.methods))
+			proto2.values.set(name, Js.fn((r, a) -> (cast r : WebGL).invokeMethod(name, a), false));
 		for (kind in [
 			"Buffer",
 			"Framebuffer",
@@ -198,7 +213,12 @@ class WebGL extends JsObject {
 			"Shader",
 			"Texture",
 			"UniformLocation",
-			"VertexArrayObjectOES"
+			"VertexArrayObjectOES",
+			"VertexArrayObject",
+			"Query",
+			"Sampler",
+			"Sync",
+			"TransformFeedback"
 		]) {
 			final type = Js.fn((_, _) -> {
 				throw "TypeError: illegal WebGL object constructor";
@@ -210,37 +230,104 @@ class WebGL extends JsObject {
 			proto.values.set(name, Js.fn((r, a) -> (cast r : WebGL).invokeMethod(name, a), false));
 	}
 
-	public static function create(canvas:WebCanvas, options:Dynamic):WebGL {
+	public static function create(canvas:WebCanvas, options:Dynamic, version:Int = 1):WebGL {
 		if (proto == null)
 			return null;
 		final attrs = Js.obj();
-		for (k in ["alpha", "depth", "stencil", "premultipliedAlpha", "preserveDrawingBuffer"]) {
+		for (k in [
+			"alpha",
+			"depth",
+			"stencil",
+			"premultipliedAlpha",
+			"preserveDrawingBuffer",
+			"antialias"
+		]) {
 			final value = options == null || options == Js.u ? Js.u : Js.get(options, k);
-			attrs.define(k, value == Js.u ? ["alpha", "depth", "premultipliedAlpha"].contains(k) : Js.truth(value));
+			attrs.define(k, value == Js.u ? ["alpha", "depth", "premultipliedAlpha", "antialias"].contains(k) : Js.truth(value));
 		}
-		attrs.define("antialias", false);
+		final id = open(canvas, attrs, version);
+		return id == 0 ? null : new WebGL(canvas, id, attrs, version);
+	}
+
+	static function open(canvas:WebCanvas, attrs:JsObject, version:Int):Int {
 		final id:Int = WebGLNative.call(0, "createContext", [
 			canvas.width,
 			canvas.height,
 			attrs.read("alpha"),
 			attrs.read("depth"),
-			attrs.read("stencil")
+			attrs.read("stencil"),
+			version,
+			attrs.read("antialias")
 		]);
-		return id == 0 ? null : new WebGL(canvas, id, attrs);
+		if (id != 0)
+			attrs.define("antialias", Js.num(WebGLNative.call(id, "samples", [])) > 0);
+		return id;
 	}
 
-	function new(canvas:WebCanvas, driver:Int, attrs:JsObject) {
-		super(proto);
+	function lose():Dynamic {
+		if (lost) {
+			fail(0x0502);
+			return Js.u;
+		}
+		lost = true;
+		canRestore = false;
+		pendingError = 0x9242;
+		WebGLNative.call(driver, "destroyContext", []);
+		driver = 0;
+		for (r in objects)
+			r.deleted = true;
+		objects.clear();
+		extObjects.clear();
+		currentProgram = null;
+		WebPlatform.enqueue(() -> {
+			final e = WebEvents.make("webglcontextlost", "Event", false, true);
+			e.define("statusMessage", "");
+			Js.call(canvas.read("dispatchEvent"), canvas, [e]);
+			canRestore = Js.truth(e.read("defaultPrevented"));
+		});
+		return Js.u;
+	}
+
+	function restore():Dynamic {
+		if (!lost) {
+			fail(0x0502);
+			return Js.u;
+		}
+		WebPlatform.enqueue(() -> {
+			if (!lost || !canRestore)
+				return;
+			driver = open(canvas, attributes, version);
+			if (driver == 0)
+				return;
+			lost = false;
+			canRestore = false;
+			pendingError = 0;
+			unpackFlip = false;
+			unpackPremultiply = false;
+			unpackAlignment = 4;
+			colorSpace = 0x9244;
+			final e = WebEvents.make("webglcontextrestored");
+			e.define("statusMessage", "");
+			Js.call(canvas.read("dispatchEvent"), canvas, [e]);
+		});
+		return Js.u;
+	}
+
+	function new(canvas:WebCanvas, driver:Int, attrs:JsObject, version:Int) {
+		super(version == 2 ? proto2 : proto);
+		this.version = version;
 		this.canvas = canvas;
 		this.driver = driver;
 		this.attributes = attrs;
 		premultiplied = Js.truth(attrs.read("premultipliedAlpha"));
 		getters.set("canvas", () -> canvas);
-		getters.set("drawingBufferWidth", () -> canvas.width);
-		getters.set("drawingBufferHeight", () -> canvas.height);
+		getters.set("drawingBufferWidth", () -> lost ? 0 : canvas.width);
+		getters.set("drawingBufferHeight", () -> lost ? 0 : canvas.height);
 	}
 
 	public function resize() {
+		if (lost)
+			return;
 		if (!Js.truth(WebGLNative.call(driver, "resize", [canvas.width, canvas.height])))
 			throw "E-WEBGL: drawing buffer resize failed";
 	}
@@ -252,6 +339,8 @@ class WebGL extends JsObject {
 	}
 
 	public function snapshot():Bytes {
+		if (lost)
+			return Bytes.alloc(canvas.width * canvas.height * 4);
 		final bits = Base64.decode(WebGLNative.call(driver, "snapshot", []));
 		final w = canvas.width, h = canvas.height, rgba = Bytes.alloc(bits.length);
 		for (y in 0...h)
@@ -279,12 +368,24 @@ class WebGL extends JsObject {
 
 	function extensionList():Array<String> {
 		final driverExtensions:Array<Dynamic> = WebGLNative.call(driver, "extensions", []);
-		return [for (k in extensions) if (driverExtensions.contains("GL_" + k)) k];
+		return ["WEBGL_lose_context"].concat([for (k in extensions) if (driverExtensions.contains("GL_" + k)) k]);
 	}
 
 	function extension(name:String):JsObject {
+		for (k in extensionList())
+			if (k.toLowerCase() == name.toLowerCase()) {
+				name = k;
+				break;
+			}
 		if (extObjects.exists(name))
 			return extObjects.get(name);
+		if (name == "WEBGL_lose_context") {
+			final o = Js.obj();
+			o.define("loseContext", Js.fn((_, _) -> lose(), false));
+			o.define("restoreContext", Js.fn((_, _) -> restore(), false));
+			extObjects.set(name, o);
+			return o;
+		}
 		if (!extensionList().contains(name) || !Js.truth(WebGLNative.call(driver, "enableExtension", ["GL_" + name])))
 			return null;
 		final e = Js.obj();
@@ -317,6 +418,8 @@ class WebGL extends JsObject {
 
 	function parameter(key:Int):Dynamic {
 		switch key {
+			case 0x9247 if (version == 2):
+				return 0;
 			case 0x9240:
 				return unpackFlip;
 			case 0x9241:
@@ -331,7 +434,12 @@ class WebGL extends JsObject {
 			case 0x8ca6: "Framebuffer";
 			case 0x8ca7: "Renderbuffer";
 			case 0x8069, 0x8514: "Texture";
-			case 0x85b5: "VertexArrayObjectOES";
+			case 0x85b5: version == 2 ? "VertexArrayObject" : "VertexArrayObjectOES";
+			case 0x8CAA: "Framebuffer";
+			case 0x806A, 0x8C1D: "Texture";
+			case 0x8F36, 0x8F37, 0x88ED, 0x88EF, 0x8A28, 0x8C8F: "Buffer";
+			case 0x8919: "Sampler";
+			case 0x8E25: "TransformFeedback";
 			default: null;
 		};
 		if (kind != null)
@@ -397,7 +505,7 @@ class WebGL extends JsObject {
 		} else if (a.length == 9) {
 			if (Std.isOfType(a[8], JsTypedArray))
 				a[8] = Base64.encode(viewBytes(a[8]));
-			else if (a[8] != null)
+			else if (a[8] != null && !(version == 2 && Js.type(a[8]) == "number"))
 				return fail(0x0501);
 		} else
 			return fail(0x0501);
@@ -430,12 +538,34 @@ class WebGL extends JsObject {
 		"bindRenderbuffer" => ["", "Renderbuffer"],
 		"framebufferTexture2D" => ["", "", "", "Texture"],
 		"framebufferRenderbuffer" => ["", "", "", "Renderbuffer"],
+		"bindVertexArray" => ["VertexArrayObject"],
+		"framebufferTextureLayer" => ["", "", "Texture"],
+		"bindSampler" => ["", "Sampler"],
+		"getSamplerParameter" => ["Sampler"],
+		"samplerParameteri" => ["Sampler"],
+		"samplerParameterf" => ["Sampler"],
+		"beginQuery" => ["", "Query"],
+		"getQueryParameter" => ["Query"],
+		"bindTransformFeedback" => ["", "TransformFeedback"],
+		"clientWaitSync" => ["Sync"],
+		"waitSync" => ["Sync"],
+		"getSyncParameter" => ["Sync"],
+		"bindBufferBase" => ["", "", "Buffer"],
+		"bindBufferRange" => ["", "", "Buffer"],
+		"getUniformIndices" => ["Program"],
+		"getActiveUniforms" => ["Program"],
+		"getUniformBlockIndex" => ["Program"],
+		"getActiveUniformBlockParameter" => ["Program"],
+		"getActiveUniformBlockName" => ["Program"],
+		"uniformBlockBinding" => ["Program"],
+		"transformFeedbackVaryings" => ["Program"],
+		"getTransformFeedbackVarying" => ["Program"],
 		"bindVertexArrayOES" => ["VertexArrayObjectOES"]
 	];
 
 	function validateResources(name:String, args:Array<Dynamic>):Bool {
 		var types = parameterObjects.get(name);
-		if (StringTools.startsWith(name, "uniform"))
+		if (StringTools.startsWith(name, "uniform") && name != "uniformBlockBinding")
 			types = ["UniformLocation"];
 		if (StringTools.startsWith(name, "delete"))
 			types = [name.substr(6)];
@@ -447,6 +577,8 @@ class WebGL extends JsObject {
 			var kind = types[i];
 			if (kind == "")
 				continue;
+			if (kind == "VertexArray")
+				kind = "VertexArrayObject";
 			if (kind == "VertexArrayOES")
 				kind = "VertexArrayObjectOES";
 			final value:Dynamic = Js.at(args, i);
@@ -467,6 +599,49 @@ class WebGL extends JsObject {
 	}
 
 	function invokeMethod(name:String, args:Array<Dynamic>):Dynamic {
+		if (lost) {
+			if (name == "isContextLost")
+				return true;
+			if (name == "getError") {
+				final code = pendingError;
+				pendingError = 0;
+				return code;
+			}
+			if (name == "getAttribLocation" || name == "getFragDataLocation")
+				return -1;
+			if (name == "checkFramebufferStatus")
+				return 0x8CDD;
+			if (name == "clientWaitSync")
+				return 0x911D;
+			if (name == "getUniformBlockIndex")
+				return 4294967295.;
+			if (name == "getVertexAttribOffset")
+				return 0;
+			if (StringTools.startsWith(name, "get") || StringTools.startsWith(name, "create") || name == "fenceSync")
+				return null;
+			return StringTools.startsWith(name, "is") ? false : Js.u;
+		}
+		if (version == 2) {
+			final buffer = name == "bufferData" || name == "bufferSubData", tex = name.indexOf("texImage") == 0 || name.indexOf("texSubImage") == 0
+				|| name.indexOf("compressedTex") == 0;
+			final matrix = StringTools.startsWith(name,
+				"uniformMatrix"), uniform = ~/^uniform[1-4](f|i|ui)v$/.match(name), clear = ~/^clearBuffer(fv|iv|uiv)$/.match(name);
+			final dataIndex = buffer ? (name == "bufferData" ? 1 : 2) : matrix
+				|| clear ? 2 : uniform ? 1 : tex ? (StringTools.startsWith(name,
+					"compressed") ? (name == "compressedTexImage2D" ? 6 : name == "compressedTexSubImage2D" ? 7 : name == "compressedTexImage3D" ? 7 : 9) : name == "texImage3D" ? 9 : name == "texSubImage3D" ? 10 : 8) : -1;
+			final offsetIndex = buffer ? 3 : dataIndex + 1;
+			if (dataIndex >= 0
+				&& args.length > offsetIndex
+				&& (Std.isOfType(args[dataIndex], JsTypedArray) || Std.isOfType(args[dataIndex], Array))) {
+				final v:Dynamic = args[dataIndex], off = Std.int(Js.num(args[offsetIndex])), length = Std.int(Js.num(Js.get(v,
+					"length"))), count = args.length > offsetIndex + 1 ? Std.int(Js.num(args[offsetIndex + 1])) : 0;
+				if (off < 0 || off > length || count < 0 || count > length - off)
+					return fail(0x0501);
+				args = args.slice(0, offsetIndex);
+				final end = count == 0 ? length : off + count;
+				args[dataIndex] = Std.isOfType(v, Array) ? (cast v : Array<Dynamic>).slice(off, end) : Js.call(Js.get(v, "subarray"), v, [off, end]);
+			}
+		}
 		if (!validateResources(name, args)) {
 			if (StringTools.startsWith(name, "is"))
 				return false;
@@ -506,19 +681,41 @@ class WebGL extends JsObject {
 						return Js.u;
 				}
 			case "texImage2D", "texSubImage2D":
-				texture(name, args);
+				final r:Dynamic = texture(name, args);
+				if (r == "INVALID_OPERATION")
+					return fail(0x0502);
+				if (r == "INVALID_VALUE")
+					return fail(0x0501);
 				return Js.u;
 			case "readPixels":
 				final v:Dynamic = Js.at(args, 6);
+				if (version == 2 && Js.type(v) == "number") {
+					final result = WebGLNative.call(driver, "readPixelsOffset", args);
+					return result == "INVALID_OPERATION" ? fail(0x0502) : Js.u;
+				}
 				if (!Std.isOfType(v, JsTypedArray))
 					return fail(0x0502);
-				final dst:JsTypedArray = v, n = Std.int(Js.num(dst.read("byteLength"))), a = args.slice(0, 6);
-				a.push(n);
-				final data:String = WebGLNative.call(driver, name, a);
-				if (data == "INVALID_VALUE")
+				final dst:JsTypedArray = v, off = version == 2 && args.length > 7 ? Std.int(Js.num(args[7])) : 0;
+				if (off < 0 || off > dst.length)
 					return fail(0x0501);
-				final bytes = Base64.decode(data);
-				dst.buffer.bytes.blit(dst.offset, bytes, 0, n);
+				final byte = off * dst.stride, n = (dst.length - off) * dst.stride, a = args.slice(0, 6);
+				a.push(n);
+				a.push(Base64.encode(dst.buffer.bytes.sub(dst.offset + byte, n)));
+				final data:String = WebGLNative.call(driver, name, a);
+				if (data == "INVALID_VALUE" || data == "INVALID_OPERATION")
+					return fail(data == "INVALID_VALUE" ? 0x0501 : 0x0502);
+				dst.buffer.bytes.blit(dst.offset + byte, Base64.decode(data), 0, n);
+				return Js.u;
+			case "getBufferSubData":
+				if (!Std.isOfType(Js.at(args, 2), JsTypedArray))
+					return fail(0x0502);
+				final dst:JsTypedArray = args[2], off = args.length > 3 ? Std.int(Js.num(args[3])) : 0, count = args.length > 4 ? Std.int(Js.num(args[4])) : 0;
+				if (off < 0 || off > dst.length || count < 0 || count > dst.length - off)
+					return fail(0x0501);
+				final n = (count == 0 ? dst.length - off : count) * dst.stride, data:String = WebGLNative.call(driver, name, [args[0], args[1], n]);
+				if (data == "INVALID_VALUE" || data == "INVALID_OPERATION")
+					return fail(data == "INVALID_VALUE" ? 0x0501 : 0x0502);
+				dst.buffer.bytes.blit(dst.offset + off * dst.stride, Base64.decode(data), 0, n);
 				return Js.u;
 		}
 		final a:Array<Dynamic> = [];
@@ -530,7 +727,11 @@ class WebGL extends JsObject {
 				a.push(obj.id);
 			} else if (Std.isOfType(v, JsTypedArray)) {
 				final view:JsTypedArray = v;
-				if (name == "bufferData" || name == "bufferSubData" || StringTools.startsWith(name, "compressedTex"))
+				if (name == "bufferData"
+					|| name == "bufferSubData"
+					|| StringTools.startsWith(name, "compressedTex")
+					|| name == "texImage3D"
+					|| name == "texSubImage3D")
 					a.push(Base64.encode(viewBytes(view)));
 				else
 					a.push(Js.items(v));
@@ -559,6 +760,16 @@ class WebGL extends JsObject {
 		if (Std.isOfType(result, String) && result == "INVALID_VALUE")
 			return fail(0x0501);
 		switch name {
+			case "fenceSync":
+				return resource("Sync", Std.int(Js.num(result)));
+			case "getQuery":
+				return resource("Query", Std.int(Js.num(result)));
+			case "getIndexedParameter" if (args[0] == 0x8a28 || args[0] == 0x8c8f):
+				return resource("Buffer", Std.int(Js.num(result)));
+			case "getInternalformatParameter":
+				return result == null ? null : Js.construct(Js.global("Int32Array"), [result]);
+			case "getActiveUniformBlockParameter" if (args[2] == 0x8a43):
+				return Js.construct(Js.global("Uint32Array"), [result]);
 			case "getAttachedShaders":
 				return [
 					for (id in (cast result : Array<Dynamic>))
@@ -576,7 +787,7 @@ class WebGL extends JsObject {
 				return values.length == 1 ? values[0] : reply[0] == "Array" ? values : Js.construct(Js.global(Js.str(reply[0])), [values]);
 		}
 		if (StringTools.startsWith(name, "create")) {
-			final kind = name == "createVertexArrayOES" ? "VertexArrayObjectOES" : name.substr(6);
+			final kind = name == "createVertexArrayOES" ? "VertexArrayObjectOES" : name == "createVertexArray" ? "VertexArrayObject" : name.substr(6);
 			return resource(kind, Std.int(Js.num(result)));
 		}
 		if (name == "getUniformLocation") {

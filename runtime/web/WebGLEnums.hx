@@ -300,7 +300,7 @@ class WebGLEnums {
 		set(proto, ctor, "BROWSER_DEFAULT_WEBGL", 0x9244);
 	}
 
-	static function set(proto:JsObject, ctor:JsObject, name:String, value:Int) {
+	public static function set(proto:JsObject, ctor:JsObject, name:String, value:Dynamic) {
 		proto.values.set(name, value);
 		ctor.values.set(name, value);
 	}

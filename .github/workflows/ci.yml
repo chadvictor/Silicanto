@@ -35,13 +35,14 @@ jobs:
           java-version: '17'
       - run: npm run setup:java
       - run: npm run test:java
-      - run: npx playwright install chromium
       - run: npm run test:generic
       - name: Compare native WebGL frames on a Metal device
         run: |
           metal=$(xcrun swift -e 'import Metal; print(MTLCreateSystemDefaultDevice() != nil)')
           if [ "$metal" = true ]; then
             npm run test:webgl
+            npm run test:webgl-conformance
+            npm run test:desktop
           else
             echo "WebGL pixel tests skipped because the runner exposes no Metal device." >> "$GITHUB_STEP_SUMMARY"
           fi

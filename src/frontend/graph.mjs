@@ -8,7 +8,9 @@ import { readDocument } from "./document.mjs";
 export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
   const dir = realpathSync(dirname(resolve(entry)));
   entry = resolve(dir, basename(entry));
-  const document = /\.html?$/i.test(entry) ? readDocument(entry) : null;
+  const document = /\.html?$/i.test(entry)
+    ? readDocument(entry, webRoot ?? dir)
+    : null;
   const scripts = document?.scripts ?? [{ path: entry, kind: "entry" }];
   const canonical = (script) =>
     script.source === undefined && existsSync(script.path)
@@ -146,6 +148,7 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
     inputs: [
       ...new Set([
         entry,
+        ...(document?.styleInputs ?? []),
         ...modules.filter((m) => !m.disabled).map((m) => m.sourcePath),
       ]),
     ],

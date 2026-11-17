@@ -22,8 +22,7 @@ export async function batchSuite({
   report,
   save,
   build,
-  execute,
-  compare,
+  observe,
   batchSize,
   jobs: parallelism,
 }) {
@@ -120,15 +119,13 @@ export async function batchSuite({
       while (cursor < items.length) {
         const pos = cursor++,
           j = items[pos];
-        const ppm = join(folder, "frame-" + j.index + ".ppm");
+        const trace = join(folder, "frames-" + j.index + ".json");
         let stage = "run";
         try {
-          await execute(binary, ["--frames", "4", "--capture", ppm], j.index);
-          stage = "compare";
-          const measurement = await compare(j.c, ppm);
+          const measurement = await observe(binary, trace, j.index);
           report.cases.push({
             ...j.c,
-            status: "frame-matched",
+            status: "native-observed",
             executed: true,
             measurement,
           });
@@ -141,7 +138,7 @@ export async function batchSuite({
             diagnostic: error.message.slice(0, 1500),
           });
         }
-        if (existsSync(ppm)) rmSync(ppm);
+        if (existsSync(trace)) rmSync(trace);
         if ((pos + 1) % 16 === 0) save();
       }
     }

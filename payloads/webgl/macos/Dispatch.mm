@@ -1,6 +1,7 @@
 #include "Context.hpp"
 #import <Foundation/Foundation.h>
 #include <GLES2/gl2ext_angle.h>
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -12,7 +13,7 @@ static NSString *stringValue(const char *s) {
   return s ? [NSString stringWithUTF8String:s] : @"";
 }
 static NSData *decode(id arg) {
-  if (arg == none())
+  if (!arg || arg == none())
     return nil;
   NSData *d = [[NSData alloc] initWithBase64EncodedString:arg options:0];
   if (!d)
@@ -29,12 +30,13 @@ template <class T> static T entry(const char *s) {
                                  userInfo:nil];
   return p;
 }
-static id state(GLenum key) {
+static id state(GLenum key, int version) {
   switch (key) {
   case GL_VERSION:
-    return @"WebGL 1.0 (OpenGL ES 2.0)";
+    return version == 2 ? @"WebGL 2.0 (OpenGL ES 3.0)"
+                        : @"WebGL 1.0 (OpenGL ES 2.0)";
   case GL_SHADING_LANGUAGE_VERSION:
-    return @"WebGL GLSL ES 1.0";
+    return version == 2 ? @"WebGL GLSL ES 3.00" : @"WebGL GLSL ES 1.0";
   case GL_VENDOR:
   case GL_RENDERER:
     return stringValue((const char *)glGetString(key));
@@ -67,6 +69,8 @@ static id state(GLenum key) {
       key == GL_POLYGON_OFFSET_FILL || key == GL_SAMPLE_COVERAGE ||
       key == GL_SCISSOR_TEST || key == GL_STENCIL_TEST)
     return @(v[0] != 0);
+  if (count == 0 && key != GL_COMPRESSED_TEXTURE_FORMATS)
+    return none();
   if (count == 1 && key != GL_COMPRESSED_TEXTURE_FORMATS)
     return @(v[0]);
   NSMutableArray *out = [NSMutableArray array];
@@ -84,7 +88,8 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
   auto S = [&](NSUInteger i) { return [arg(i) UTF8String] ?: ""; };
 #define IS(name) [op isEqualToString:@ #name]
   if (IS(createContext)) {
-    auto ctx = createContext(I(0), I(1), B(2), B(3), B(4));
+    auto ctx =
+        createContext(I(0), I(1), B(2), B(3), B(4), I(5) == 2 ? 2 : 1, B(6));
     if (!ctx)
       return @(0);
     const int n = nextContext++;
@@ -101,6 +106,11 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
     contexts.erase(it);
     return none();
   }
+  if (IS(samples)) {
+    EGLint count = 0;
+    eglGetConfigAttrib(ctx.display, ctx.config, EGL_SAMPLES, &count);
+    return @(count);
+  }
   if (IS(resize))
     return @(ctx.resize(I(0), I(1)));
 #define VOID_CALL(name, expr)                                                  \
@@ -112,6 +122,9 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
   if (IS(name))                                                                \
     return @(expr);
 #include "ScalarCalls.inc"
+  if (ctx.version == 2) {
+#include "WebGL2Calls.inc"
+  }
 #define RESOURCE(name)                                                         \
   if (IS(create##name)) {                                                      \
     GLuint n = 0;                                                              \
@@ -124,8 +137,8 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
     return none();                                                             \
   }
   RESOURCE(Buffer)
-  RESOURCE(Texture) RESOURCE(Framebuffer)
-      RESOURCE(Renderbuffer) if (IS(extensions)) {
+  RESOURCE(Texture)
+  RESOURCE(Framebuffer) RESOURCE(Renderbuffer) if (IS(extensions)) {
     NSString *enabled = stringValue((const char *)glGetString(GL_EXTENSIONS));
     NSString *available =
         stringValue((const char *)glGetString(GL_REQUESTABLE_EXTENSIONS_ANGLE));
@@ -184,7 +197,7 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
     return none();
   }
   if (IS(getParameter))
-    return state(I(0));
+    return state(I(0), ctx.version);
   if (IS(shaderSource)) {
     const char *s = S(1);
     glShaderSource(I(0), 1, &s, nullptr);
@@ -274,15 +287,35 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
     return none();
   }
   if (IS(texImage2D) || IS(texSubImage2D)) {
-    NSData *data = arg(8) ? decode(arg(8)) : nil;
+    bool offset = [arg(8) isKindOfClass:NSNumber.class];
+    GLint bound = 0;
+    if (ctx.version == 2)
+      glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &bound);
+    if ((bound != 0) != offset)
+      return @"INVALID_OPERATION";
+    if (offset && I(8) < 0)
+      return @"INVALID_VALUE";
+    NSData *data = offset ? nil : decode(arg(8));
+    const void *ptr =
+        offset ? reinterpret_cast<const void *>(static_cast<uintptr_t>(I(8)))
+               : data.bytes;
     if (IS(texImage2D))
       entry<PFNGLTEXIMAGE2DROBUSTANGLEPROC>("glTexImage2DRobustANGLE")(
           I(0), I(1), I(2), I(3), I(4), I(5), I(6), I(7), (GLsizei)data.length,
-          data.bytes);
+          ptr);
     else
       entry<PFNGLTEXSUBIMAGE2DROBUSTANGLEPROC>("glTexSubImage2DRobustANGLE")(
           I(0), I(1), I(2), I(3), I(4), I(5), I(6), I(7), (GLsizei)data.length,
-          data.bytes);
+          ptr);
+    return none();
+  }
+  if (IS(readPixelsOffset)) {
+    GLint pbo = 0;
+    glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &pbo);
+    if (!pbo || I(6) < 0)
+      return @"INVALID_OPERATION";
+    glReadPixels(I(0), I(1), I(2), I(3), I(4), I(5),
+                 reinterpret_cast<void *>(static_cast<uintptr_t>(I(6))));
     return none();
   }
   if (IS(readPixels) || IS(snapshot)) {
@@ -293,11 +326,32 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
     const int size = snap ? w * h * 4 : I(6);
     if (size < 0 || size > 268435456)
       return @"INVALID_VALUE";
-    NSMutableData *data = [NSMutableData dataWithLength:size];
+    NSMutableData *data = snap || !arg(7) ? [NSMutableData dataWithLength:size]
+                                          : [decode(arg(7)) mutableCopy];
+    if (data.length != size)
+      return @"INVALID_VALUE";
+    GLint pack = 0, row = 0, rows = 0, cols = 0;
+    if (ctx.version == 2) {
+      glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &pack);
+      if (pack && !snap)
+        return @"INVALID_OPERATION";
+      if (snap) {
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        glGetIntegerv(GL_PACK_ROW_LENGTH, &row);
+        glGetIntegerv(GL_PACK_SKIP_ROWS, &rows);
+        glGetIntegerv(GL_PACK_SKIP_PIXELS, &cols);
+        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+        glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+      }
+    }
     GLint fb = 0, align = 4;
     if (snap) {
-      glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fb);
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glGetIntegerv(ctx.version == 2 ? GL_READ_FRAMEBUFFER_BINDING
+                                     : GL_FRAMEBUFFER_BINDING,
+                    &fb);
+      glBindFramebuffer(ctx.version == 2 ? GL_READ_FRAMEBUFFER : GL_FRAMEBUFFER,
+                        0);
       glGetIntegerv(GL_PACK_ALIGNMENT, &align);
       glPixelStorei(GL_PACK_ALIGNMENT, 1);
     }
@@ -306,7 +360,14 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
         snap ? GL_UNSIGNED_BYTE : I(5), size, nullptr, nullptr, nullptr,
         data.mutableBytes);
     if (snap) {
-      glBindFramebuffer(GL_FRAMEBUFFER, fb);
+      glBindFramebuffer(ctx.version == 2 ? GL_READ_FRAMEBUFFER : GL_FRAMEBUFFER,
+                        fb);
+      if (ctx.version == 2) {
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, pack);
+        glPixelStorei(GL_PACK_ROW_LENGTH, row);
+        glPixelStorei(GL_PACK_SKIP_ROWS, rows);
+        glPixelStorei(GL_PACK_SKIP_PIXELS, cols);
+      }
       glPixelStorei(GL_PACK_ALIGNMENT, align);
     }
     return [data base64EncodedStringWithOptions:0];
@@ -342,7 +403,8 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
     return none();                                                             \
   }
     VECTOR(1)
-    VECTOR(2) VECTOR(3) VECTOR(4)
+    VECTOR(2)
+    VECTOR(3) VECTOR(4)
 #define MATRIX(N)                                                              \
   if (IS(uniformMatrix##N##fv)) {                                              \
     if (floats.size() % (N * N))                                               \
@@ -439,27 +501,37 @@ static id dispatch(int handle, NSString *op, NSArray *a) {
     bool numeric = kind == GL_FLOAT || kind == GL_FLOAT_VEC2 ||
                    kind == GL_FLOAT_VEC3 || kind == GL_FLOAT_VEC4 ||
                    kind == GL_FLOAT_MAT2 || kind == GL_FLOAT_MAT3 ||
-                   kind == GL_FLOAT_MAT4;
+                   kind == GL_FLOAT_MAT4 ||
+                   (kind >= GL_FLOAT_MAT2x3 && kind <= GL_FLOAT_MAT4x3);
+    const bool unsignedInt =
+        kind == GL_UNSIGNED_INT ||
+        (kind >= GL_UNSIGNED_INT_VEC2 && kind <= GL_UNSIGNED_INT_VEC4);
     bool boolean = kind == GL_BOOL || kind == GL_BOOL_VEC2 ||
                    kind == GL_BOOL_VEC3 || kind == GL_BOOL_VEC4;
     GLint count = 0;
     GLfloat fs[16] = {};
     GLint is[16] = {};
+    GLuint us[16] = {};
     if (numeric)
       entry<PFNGLGETUNIFORMFVROBUSTANGLEPROC>("glGetUniformfvRobustANGLE")(
           program, location, 16, &count, fs);
+    else if (unsignedInt)
+      entry<PFNGLGETUNIFORMUIVROBUSTANGLEPROC>("glGetUniformuivRobustANGLE")(
+          program, location, 16, &count, us);
     else
       entry<PFNGLGETUNIFORMIVROBUSTANGLEPROC>("glGetUniformivRobustANGLE")(
           program, location, 16, &count, is);
     NSMutableArray *values = [NSMutableArray array];
     for (int i = 0; i < count && i < 16; i++)
-      [values addObject:numeric   ? @(fs[i])
-                        : boolean ? @(is[i] != 0)
-                                  : @(is[i])];
+      [values addObject:numeric       ? @(fs[i])
+                        : unsignedInt ? @(us[i])
+                        : boolean     ? @(is[i] != 0)
+                                      : @(is[i])];
     return @[
-      numeric   ? @"Float32Array"
-      : boolean ? @"Array"
-                : @"Int32Array",
+      numeric       ? @"Float32Array"
+      : unsignedInt ? @"Uint32Array"
+      : boolean     ? @"Array"
+                    : @"Int32Array",
       values
     ];
   }
