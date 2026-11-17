@@ -194,12 +194,14 @@ class WebGL extends JsObject {
 			throw "TypeError: illegal WebGL constructor";
 		}, true);
 		proto = ctor.read("prototype");
+		ctor.values.set("name", "WebGLRenderingContext");
 		Js.realm.define("WebGLRenderingContext", ctor);
 		WebGLEnums.install(proto, ctor);
 		final ctor2 = Js.fn((_, _) -> {
 			throw "TypeError: illegal WebGL2 constructor";
 		}, true);
 		proto2 = ctor2.read("prototype");
+		ctor2.values.set("name", "WebGL2RenderingContext");
 		Js.realm.define("WebGL2RenderingContext", ctor2);
 		WebGLEnums.install(proto2, ctor2);
 		WebGL2Bindings.install(proto2, ctor2);

@@ -639,6 +639,8 @@ class Js {
 				"slice",
 				"splice",
 				"sort",
+				"toSorted",
+				"toReversed",
 				"concat",
 				"indexOf",
 				"map",
@@ -655,7 +657,7 @@ class Js {
 				ap.values.set(k, get(([] : Array<Dynamic>), k));
 			array.define("isArray", fn((_, a) -> Std.isOfType(at(a, 0), Array), false));
 			globals.set("Array", array);
-			for (k in ["Error", "TypeError", "RangeError", "ReferenceError", "URIError"]) {
+			for (k in ["Error", "TypeError", "RangeError", "ReferenceError", "URIError", "SyntaxError"]) {
 				final constructor = fn((_, a) -> {
 					final e = new JsObject(cast get(global(k), "prototype"));
 					e.define("name", k);
@@ -670,6 +672,8 @@ class Js {
 			globals.set("undefined", u);
 			globals.set("NaN", Math.NaN);
 			globals.set("Infinity", Math.POSITIVE_INFINITY);
+			JsPattern.install(realm);
+			JsPromise.install();
 			JsTypedArray.install(realm);
 			JsDate.install(realm);
 			JsCollection.install(realm);

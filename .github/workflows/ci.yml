@@ -36,6 +36,7 @@ jobs:
       - run: npm run setup:java
       - run: npm run test:java
       - run: npm run test:generic
+      - run: npm run test:async
       - name: Compare native WebGL frames on a Metal device
         run: |
           metal=$(xcrun swift -e 'import Metal; print(MTLCreateSystemDefaultDevice() != nil)')

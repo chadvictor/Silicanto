@@ -14,8 +14,11 @@ class JsProperties {
 	public static function descriptor(o:JsObject, k:String):Dynamic {
 		if (!own(o, k))
 			return Js.u;
-		if (o.descriptors.exists(k))
-			return o.descriptors.get(k);
+		if (o.descriptors.exists(k)) {
+			final result = Js.obj();
+			copy(result, o.descriptors.get(k));
+			return result;
+		}
 		final d = Js.obj();
 		d.define("enumerable", o.keys.contains(k));
 		d.define("configurable", true);
@@ -93,6 +96,30 @@ class JsProperties {
 			return dst;
 		}, false));
 		object.define("defineProperty", Js.fn((_, a) -> define(a[0], Js.str(a[1]), a[2]), false));
+		object.define("defineProperties", Js.fn((_, args) -> {
+			final target = Js.at(args, 0), descriptors = Js.at(args, 1);
+			if (!Std.isOfType(target, JsObject) || descriptors == null || descriptors == Js.u)
+				throw Js.construct(Js.global("TypeError"), ["Expected property descriptors"]);
+			final pending:Array<{key:String, descriptor:JsObject}> = [];
+			for (key in JsStandard.keys(descriptors)) {
+				final input = Js.get(descriptors, key);
+				if (!Std.isOfType(input, JsObject))
+					throw Js.construct(Js.global("TypeError"), ["Expected a property descriptor"]);
+				final d = Js.obj();
+				for (field in ["enumerable", "configurable", "value", "writable", "get", "set"])
+					if (Js.has(input, field)) {
+						final v = Js.get(input, field);
+						if ((field == "get" || field == "set") && v != Js.u && Js.type(v) != "function")
+							throw Js.construct(Js.global("TypeError"), ["Invalid accessor"]);
+						d.define(field, v);
+					}
+				if ((own(d, "get") || own(d, "set")) && (own(d, "value") || own(d, "writable")))
+					throw Js.construct(Js.global("TypeError"), ["Mixed property descriptor"]);
+				pending.push({key: key, descriptor: d});
+			}
+			for (entry in pending) define(cast target, entry.key, entry.descriptor);
+			return target;
+		}, false));
 		object.define("getOwnPropertyDescriptor", Js.fn((_, a) -> descriptor(a[0], Js.str(a[1])), false));
 		object.define("getPrototypeOf", Js.fn((_, a) -> (cast a[0] : JsObject).prototype, false));
 		object.define("getOwnPropertyNames", Js.fn((_, a) -> {

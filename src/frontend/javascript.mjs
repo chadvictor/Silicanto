@@ -5,7 +5,7 @@ const quoted = (s) => JSON.stringify(String(s));
 const numericOps = new Set(["-", "*", "/", "%"]);
 const bitOps = new Set(["&", "|", "^", "<<", ">>"]);
 
-export function emitModule(graph, module, file, units, globals) {
+export function emitModule(graph, module, file, units, globals, lowered = {}) {
   const frames = [],
     loopUpdates = [];
   let next = 0;
@@ -47,10 +47,15 @@ export function emitModule(graph, module, file, units, globals) {
     exports = [],
     hoisted = [],
     preamble = [];
+  const position = (n) => {
+    const loc = file.getLineAndCharacterOfPosition(n.getStart(file));
+    const original = lowered.map?.findEntry(loc.line, loc.character);
+    return original?.originalLine == null
+      ? loc
+      : { line: original.originalLine, character: original.originalColumn };
+  };
   const fail = (node, msg) => {
-    const { line, character } = file.getLineAndCharacterOfPosition(
-      node.getStart(file),
-    );
+    const { line, character } = position(node);
     throw Error(
       `${module.id}:${line + 1 + module.line}:${character + 1} E-JAVASCRIPT: ${msg}`,
     );
@@ -186,7 +191,7 @@ export function emitModule(graph, module, file, units, globals) {
   }
   function func(n, outer, constructor = null) {
     if (n.asteriskToken || n.modifiers?.some((m) => m.kind === K.AsyncKeyword))
-      fail(n, "async functions and generators require a resumable frame");
+      fail(n, "unsupported generator or async function form");
     const s = scope(outer),
       lines = [],
       self = fresh("this"),
@@ -721,7 +726,7 @@ export function emitModule(graph, module, file, units, globals) {
       }
       const variadic = n.arguments?.some(ts.isSpreadElement);
       const args = variadic ? [] : (n.arguments ?? []).map((a) => expr(a, s));
-      const pos = file.getLineAndCharacterOfPosition(n.getStart(file));
+      const pos = position(n);
       const site = quoted(
         module.id +
           ":" +
@@ -1167,6 +1172,7 @@ export function emitModule(graph, module, file, units, globals) {
   }
   if (module.format === "classic") {
     for (const [name, sym] of root.names) {
+      if (lowered.identifiers && !lowered.identifiers.has(name)) continue;
       const getter = "function():Dynamic return " + sym.read;
       if (sym.read === sym.id) {
         preamble.push(

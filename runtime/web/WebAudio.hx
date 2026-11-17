@@ -19,7 +19,7 @@ class WebAudio extends JsObject {
 	var duration = Math.NaN;
 	var position = 0.;
 	var loading = false;
-	var waiting:Array<WebPromise> = [];
+	var waiting:Array<JsPromise> = [];
 
 	public static function install() {
 		if (!DesktopServices.available())
@@ -92,7 +92,7 @@ class WebAudio extends JsObject {
 			].contains(s) ? "probably" : "";
 		}, false));
 		define("play", Js.fn((_, _) -> {
-			final p = new WebPromise();
+			final p = new JsPromise();
 			waiting.push(p);
 			paused = false;
 			if (handle != 0)

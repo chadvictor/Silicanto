@@ -301,7 +301,14 @@ class WebGLEnums {
 	}
 
 	public static function set(proto:JsObject, ctor:JsObject, name:String, value:Dynamic) {
-		proto.values.set(name, value);
-		ctor.values.set(name, value);
+		final descriptor = Js.obj();
+		descriptor.define("value", value);
+		descriptor.define("enumerable", true);
+		descriptor.define("configurable", false);
+		descriptor.define("writable", false);
+		for (target in [proto, ctor]) {
+			if (!target.descriptors.exists(name)) target.keys.push(name);
+			target.descriptors.set(name, descriptor);
+		}
 	}
 }

@@ -40,6 +40,7 @@ const server = createServer(async (req, res) => {
     JSON.stringify({
       text: Buffer.concat(body).toString(),
       client: req.headers["x-client"],
+      type: req.headers["content-type"],
     }),
   );
 });

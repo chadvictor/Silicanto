@@ -257,6 +257,7 @@ let key = 0,
   ended = 0,
   played = 0,
   remote = 0,
+  formPosted = 0,
   aborted = 0,
   missing = 0,
   frame = 0;
@@ -298,6 +299,24 @@ fetch(TEST_ORIGIN + "/echo", {
   .then((j) => {
     check(j.text === "native-body" && j.client === "Silicanto", "HTTP body");
     remote++;
+  });
+const params = new URLSearchParams("?b=x+y&a=%2B&b=%C3%A9");
+check(
+  params.getAll("b").join("|") === "x y|é" && params.get("a") === "+",
+  "form decoding",
+);
+params.set("b", "two words");
+params.append("a", "?");
+params.sort();
+fetch(TEST_ORIGIN + "/echo", { method: "POST", body: params })
+  .then((r) => r.json())
+  .then((j) => {
+    check(
+      j.text === "a=%2B&a=%3F&b=two+words" &&
+        j.type === "application/x-www-form-urlencoded;charset=UTF-8",
+      "form data transport",
+    );
+    formPosted++;
   });
 const req = new XMLHttpRequest();
 req.open("GET", TEST_ORIGIN + "/slow");
@@ -357,7 +376,7 @@ function animate() {
       "native audio lifecycle " + loaded + " " + played + " " + ended,
     );
     check(
-      remote === 1 && missing === 1 && aborted === 1,
+      remote === 1 && formPosted === 1 && missing === 1 && aborted === 1,
       "native HTTP lifecycle",
     );
     check(

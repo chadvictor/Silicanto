@@ -74,7 +74,12 @@ class WebNetwork {
 			});
 	}
 
-	public static function body(v:Dynamic):Bytes {
+	public static function body(v:Dynamic, ?headers:Dynamic):Bytes {
+		if (Std.isOfType(v, WebSearchParams)) {
+			if (headers != null && !Reflect.fields(headers).map(k -> k.toLowerCase()).contains("content-type"))
+				Reflect.setField(headers, "content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+			return Bytes.ofString((cast v : WebSearchParams).serialize());
+		}
 		if (v == null || v == Js.u)
 			return null;
 		if (Std.isOfType(v, WebBlob))
@@ -95,9 +100,8 @@ class WebNetwork {
 	}
 
 	public static function install() {
-		WebPromise.install();
 		Js.realm.define("fetch", Js.fn((_, a) -> {
-			final promise = new WebPromise(), url = Js.str(Js.at(a, 0)), init = Js.at(a, 1);
+			final promise = new JsPromise(), url = Js.str(Js.at(a, 0)), init = Js.at(a, 1);
 			final field = k -> init == Js.u || init == null ? Js.u : Js.get(init, k);
 			final method = field("method") == Js.u ? "GET" : Js.str(field("method")).toUpperCase(), headers:Dynamic = {}, h = field("headers");
 			function finish(b:WebBlob, status:Int, finalUrl:String, fields:Dynamic) {
@@ -111,7 +115,7 @@ class WebNetwork {
 				res.getters.set("bodyUsed", () -> used);
 				for (name in ["text", "json", "blob", "arrayBuffer"])
 					res.define(name, Js.fn((_, _) -> {
-						final p = new WebPromise();
+						final p = new JsPromise();
 						if (used) {
 							p.reject("TypeError: body already consumed");
 							return p;
@@ -135,7 +139,7 @@ class WebNetwork {
 				if (h != null && h != Js.u)
 					for (k in JsStandard.keys(h))
 						Reflect.setField(headers, k, Js.str(Js.get(h, k)));
-				final bytes = body(field("body"));
+				final bytes = body(field("body"), headers);
 				if ((method == "GET" || method == "HEAD") && bytes != null)
 					throw "TypeError: body on GET/HEAD";
 				if (remote(url))

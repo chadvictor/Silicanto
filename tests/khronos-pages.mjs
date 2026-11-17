@@ -129,6 +129,8 @@ function nativePage(id, work) {
         if (skipped) nativeKhronos.skipped++;
         else if (ok) nativeKhronos.pass++;
         else { nativeKhronos.fail++; if(nativeKhronos.errors.length < 8) nativeKhronos.errors.push(text); }
+        if (nativeKhronos.pass + nativeKhronos.fail + nativeKhronos.skipped === 1 || (nativeKhronos.pass + nativeKhronos.fail + nativeKhronos.skipped) % 50 === 0 || !ok)
+          console.log("SILICANTO_KHRONOS_PROGRESS=" + JSON.stringify(nativeKhronos));
       },
       notifyFinished:function(){ console.log("SILICANTO_KHRONOS_RESULT=" + JSON.stringify(nativeKhronos)); }
     };
@@ -196,9 +198,18 @@ for (const id of selected) {
     }
   } catch (e) {
     row.status = stage + "-failed";
-    row.diagnostic = String(
-      e.stderr?.trim() || e.stdout?.trim() || e.signal || e.message,
-    )
+    const stdout = String(e.stdout ?? "");
+    const progress = [
+      ...stdout.matchAll(/^SILICANTO_KHRONOS_PROGRESS=(.+)$/gm),
+    ].at(-1);
+    if (stage === "run" && progress) row.lastProgress = JSON.parse(progress[1]);
+    const details = [
+      stdout.replace(/^SILICANTO_KHRONOS_PROGRESS=.+$/gm, "").trim(),
+      e.stderr?.trim(),
+    ]
+      .filter(Boolean)
+      .join("\n");
+    row.diagnostic = String(details || e.signal || e.message)
       .slice(0, 1000)
       .replaceAll(checkout + "/", "")
       .replaceAll(root, "");

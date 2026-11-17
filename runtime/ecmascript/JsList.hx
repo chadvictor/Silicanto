@@ -8,7 +8,7 @@ class JsList {
 	public static function method(name:String):Dynamic {
 		switch name {
 			case "slice", "splice", "shift", "unshift", "indexOf", "lastIndexOf", "includes", "map", "filter", "some", "every", "find", "concat", "reverse",
-				"sort", "entries", "fill", "at", "reduce", "reduceRight", "copyWithin", "findIndex":
+				"sort", "toSorted", "toReversed", "entries", "fill", "at", "reduce", "reduceRight", "copyWithin", "findIndex":
 			default:
 				return Js.u;
 		}
@@ -71,13 +71,15 @@ class JsList {
 						else
 							out.push(v);
 					return out;
-				case "reverse":
-					a.reverse();
-					return a;
+				case "reverse", "toReversed":
+					final list = name == "reverse" ? a : a.copy();
+					list.reverse();
+					return list;
 				case "entries":
 					return [for (i in 0...len) ([i, a[i]] : Array<Dynamic>)];
-				case "sort":
-					haxe.ds.ArraySort.sort(a, (x, y) -> {
+				case "sort", "toSorted":
+					final list = name == "sort" ? a : a.copy();
+					haxe.ds.ArraySort.sort(list, (x, y) -> {
 						if (x == Js.u)
 							return y == Js.u ? 0 : 1;
 						if (y == Js.u)
@@ -87,7 +89,7 @@ class JsList {
 						final d = Js.num(Js.call(f, Js.u, [x, y]));
 						return d < 0 ? -1 : d > 0 ? 1 : 0;
 					});
-					return a;
+					return list;
 				case "includes", "indexOf", "lastIndexOf":
 					if (name == "lastIndexOf") {
 						var i = args.length < 2 ? len - 1 : Std.int(Js.num(self));

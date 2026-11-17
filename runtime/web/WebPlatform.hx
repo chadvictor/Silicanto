@@ -27,6 +27,7 @@ class WebPlatform {
 		final c = Js.fn((_, _) -> {
 			throw "TypeError: Illegal constructor " + name;
 		}, true);
+		c.values.set("name", name);
 		Js.realm.define(name, c);
 		return Js.get(c, "prototype");
 	}
@@ -85,6 +86,7 @@ class WebPlatform {
 	public static function init(markup:String) {
 		WebEvents.install();
 		WebResources.install();
+		WebSearchParams.install();
 		WebNetwork.install();
 		WebSocketClient.install();
 		WebAudio.install();
@@ -228,12 +230,12 @@ class WebPlatform {
 		var count = 0;
 		do {
 			WebNetwork.poll();
-			WebPromise.checkpoint();
+			JsPromise.checkpoint();
 			while (tasks.length > 0) {
 				if (++count > 100000)
 					throw "E-EVENT: task queue did not settle";
 				tasks.shift()();
-				WebPromise.checkpoint();
+				JsPromise.checkpoint();
 			}
 			if (waitForNetwork && WebNetwork.busy())
 				Sys.sleep(.001);
@@ -305,7 +307,7 @@ class WebPlatform {
 			callbacks = [];
 			for (cb in frame) {
 				Js.call(cb.fn, Js.realm, [clock]);
-				WebPromise.checkpoint();
+				JsPromise.checkpoint();
 			}
 			if (i == frames - 1 && (!window || finite))
 				drain(true);

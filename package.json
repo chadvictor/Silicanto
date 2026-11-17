@@ -27,6 +27,7 @@
     "test:desktop": "node tests/desktop-targets.mjs",
     "test:webgl": "node tests/webgl-targets.mjs",
     "test:phaser4": "node tests/phaser4/run.mjs",
+    "test:async": "node tests/async-targets.mjs",
     "test:generic": "node tests/generic-targets.mjs",
     "test:source-libraries": "node tests/phaser4/library-logic.mjs",
     "test:webgl-pages": "node tests/khronos-pages.mjs",
@@ -35,6 +36,8 @@
     "test:css": "node tests/css-reftests.mjs"
   },
   "dependencies": {
+    "@babel/core": "7.29.7",
+    "babel-plugin-transform-async-to-promises": "0.8.18",
     "esbuild": "0.25.12",
     "parse5": "7.3.0",
     "three": "0.180.0",

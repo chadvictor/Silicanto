@@ -130,6 +130,7 @@ try {
       frontend: result.frontend,
       moduleGraph: result.graph,
       webHost: !!result.web,
+      ...(result.asyncLowering && { asyncLowering: true }),
       globals: result.globals,
       inputs: result.inputs.map((p) => ({
         file: relative(dirname(source), p),
@@ -206,6 +207,14 @@ try {
       }
       mkdirSync(join(stage, "licenses"));
       cpSync(join(root, "LICENSE"), join(stage, "licenses/silicanto.txt"));
+      if (metadata.asyncLowering)
+        cpSync(
+          join(
+            root,
+            "node_modules/babel-plugin-transform-async-to-promises/LICENSE",
+          ),
+          join(stage, "licenses/async-to-promises.txt"),
+        );
       if (metadata.webHost)
         cpSync(
           join(root, "licenses/haxe-format.txt"),

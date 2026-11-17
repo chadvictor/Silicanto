@@ -139,7 +139,7 @@ class WebRequest extends JsObject {
 				events.fire("loadend");
 			};
 			if (WebNetwork.remote(url)) {
-				final payload = (method == "GET" || method == "HEAD") ? null : WebNetwork.body(Js.at(a, 0));
+				final payload = (method == "GET" || method == "HEAD") ? null : WebNetwork.body(Js.at(a, 0), headers);
 				try
 					requestId = WebNetwork.send(method, url, headers, payload, Js.num(read("timeout")), async, r -> {
 						if (r.error != null)
