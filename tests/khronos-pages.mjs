@@ -36,12 +36,14 @@ const tests = dirname(sourceTree(values.checkout)),
   checkout = resolve(tests, "../..");
 const git = (...args) =>
   execFileSync("git", ["-C", checkout, ...args], { encoding: "utf8" }).trim();
-if (
-  !["conformance2", "deqp", "js", "resources"].every((p) =>
-    existsSync(join(tests, p)),
-  )
-)
-  git("sparse-checkout", "add", "sdk/tests");
+// The list runner needs the complete upstream test tree, including shared
+// libraries outside the conformance directories of a shader-only checkout.
+const sparse = git("config", "--type=bool", "--default", "false", "--get", "core.sparseCheckout");
+if (sparse === "true") {
+  const paths = git("sparse-checkout", "list").split("\n");
+  if (!paths.includes("sdk/tests") && !paths.includes("sdk"))
+    git("sparse-checkout", "add", "sdk/tests");
+}
 assert.equal(git("rev-parse", "HEAD"), revision);
 assert.equal(git("status", "--porcelain", "--", "sdk/tests"), "");
 const version = (v) => v.split(".").reduce((a, n) => a * 100 + Number(n), 0);
