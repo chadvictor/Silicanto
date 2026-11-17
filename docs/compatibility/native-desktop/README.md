@@ -15,6 +15,8 @@ The input was the original Phaser distribution and the 2,061 entries in the pinn
 
 Of the 1,925 entries observed on both targets, 944 produced exactly the same pixels at all three marks. Matching outputs can include blank scenes. Independent renderers, timed events and game randomness can produce different hashes. These results give no playability judgment for a particular game. Four captures interrupted by storage errors were rerun at the same revision. The original diagnostics accompany the successful retries. [Per-example table](phaser4/matrix.tsv) · [Hashes and failures](phaser4/frames.json.gz) · [Summary](phaser4/summary.json)
 
+A separate run at 4b16e12 revisited the same 151 historically failing entries. C++ produced three frames for 17 and Java for 20. Two JVM cases exceeded an explicitly capped heap, then produced all three frames when repeated with the default heap. The recheck stores both attempts. [151-entry recheck](phaser4-recheck.json.gz)
+
 The original `animation/animation from png sequence.js` was also built as a standalone application and captured at frames 4, 12, 20, 30 and 48. The animation changed over time and its C++ and Java pixels agreed at each mark. [Five-frame hashes](phaser-animation.json) · [Run the gallery](../../../tests/phaser4/README.md)
 
 ## WebGL on Metal
@@ -32,7 +34,7 @@ The render runner reads pixels from the Metal-backed framebuffer and applies eac
 
 The full page runner loads the original upstream scripts and listens for their assertion and completion callbacks. In the initial C++ sweep, 914 of 970 WebGL 1 pages stopped during translation and 56 stopped during execution. For WebGL 2, 2,808 of 2,865 stopped during translation and 57 stopped during execution. No page completed that first sweep. The shared JavaScript harness itself used features the compiler did not yet implement. [WebGL 1 page diagnostics](webgl-native-before-async-1.0.4.json.gz) · [WebGL 2 page diagnostics](webgl-native-before-async-2.0.1.json.gz)
 
-After native async lowering, the compiler emitted Haxe for **933 / 970** WebGL 1 pages and **2,063 / 2,865** WebGL 2 pages at [4b16e12](https://github.com/chadvictor/Silicanto/commit/4b16e124f1831b4de8e0b05877a9b452fe9c386e). This step tests translation only. Full WebGL conformance requires every applicable upstream page to execute and meet its assertions. [WebGL 1 translation census](webgl-frontend-1.0.4.json.gz) · [WebGL 2 translation census](webgl-frontend-2.0.1.json.gz)
+After native async lowering, the compiler emitted Haxe for **933 / 970** WebGL 1 pages and **2,063 / 2,865** WebGL 2 pages at [6def5e8](https://github.com/chadvictor/Silicanto/commit/6def5e8b66bca46cfb97a676043548c00068ad74). This step tests translation only. Full WebGL conformance requires every applicable upstream page to execute and meet its assertions. [WebGL 1 translation census](webgl-frontend-1.0.4.json.gz) · [WebGL 2 translation census](webgl-frontend-2.0.1.json.gz)
 
 ## CSS layout and painting
 

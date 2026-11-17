@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -77,7 +78,9 @@ for (let i = 0; i < frames; i++)
     Math.round(Math.sin((i * 440 * 2 * Math.PI) / 11025) * 2400),
     44 + 2 * i,
   );
-writeFileSync(join(source, "tone.wav"), wav);
+const assets = join(work, "runtime-assets");
+mkdirSync(assets);
+writeFileSync(join(assets, "tone.wav"), wav);
 writeFileSync(
   join(work, "input.json"),
   JSON.stringify([
@@ -184,21 +187,29 @@ try {
             "-jar",
             join(dir, "java/Sample.jar"),
           ];
-    const log = await run(cmd[0], [
-      ...cmd.slice(1),
-      "--asset-root",
-      source,
-      "--realtime",
-      "--frames",
-      "45",
-      "--input",
-      join(work, "input.json"),
-      "--timeline",
-      trace,
-      "1,15,45",
-      "--capture-page",
-      page,
-    ]);
+    // Keep original HTML, scripts and stylesheets inaccessible during execution.
+    const offlineSource = join(work, "offline-source");
+    renameSync(source, offlineSource);
+    let log;
+    try {
+      log = await run(cmd[0], [
+        ...cmd.slice(1),
+        "--asset-root",
+        assets,
+        "--realtime",
+        "--frames",
+        "45",
+        "--input",
+        join(work, "input.json"),
+        "--timeline",
+        trace,
+        "1,15,45",
+        "--capture-page",
+        page,
+      ]);
+    } finally {
+      renameSync(offlineSource, source);
+    }
     assert.match(log, /native contracts passed/);
     const samples = JSON.parse(readFileSync(trace));
     assert.deepEqual(

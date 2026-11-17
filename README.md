@@ -6,6 +6,18 @@ Silicanto is an open-source compiler for turning supported Three.js applications
 
 **General JavaScript frontend (experimental).** Compile an application's JS and transitive npm dependencies to Haxe with `--frontend generic`. The new path uses standard JavaScript and web APIs without library adapters. [Build and retarget a Canvas app](docs/general-javascript.md) · [Native desktop measurements for WebGL, CSS and 2,061 Phaser examples](docs/compatibility/native-desktop/README.md) · [Reproduce the multi-frame gallery](tests/phaser4/README.md).
 
+### Native desktop support on Apple Silicon
+
+The generic frontend compiles the application's JavaScript and its libraries into editable Haxe. The C++ executable and Java desktop build draw through ANGLE on Metal, play audio through AVFoundation and receive mouse and keyboard input from AppKit or AWT. HTTP, HTTPS and WebSocket traffic uses URLSession. The CSS renderer supports block, flex and grid layout. Local script resources can be compiled ahead of time, including scripts loaded by other scripts.
+
+| Native test | Measured result |
+| --- | --- |
+| Phaser 4.1.0 gallery | Of 2,061 original examples, 1,925 produced frames 1, 4 and 12 on C++ and 1,929 did so on Java. Both targets produced identical pixels at all three marks for 944 examples. |
+| WebGL 1 OGLES | All 178 shader build cases and 775 reference rendering comparisons passed on both targets. |
+| CSS reference pairs | The C++ renderer completed 1,714 pairs. Of these, 630 matched with visible detail, 28 matched uniformly and 1,056 differed. |
+
+WebGL 2 has a native ES 3 context. Full WebGL conformance and complete CSS layout remain open. The gallery records pixels at specific frames. Playability requires input and longer scenarios for each game. [Per-example outcomes, hashes and reproduction commands](docs/compatibility/native-desktop/README.md)
+
 ![A frame from the native Metal build of Nácar: a river of molten silicon runs between crystal spires beneath a ringed planet.](docs/nacar-metal.png)
 
 *Nácar · Silicon Sea* starts as three JavaScript modules. The native executable generates the terrain, crystals and HDR reflection texture when it starts. Press **Space** to pause or resume the camera flight. [Download the C/Metal demo for macOS ARM64](https://github.com/chadvictor/Silicanto/releases/tag/v0.1.0) · [Explore the scene source](examples/nacar/world.mjs) · [See how the frames are compared](tests/nacar.mjs)
