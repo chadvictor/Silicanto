@@ -1,6 +1,7 @@
 #import <AppKit/AppKit.h>
 #import <CoreText/CoreText.h>
 #include <litehtml.h>
+#include <litehtml/css_parser.h>
 #include <litehtml/el_image.h>
 #include <litehtml/render_item.h>
 
@@ -276,6 +277,17 @@ static void boxes(element::ptr el, NSMutableDictionary *result) {
     boxes(child, result);
 }
 id sil_layout(NSString *op, NSArray *args) {
+  if ([op isEqual:@"rules"]) {
+    NSMutableArray *result = [NSMutableArray array];
+    for (const auto &rule : css_parser::parse_stylesheet([args[0] UTF8String], true)) {
+      NSString *prelude = [str(get_repr(rule->prelude).c_str())
+          stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+      NSString *name = str(rule->name.c_str());
+      NSString *body = rule->block.type == CURLY_BLOCK ? str(get_repr(rule->block.value).c_str()) : nil;
+      [result addObject:@[name, prelude, body ?: NSNull.null]];
+    }
+    return result;
+  }
   static Page page;
   int w = [args[1] intValue], h = [args[2] intValue];
   if (w < 1 || h < 1 || 1LL * w * h > 16777216)

@@ -6,6 +6,7 @@ class WebStyle extends JsObject {
 	public var text:Null<String>;
 	public var html:Null<String>;
 	public var sheet:Null<String>;
+	public var rules:WebStyleSheet;
 
 	public function new(tag:String) {
 		super(Js.obj().prototype);

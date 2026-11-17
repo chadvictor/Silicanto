@@ -1,0 +1,97 @@
+--- a/include/taffy/compute/grid/types/cell_occupancy/CellOccupancyMatrix.hpp
++++ b/include/taffy/compute/grid/types/cell_occupancy/CellOccupancyMatrix.hpp
+@@ -93,7 +93,7 @@
+     {
+         // Calculate number of rows and columns missing to accomodate ranges (if any)
+-        const auto req_negative_rows = min(row_range.start, int16_t{0});
++        const auto req_negative_rows = max(-int(row_range.start), 0);
+         const auto req_positive_rows = max(row_range.end - static_cast<int16_t>(this->rows.len()), 0);
+-        const auto req_negative_cols = min(col_range.start, int16_t{0});
++        const auto req_negative_cols = max(-int(col_range.start), 0);
+         const auto req_positive_cols = max(col_range.end - static_cast<int16_t>(this->columns.len()), 0);
+ 
+@@ -103,30 +103,11 @@
+         const auto new_col_count = old_col_count + static_cast<size_t>(req_negative_cols + req_positive_cols);
+ 
+-        auto data = new_vec_with_capacity<CellOccupancyState>(new_row_count * new_col_count); // TODO: in Rust here is 'Vec::with_capacity'. maybe we need to change rust too ?
+-
+-        // Push new negative rows
+-        for(size_t _ = 0; _ < (static_cast<size_t>(req_negative_rows) * new_col_count); ++_) {
+-            data.push_back(CellOccupancyState::Unoccupied());
+-        }
+-        
+-        // Push existing rows
+-        for(size_t row = 0; row < old_row_count; ++row) {
+-            // Push new negative columns
+-            for(int16_t _ = 0; _ < req_negative_cols; ++_) {
+-                data.push_back(CellOccupancyState::Unoccupied());
+-            }
+-            // Push existing columns
+-            for(size_t col = 0; col < old_col_count; ++col) {
+-                data.push_back(this->inner.get(row, col).unwrap());
+-            }
+-            // Push new positive columns
+-            for(int16_t _ = 0; _ < req_positive_cols; ++_) {
+-                data.push_back(CellOccupancyState::Unoccupied());
+-            }
+-        }
+-
+-        // Push new negative rows
+-        for(size_t _ = 0; _ < (static_cast<size_t>(req_positive_rows) * new_col_count); ++_) {
+-            data.push_back(CellOccupancyState::Unoccupied());
++        std::vector<CellOccupancyState> data(new_row_count * new_col_count,
++                                               CellOccupancyState::Unoccupied());
++        for (size_t row = 0; row < old_row_count; ++row) {
++            for (size_t col = 0; col < old_col_count; ++col) {
++                data[(row + req_negative_rows) * new_col_count + col + req_negative_cols] =
++                    this->inner.get(row, col).unwrap();
++            }
+         }
+ 
+@@ -286,4 +267,8 @@
+         const auto track_computed_index = track_counts.oz_line_to_next_track(start_at);
+ 
++        const auto limit = track_type.type() == AbsoluteAxis::Type::Horizontal
++            ? this->inner.rows() : this->inner.cols();
++        if (track_computed_index < 0 || static_cast<size_t>(track_computed_index) >= limit)
++            return None;
+         const auto maybe_index = [&]
+         {
+--- a/include/taffy/compute/grid/placement.hpp
++++ b/include/taffy/compute/grid/placement.hpp
+@@ -410,5 +410,7 @@
+     const auto secondary_placement_style = placement.get(primary_axis.other_axis());
+ 
+-    const auto primary_span = primary_placement_style.indefinite_span();
++    const auto primary_span = primary_placement_style.is_definite()
++        ? primary_placement_style.resolve_definite_grid_lines().span()
++        : primary_placement_style.indefinite_span();
+     const auto secondary_span = secondary_placement_style.indefinite_span();
+     const auto has_definite_primary_axis_position = primary_placement_style.is_definite();
+@@ -464,5 +466,6 @@
+             // If the primary index is out of bounds, then increment the secondary index and reset the primary
+             // index back to the start of the grid
+-            const auto primary_out_of_bounds = _primary_span.end > primary_axis_grid_end_line;
++            const auto primary_out_of_bounds = _primary_span.end > primary_axis_grid_end_line
++                && primary_idx != primary_axis_grid_start_line;
+             if( primary_out_of_bounds ) {
+                 secondary_idx += 1;
+--- a/include/taffy/compute/grid/explicit_grid.hpp
++++ b/include/taffy/compute/grid/explicit_grid.hpp
+@@ -253,5 +253,5 @@
+                     const auto max_size = sizing_function.max.definite_value(parent_size);
+                     const auto min_size = sizing_function.max.definite_value(parent_size);
+-                    return max_size.map<float>([&](float max) { return MaybeMath(max).maybe_min(min_size); }).Or(min_size).unwrap();
++                    return std::max(1.0f, std::max(max_size.unwrap_or(0.0f), min_size.unwrap_or(0.0f)));
+                 };
+ 
+@@ -305,7 +305,7 @@
+                     // In all cases we add the additional repetition that was already accounted for in the special-case computation above
+                     if( size_is_maximum ) {
+-                        return static_cast<uint16_t>(floor(num_repetition_that_fit)) + 1;
++                        return static_cast<uint16_t>(floor(std::min(999.0f, num_repetition_that_fit))) + 1;
+                     } else {
+-                        return static_cast<uint16_t>(ceil(num_repetition_that_fit)) + 1;
++                        return static_cast<uint16_t>(ceil(std::min(999.0f, num_repetition_that_fit))) + 1;
+                     }
+                 }

@@ -1,6 +1,26 @@
 function check(v, message) {
   if (!v) throw new Error(message);
 }
+const palette = document.createElement("canvas").getContext("2d");
+palette.fillStyle = "LiMe";
+palette.strokeStyle = "RebeccaPurple";
+palette.fillStyle = "invalid-color";
+palette.strokeStyle = "invalid-color";
+check(palette.fillStyle === "#00ff00" && palette.strokeStyle === "#663399", "CSS color state");
+palette.fillRect(0, 0, 1, 1);
+check(palette.getImageData(0, 0, 1, 1).data.join(",") === "0,255,0,255", "named color raster");
+const tile = document.createElement("canvas");
+tile.width = 2;
+tile.height = 1;
+const tileCtx = tile.getContext("2d");
+tileCtx.fillStyle = "red";
+tileCtx.fillRect(0, 0, 1, 1);
+const pat = palette.createPattern(tile, "repeat-x");
+tileCtx.clearRect(0, 0, 2, 1);
+pat.setTransform({e: 1});
+palette.fillStyle = pat;
+palette.fillRect(1, 0, 4, 2);
+check(pat instanceof CanvasPattern && palette.getImageData(3, 0, 1, 1).data.join(",") === "255,0,0,255" && palette.getImageData(3, 1, 1, 1).data[3] === 0, "snapshot, transform and repeat-x pattern");
 const canvas = document.getElementById("scene"),
   panel = document.getElementById("panel");
 const gl = canvas.getContext("webgl2", { alpha: false, antialias: false });
@@ -104,6 +124,34 @@ const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
 check(gl.isSync(sync), "native fence");
 gl.deleteSync(sync);
 check(gl.getError() === gl.NO_ERROR, "ES3 driver error");
+const stageBox = document.getElementById("stage").getBoundingClientRect();
+check(stageBox.width === 240 && stageBox.height === 80, "flex container bounds");
+const grid = document.getElementById("tiles"),
+  lead = document.getElementById("lead").getBoundingClientRect(),
+  end = document.getElementById("end").getBoundingClientRect();
+check(getComputedStyle(grid).display === "grid", "computed grid display");
+check(lead.left === 0 && lead.top === 80 && lead.width === 158 && end.left === 164 && end.width === 76 && end.height === 80, "named grid areas and fractional track geometry");
+const styleElement = document.createElement("style");
+document.head.appendChild(styleElement);
+styleElement.textContent = "#end { width: 55px; }";
+const sheet = styleElement.sheet, rules = sheet.cssRules;
+check(rules.length === 1 && rules.item(0) === rules[0] && rules[0].selectorText === "#end", "live stylesheet");
+const ix = sheet.insertRule("#end { height: 44px; }", 1);
+check(ix === 1 && rules.length === 2 && document.getElementById("end").getBoundingClientRect().height === 44, "CSSOM insertion changes native layout");
+rules[1].style.height = "51px";
+check(document.getElementById("end").getBoundingClientRect().height === 51, "live declaration changes layout");
+sheet.deleteRule(1);
+sheet.disabled = true;
+check(rules.length === 1 && document.getElementById("end").getBoundingClientRect().width === 76, "disable and remove native style rules");
+document.head.removeChild(styleElement);
+const stress = document.createElement("div");
+stress.style = "display:grid;width:150px;height:20px;grid-template-columns:repeat(auto-fit,minmax(25px,auto))";
+document.body.appendChild(stress);
+const placed = document.createElement("div");
+placed.style = "grid-column:-5/span 8;grid-row:2;height:10px";
+stress.appendChild(placed);
+check(placed.getBoundingClientRect().height === 10 && stress.getBoundingClientRect().width === 150, "auto fit and negative implicit tracks");
+document.body.removeChild(stress);
 const bounds = panel.getBoundingClientRect();
 check(
   bounds.left === 48 && bounds.width === 192 && bounds.height === 40,

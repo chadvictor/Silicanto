@@ -6,7 +6,14 @@ const xhr = new XMLHttpRequest();
 xhr.open("GET", "cases.json", false);
 xhr.send();
 if (xhr.status !== 200) throw Error("Could not load Khronos descriptors");
-const cases = JSON.parse(xhr.responseText);
+const data = JSON.parse(xhr.responseText);
+const cases = data.cases;
+for (const name of data.methods) {
+  if (typeof gl[name] !== "function") throw Error("Missing context method " + name);
+}
+for (const name of Object.keys(data.constants)) {
+  if (gl[name] !== data.constants[name]) throw Error("Wrong context constant " + name);
+}
 const results = [];
 function compile(kind, source) {
   const shader = gl.createShader(kind);

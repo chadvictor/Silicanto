@@ -17,7 +17,7 @@ class WebCanvas extends JsObject {
 
 	var fill = 0;
 	var alpha = 255;
-	var style = "#000000";
+	var style:Dynamic = "#000000";
 	var op = "source-over";
 	var opacity:Float = 1.;
 	var transform = new WebTransform();
@@ -25,7 +25,7 @@ class WebCanvas extends JsObject {
 	var clips:Array<WebPath> = [];
 	var stroke = 0;
 	var strokeAlpha = 255;
-	var strokeStyle = "#000000";
+	var strokeStyle:Dynamic = "#000000";
 	var lineWidth = 1.;
 	var text = new WebText();
 
@@ -34,12 +34,12 @@ class WebCanvas extends JsObject {
 		text:WebText,
 		opacity:Float,
 		op:String,
-		style:String,
+		style:Dynamic,
 		fill:Int,
 		alpha:Int,
 		clips:Array<WebPath>,
 		stroke:Int,
-		strokeStyle:String,
+		strokeStyle:Dynamic,
 		strokeAlpha:Int,
 		lineWidth:Float
 	}> = [];
@@ -79,6 +79,7 @@ class WebCanvas extends JsObject {
 			return null;
 		}, false));
 		ctx.define("canvas", this);
+		ctx.define("createPattern", Js.fn((_, a) -> WebPattern.create(Js.at(a, 0), Js.at(a, 1)), false));
 		ctx.define("imageSmoothingEnabled", true);
 		ctx.getters.set("globalAlpha", () -> opacity);
 		ctx.setters.set("globalAlpha", v -> {
@@ -167,6 +168,9 @@ class WebCanvas extends JsObject {
 		ctx.getters.set("strokeStyle", () -> strokeStyle);
 		ctx.setters.set("strokeStyle", v -> {
 			final a = alpha, f = fill, old = style;
+			style = strokeStyle;
+			fill = stroke;
+			alpha = strokeAlpha;
 			setStyle(v);
 			stroke = fill;
 			strokeAlpha = alpha;
@@ -233,10 +237,13 @@ class WebCanvas extends JsObject {
 					return Js.u;
 				final scale = advance > limit ? limit / advance : 1.;
 				final x = Js.num(Js.at(a, 1)) + (text.dx(b) + b.getFloat(4)) * scale, y = Js.num(Js.at(a, 2)) + text.dy(b) + b.getFloat(8);
+				final painter = patternPaint(outline ? strokeStyle : style);
 				final col = outline ? stroke : fill, opacityByte = (outline ? strokeAlpha : alpha) * opacity;
 				project(x, y, w * scale, h, (i, u, v) -> {
 					final coverage = b.get(36 + Std.int(v * h) * w + Std.int(u * w));
-					if (coverage > 0)
+					if (coverage > 0 && painter != null)
+						painter(i, coverage / 255);
+					else if (coverage > 0)
 						WebRaster.blend(pixels, i, col >> 16, (col >> 8) & 255, col & 255, WebRaster.byte(coverage * opacityByte / 255), op);
 				});
 				return Js.u;
@@ -279,28 +286,31 @@ class WebCanvas extends JsObject {
 		}, false));
 	}
 
+	function patternPaint(value:Dynamic):(Int, Float) -> Void {
+		return Std.isOfType(value, WebPattern) ? (cast value : WebPattern).painter(this, transform, op, opacity) : null;
+	}
+
 	function setStyle(v:Dynamic) {
-		var s = Js.str(v).toLowerCase();
-		s = switch s {
-			case "red": "#ff0000";
-			case "green": "#008000";
-			case "blue": "#0000ff";
-			case "white": "#ffffff";
-			case "black": "#000000";
-			case "transparent": "rgba(0,0,0,0)";
-			default: s;
-		};
-		if (~/^#[0-9a-f]{3}$/.match(s))
-			s = "#" + s.charAt(1) + s.charAt(1) + s.charAt(2) + s.charAt(2) + s.charAt(3) + s.charAt(3);
-		if (~/^#[0-9a-f]{6}$/.match(s)) {
-			style = s;
-			fill = Std.parseInt("0x" + s.substr(1));
-			alpha = 255;
+		if (Std.isOfType(v, WebPattern)) {
+			style = v;
+			return;
+		}
+		var s = StringTools.trim(Js.str(v)).toLowerCase();
+		if (WebColors.names.exists(s))
+			s = WebColors.names.get(s);
+		else if (s == "transparent")
+			s = "rgba(0,0,0,0)";
+		if (~/^#(?:[0-9a-f]{3}|[0-9a-f]{4})$/.match(s))
+			s = "#" + [for (i in 1...s.length) s.charAt(i) + s.charAt(i)].join("");
+		if (~/^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/.match(s)) {
+			fill = Std.parseInt("0x" + s.substr(1, 6));
+			alpha = s.length == 9 ? Std.parseInt("0x" + s.substr(7, 2)) : 255;
+			style = alpha == 255 ? s.substr(0, 7) : 'rgba(${fill >> 16}, ${(fill >> 8) & 255}, ${fill & 255}, ${Math.round(alpha * 1000 / 255) / 1000})';
 			return;
 		}
 		final rgba = ~/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([.\d]+)\s*)?\)$/;
 		if (!rgba.match(s))
-			throw "E-CANVAS: unsupported fill style " + s;
+			return; // Invalid CSS colors leave the drawing state unchanged.
 		fill = (WebRaster.byte(Std.parseFloat(rgba.matched(1))) << 16) | (WebRaster.byte(Std.parseFloat(rgba.matched(2))) << 8) | WebRaster.byte(Std.parseFloat(rgba.matched(3)));
 		final part = rgba.matched(4);
 		alpha = part == null ? 255 : WebRaster.byte(Std.parseFloat(part) * 255);
@@ -351,9 +361,12 @@ class WebCanvas extends JsObject {
 
 	function rect(a:Array<Dynamic>, clear:Bool) {
 		final x = Js.num(Js.at(a, 0)), y = Js.num(Js.at(a, 1)), w = Js.num(Js.at(a, 2)), h = Js.num(Js.at(a, 3));
+		final painter = clear ? null : patternPaint(style);
 		project(x, y, w, h, (i, _, _) -> {
 			if (clear)
 				pixels.setInt32(i, 0);
+			else if (painter != null)
+				painter(i, 1);
 			else if (op == "source-over" && alpha == 255 && opacity == 1) {
 				pixels.set(i, fill >> 16);
 				pixels.set(i + 1, (fill >> 8) & 255);
@@ -375,12 +388,16 @@ class WebCanvas extends JsObject {
 		if (p.contours.length == 0)
 			return;
 		final r = isStroke ? lineWidth * Math.sqrt(transform.a * transform.a + transform.b * transform.b) * 0.5 : 0.;
+		final painter = patternPaint(isStroke ? strokeStyle : style);
 		final col = isStroke ? stroke : fill, a = WebRaster.byte((isStroke ? strokeAlpha : alpha) * opacity);
 		for (y in Math.floor(Math.max(0, p.minY - r))...Math.ceil(Math.min(height, p.maxY + r)))
 			for (x in Math.floor(Math.max(0, p.minX - r))...Math.ceil(Math.min(width, p.maxX + r))) {
 				final px = x + 0.5, py = y + 0.5;
-				if (visible(px, py) && (isStroke ? p.onStroke(px, py, r) : p.contains(px, py)))
-					WebRaster.blend(pixels, (y * width + x) * 4, col >> 16, (col >> 8) & 255, col & 255, a, op);
+				if (visible(px, py) && (isStroke ? p.onStroke(px, py, r) : p.contains(px, py))) {
+					final i = (y * width + x) * 4;
+					if (painter != null) painter(i, 1);
+					else WebRaster.blend(pixels, i, col >> 16, (col >> 8) & 255, col & 255, a, op);
+				}
 			}
 	}
 

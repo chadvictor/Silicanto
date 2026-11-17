@@ -152,6 +152,7 @@ const report = {
   stage: options.stage,
   oracle: "native-rgba-timeline-v1",
   engine: version,
+  engineSHA256,
   revision: rev,
   target: optionsTarget,
   catalogSize: catalog.length,
@@ -292,14 +293,9 @@ async function execute(project, args, index) {
       maxBuffer: 4 << 20,
     });
   } catch (error) {
-    const output =
-      error.stdout
-        ?.split("\n")
-        .filter((line) => /^Error :|Exception|E-[A-Z]+:/.test(line))
-        .join("\n") ||
-      error.stderr?.trim() ||
-      error.stdout?.trim() ||
-      error.message;
+    const stdout = error.stdout?.trim() ?? "";
+    const first = stdout.search(/^(?:Error :|Exception|E-[A-Z]+:)/m);
+    const output = (first >= 0 ? stdout.slice(first) : error.stderr?.trim() || stdout) || error.message;
     throw Error(output.slice(0, 4000));
   }
 }

@@ -1,0 +1,2 @@
+# Preserve upstream whitespace carried by unified diff context lines.
+payloads/layout/*.patch -whitespace

@@ -216,6 +216,8 @@ try {
     ];
     assert.deepEqual(pixel(1, 1), [45, 255, 0]);
     assert.deepEqual(pixel(100, 35), [250, 100, 10]);
+    assert.deepEqual(pixel(157, 100), [18, 104, 55]);
+    assert.deepEqual(pixel(165, 100), [222, 167, 33]);
     console.log(
       t +
         ": GPU, page pixels, media playback, HTTP, pointer and keyboard contracts passed across 45 frames",

@@ -17,7 +17,16 @@ const { values } = parseArgs({
   options: { checkout: { type: "string" }, out: { type: "string" } },
 });
 const group = "sdk/tests/conformance/ogles/GL/build";
-const folder = join(sourceTree(values.checkout), "ogles/GL/build");
+const tree = sourceTree(values.checkout);
+const folder = join(tree, "ogles/GL/build");
+const page = (file) => readFileSync(join(tree, "context", file + ".html"), "utf8");
+const methodList = page("methods").match(/const methods = \[([\s\S]*?)\];/)[1];
+const methods = [...methodList.matchAll(/"(\w+)"/g)].map(m => m[1]);
+const enumList = page("constants-and-properties").match(/var constants = \{([\s\S]*?)\};/)[1];
+const constants = Object.fromEntries([...enumList.matchAll(/^\s*(\w+)\s*:\s*(0x[\da-f]+|\d+)\s*,?/gim)]
+  .map(([,name, value]) => [name, Number(value)]));
+assert.equal(methods.length, 136);
+assert.equal(Object.keys(constants).length, 296);
 const cases = readdirSync(folder)
   .filter((name) => name.endsWith(".html"))
   .sort()
@@ -43,7 +52,7 @@ assert.equal(new Set(cases.map((c) => c.name)).size, 178);
 mkdirSync(join(root, "dist"), { recursive: true });
 const work = mkdtempSync(join(root, "dist/khronos-"));
 try {
-  writeFileSync(join(work, "cases.json"), JSON.stringify(cases));
+  writeFileSync(join(work, "cases.json"), JSON.stringify({cases, methods, constants}));
   const results = {};
   for (const target of ["cpp", "java"]) {
     const dest = join(work, target);
@@ -81,6 +90,7 @@ try {
       result.map((c) => c.name),
       cases.map((c) => c.name),
     );
+    console.log(target + ": all 136 context methods callable and 296 enum values matched the Khronos list");
     const failures = result.filter((c) => !c.passed);
     results[target] = result;
     console.log(
@@ -97,7 +107,7 @@ try {
   if (values.out)
     writeFileSync(
       values.out,
-      JSON.stringify({ revision, group, results }, null, 2) + "\n",
+      JSON.stringify({ revision, group, contextMethods: methods, contextConstants: constants, results }, null, 2) + "\n",
     );
 } finally {
   rmSync(work, { recursive: true, force: true });

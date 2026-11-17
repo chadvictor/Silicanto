@@ -5,10 +5,12 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  renameSync,
   readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs, promisify } from "node:util";
@@ -130,12 +132,13 @@ for (const m of modules) {
 }
 assert.ok(cases.length, "No static, self-contained reftest pairs in selection");
 mkdirSync(join(root, "dist"), { recursive: true });
-const work = mkdtempSync(join(root, "dist/wpt-css-")),
+const work = mkdtempSync(join(tmpdir(), "silicanto-wpt-css-")),
   log = new Array(cases.length);
 const report = () => {
-  if (values.out)
+  if (values.out) {
+    const partial = values.out + ".partial";
     writeFileSync(
-      values.out,
+      partial,
       JSON.stringify(
         {
           revision,
@@ -147,6 +150,8 @@ const report = () => {
         2,
       ) + "\n",
     );
+    renameSync(partial, values.out);
+  }
 };
 try {
   const dest = join(work, "cpp");
@@ -227,7 +232,7 @@ try {
         log[i] = {
           ...c,
           status: "failed",
-          error: String(e.message).slice(0, 300),
+          error: String(e.stderr?.trim() || e.signal || e.message).slice(0, 1400),
         };
       }
       if (++done % 50 === 0) report();

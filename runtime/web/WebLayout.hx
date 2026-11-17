@@ -16,6 +16,15 @@ class WebLayout {
 		final css = new WebStyle(tag);
 		if (DesktopServices.available())
 			selectors(o, o);
+		if (DesktopServices.available() && (tag == "style" || tag == "link")) {
+			o.getters.set("sheet", () -> {
+				if ((tag == "link" && css.sheet == null) || o.read("parentNode") == null)
+					return null;
+				if (css.rules == null)
+					css.rules = new WebStyleSheet(o, css.sheet != null ? css.sheet : (css.html != null ? css.html : Js.str(o.read("textContent"))));
+				return css.rules;
+			});
+		}
 		o.getters.set("style", () -> css);
 		o.setters.set("style", v -> {
 			css.parse(Js.str(v));
@@ -24,6 +33,7 @@ class WebLayout {
 		o.getters.set("textContent", () -> css.text != null ? css.text : plain(o));
 		o.setters.set("textContent", v -> {
 			clear(o);
+			css.rules = null;
 			css.text = v == null ? "" : Js.str(v);
 			css.html = null;
 			styled = true;
@@ -31,6 +41,7 @@ class WebLayout {
 		o.getters.set("innerHTML", () -> css.html != null ? css.html : StringTools.htmlEscape(css.text == null ? "" : css.text));
 		o.setters.set("innerHTML", v -> {
 			clear(o);
+			css.rules = null;
 			css.html = Js.str(v);
 			css.text = null;
 			styled = true;
@@ -133,7 +144,9 @@ class WebLayout {
 				Reflect.setField(images, key, data);
 			}
 			out.add(">");
-			if (css.sheet != null)
+			if (css.rules != null)
+				out.add(css.rules.serialize());
+			else if (css.sheet != null)
 				out.add(css.sheet);
 			else if (css.html != null)
 				out.add(css.html);

@@ -1,0 +1,153 @@
+--- a/include/litehtml/element.h
++++ b/include/litehtml/element.h
+@@ -216,3 +216,3 @@
+ 		if (css().get_display() == display_block ||
+-			css().get_display() == display_flex ||
++			is_flex_or_grid(css().get_display()) ||
+ 			css().get_display() == display_table ||
+--- a/include/litehtml/html_tag.h
++++ b/include/litehtml/html_tag.h
+@@ -35,2 +35,3 @@
+ 		explicit html_tag(const shared_ptr<document>& doc);
++		const property_value& declared_property(const char* name) const {return m_style.get_property(_id(name));}
+ 		// constructor for anonymous wrapper boxes
+--- a/include/litehtml/render_item.h
++++ b/include/litehtml/render_item.h
+@@ -427,3 +427,3 @@
+ 			auto par = parent();
+-			if(par && (par->css().get_display() == display_inline_flex || par->css().get_display() == display_flex))
++			if(par && (is_inline_flex_or_grid(par->css().get_display()) || is_flex_or_grid(par->css().get_display())))
+ 			{
+--- a/include/litehtml/types.h
++++ b/include/litehtml/types.h
+@@ -424,3 +424,3 @@
+ 
+-#define  style_display_strings		"none;block;inline;inline-block;inline-table;list-item;table;table-caption;table-cell;table-column;table-column-group;table-footer-group;table-header-group;table-row;table-row-group;inline-text;flex;inline-flex"
++#define  style_display_strings		"none;block;inline;inline-block;inline-table;list-item;table;table-caption;table-cell;table-column;table-column-group;table-footer-group;table-header-group;table-row;table-row-group;inline-text;flex;inline-flex;grid;inline-grid"
+ 
+@@ -446,3 +446,7 @@
+ 		display_inline_flex,
+-	};
++		display_grid,
++		display_inline_grid,
++    };
++    inline bool is_flex_or_grid(style_display d) { return d==display_flex || d==display_grid; }
++    inline bool is_inline_flex_or_grid(style_display d) { return d==display_inline_flex || d==display_inline_grid; }
+ 
+--- a/src/css_properties.cpp
++++ b/src/css_properties.cpp
+@@ -366,3 +366,3 @@
+ 	m_font_style		= (font_style) el->get_property<int>(       _font_style_,		true, font_style_normal,							offset(m_font_style));
+-	bool propagate_decoration = !is_one_of(m_display, display_inline_block, display_inline_table, display_inline_flex) &&
++	bool propagate_decoration = !is_one_of(m_display, display_inline_block, display_inline_table, display_inline_flex, display_inline_grid) &&
+ 								m_float == float_none && !is_one_of(m_el_position, element_position_absolute, element_position_fixed);
+@@ -502,3 +502,3 @@
+ {
+-	if (m_display == display_flex || m_display == display_inline_flex)
++	if (is_flex_or_grid(m_display) || is_inline_flex_or_grid(m_display))
+ 	{
+@@ -513,3 +513,3 @@
+ 	auto parent = el->parent();
+-	if (parent && (parent->css().m_display == display_flex || parent->css().m_display == display_inline_flex))
++	if (parent && (is_flex_or_grid(parent->css().m_display) || is_inline_flex_or_grid(parent->css().m_display)))
+ 	{
+@@ -530,5 +530,5 @@
+ 			m_display = display_table;
+-		} else if(m_display == display_inline_flex)
+-		{
+-			m_display = display_flex;
++		} else if(is_inline_flex_or_grid(m_display))
++		{
++			m_display = m_display==display_inline_grid?display_grid:display_flex;
+ 		}
+--- a/src/element.cpp
++++ b/src/element.cpp
+@@ -5,2 +5,3 @@
+ #include "render_flex.h"
++#include "render_grid.h"
+ #include "render_inline.h"
+@@ -55,3 +56,3 @@
+ 		   css().get_display() == display_inline_text ||
+-		   css().get_display() == display_inline_flex)
++		   is_inline_flex_or_grid(css().get_display()))
+ 	{
+@@ -66,3 +67,3 @@
+ 		   css().get_display() == display_inline_block ||
+-		   css().get_display() == display_inline_flex)
++		   is_inline_flex_or_grid(css().get_display()))
+ 	{
+@@ -157,5 +158,7 @@
+ 		ret = std::make_shared<render_item_inline>(shared_from_this());
+-	} else if(css().get_display() == display_flex || css().get_display() == display_inline_flex)
+-	{
+-		ret = std::make_shared<render_item_flex>(shared_from_this());
++	} else if(is_flex_or_grid(css().get_display()) || is_inline_flex_or_grid(css().get_display()))
++	{
++		if(css().get_display()==display_grid || css().get_display()==display_inline_grid)
++			ret=std::make_shared<render_item_grid>(shared_from_this());
++		else ret = std::make_shared<render_item_flex>(shared_from_this());
+ 	}
+@@ -279,3 +282,3 @@
+ 		auto par = parent();
+-		if(par && (par->css().get_display() == display_inline_flex || par->css().get_display() == display_flex))
++		if(par && (is_inline_flex_or_grid(par->css().get_display()) || is_flex_or_grid(par->css().get_display())))
+ 		{
+@@ -286,4 +289,4 @@
+ 		   m_css.get_display() == display_table_cell ||
+-		   m_css.get_display() == display_inline_flex ||
+-		   m_css.get_display() == display_flex ||
++		   is_inline_flex_or_grid(m_css.get_display()) ||
++		   is_flex_or_grid(m_css.get_display()) ||
+ 		   m_css.get_display() == display_table_caption ||
+--- a/src/iterators.cpp
++++ b/src/iterators.cpp
+@@ -62,3 +62,3 @@
+         el->src_el()->css().get_display() == display_inline_block ||
+-        el->src_el()->css().get_display() == display_inline_flex ||
++        is_inline_flex_or_grid(el->src_el()->css().get_display()) ||
+         el->src_el()->css().get_float() != float_none)
+--- a/src/render_flex.cpp
++++ b/src/render_flex.cpp
+@@ -385,2 +385,3 @@
+     children() = new_children;
++    src_el()->add_render(shared_from_this());
+ 
+--- a/src/render_item.cpp
++++ b/src/render_item.cpp
+@@ -882,3 +882,3 @@
+                         el->src_el()->draw(hdc, pos.x, pos.y, clip, el);
+-                        if (el->src_el()->css().get_display() == display_inline_block || el->src_el()->css().get_display() == display_inline_flex)
++                        if (el->src_el()->css().get_display() == display_inline_block || is_inline_flex_or_grid(el->src_el()->css().get_display()))
+                         {
+@@ -1005,3 +1005,3 @@
+                                 el->src_el()->css().get_display() == display_inline_table ||
+-                                el->src_el()->css().get_display() == display_inline_flex)
++                                is_inline_flex_or_grid(el->src_el()->css().get_display()))
+                         {
+@@ -1048,3 +1048,3 @@
+                     if(	el->src_el()->css().get_float() == float_none &&
+-                           el->src_el()->css().get_display() != display_inline_block && el->src_el()->css().get_display() != display_inline_flex)
++                           el->src_el()->css().get_display() != display_inline_block && !is_inline_flex_or_grid(el->src_el()->css().get_display()))
+                     {
+@@ -1338,3 +1338,3 @@
+ 			auto *width = &css().get_width();
+-			if(par && (par->css().get_display() == display_flex || par->css().get_display() == display_inline_flex))
++			if(par && (is_flex_or_grid(par->css().get_display()) || is_inline_flex_or_grid(par->css().get_display())))
+ 			{
+@@ -1362,3 +1362,3 @@
+ 			auto *height = &css().get_height();
+-			if(par && (par->css().get_display() == display_flex || par->css().get_display() == display_inline_flex))
++			if(par && (is_flex_or_grid(par->css().get_display()) || is_inline_flex_or_grid(par->css().get_display())))
+ 			{
+@@ -1431,3 +1431,3 @@
+ 		auto par = parent();
+-		if (par && (par->css().get_display() == display_flex || par->css().get_display() == display_inline_flex)
++		if (par && (is_flex_or_grid(par->css().get_display()) || is_inline_flex_or_grid(par->css().get_display()))
+ 			&& (par->css().get_flex_direction() == flex_direction_row
+--- a/src/style.cpp
++++ b/src/style.cpp
+@@ -529,3 +529,3 @@
+ 	default:
+-		if (_s(name).substr(0, 2) == "--" && _s(name).size() >= 3 &&
++		if ((_s(name).substr(0, 2) == "--" || _s(name).substr(0, 5) == "grid-" || _s(name)=="gap" || _s(name)=="row-gap" || _s(name)=="column-gap" || _s(name)=="justify-items" || _s(name)=="justify-self") &&
+ 			(value.empty() || is_declaration_value(value)))

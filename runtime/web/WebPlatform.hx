@@ -21,6 +21,7 @@ class WebPlatform {
 
 	public static var canvasType:JsObject;
 	public static var contextType:JsObject;
+	public static var patternType:JsObject;
 
 	static function interfaceType(name:String):JsObject {
 		final c = Js.fn((_, _) -> {
@@ -99,6 +100,7 @@ class WebPlatform {
 		#end
 		canvasType = interfaceType("HTMLCanvasElement");
 		contextType = interfaceType("CanvasRenderingContext2D");
+		patternType = interfaceType("CanvasPattern");
 		final image = Js.fn((self, _) -> new WebImage((cast self : JsObject).prototype), true);
 		Js.realm.define("Image", image);
 		Js.realm.define("HTMLImageElement", image);

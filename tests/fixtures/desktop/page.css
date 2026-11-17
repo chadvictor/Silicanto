@@ -15,3 +15,14 @@
   background-color: #fa640a;
   color: black;
 }
+
+#tiles {
+  display: grid;
+  width: 240px;
+  height: 80px;
+  gap: 6px;
+  grid-template-columns: repeat(3, minmax(10px, 1fr));
+  grid-template-areas: "lead lead end";
+}
+#lead { grid-area: lead; background-color: #126837; }
+#end { grid-area: end; background-color: #dea721; }
