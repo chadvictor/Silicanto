@@ -80,3 +80,17 @@ if (
   (1.25).toFixed(20) !== "1.25000000000000000000"
 )
   throw new Error("IEEE-754 decimal rounding");
+
+const parser = new DOMParser();
+const marker = parser.parseFromString(
+  '<top><!-- " > --><char value=">" other="&gt;"/><text><![CDATA[<n value=">"/>]]></text></top>',
+  "text/xml",
+);
+if (
+  marker.documentElement.firstElementChild.getAttribute("value") !== ">" ||
+  marker.getElementsByTagName("text")[0].textContent !== '<n value=">"/>' ||
+  !parser
+    .parseFromString('<a one=">" two="<"/>', "text/xml")
+    .getElementsByTagName("parsererror").length
+)
+  throw new Error("quoted XML delimiters");

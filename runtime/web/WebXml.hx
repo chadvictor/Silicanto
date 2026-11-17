@@ -73,9 +73,59 @@ class WebXml extends JsObject {
 		}
 	}
 
+	// XML 1.0 AttValue permits literal '>'. Haxe's strict parser requires '&gt;'.
+	// Re-encode only element attributes, preserving comments, CDATA, PIs and DTDs.
+	static function strictXml(text:String):Xml {
+		try {
+			return haxe.xml.Parser.parse(text, true);
+		} catch (e:haxe.xml.Parser.XmlParserException) {
+			if (e.message != "Invalid unescaped > in attribute value")
+				throw e;
+		}
+		var cursor = 0, start = 0;
+		final out = new StringBuf();
+		while (cursor < text.length) {
+			final tag = text.indexOf("<", cursor);
+			if (tag < 0)
+				break;
+			final endMarker = text.substr(tag, 4) == "<!--" ? "-->" : text.substr(tag, 9) == "<![CDATA[" ? "]]>" : text.substr(tag, 2) == "<?" ? "?>" : null;
+			if (endMarker != null) {
+				final end = text.indexOf(endMarker, tag + 2);
+				if (end < 0)
+					break;
+				cursor = end + endMarker.length;
+				continue;
+			}
+			final declaration = text.charAt(tag + 1) == "!";
+			var quote = 0, subset = 0;
+			cursor = tag + 1;
+			while (cursor < text.length) {
+				final n = StringTools.fastCodeAt(text, cursor++);
+				if (quote != 0) {
+					if (n == quote)
+						quote = 0;
+					else if (n == 62 && !declaration) {
+						out.addSub(text, start, cursor - 1 - start);
+						out.add("&gt;");
+						start = cursor;
+					}
+				} else if (n == 34 || n == 39)
+					quote = n;
+				else if (declaration && n == 91)
+					subset++;
+				else if (declaration && n == 93 && subset > 0)
+					subset--;
+				else if (n == 62 && subset == 0)
+					break;
+			}
+		}
+		out.addSub(text, start, text.length - start);
+		return haxe.xml.Parser.parse(out.toString(), true);
+	}
+
 	public static function parse(text:String):WebXml {
 		try {
-			final xml = haxe.xml.Parser.parse(text, true), roots = [for (e in xml.elements()) e];
+			final xml = strictXml(text), roots = [for (e in xml.elements()) e];
 			if (roots.length != 1)
 				throw "XML document needs one root element";
 			for (n in xml)

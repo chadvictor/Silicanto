@@ -39,7 +39,9 @@ class JsStandard {
 		if (value == null || value == Js.u)
 			throw "TypeError: null receiver";
 		final array = Std.isOfType(value, Array), string = Std.isOfType(value, String), typed = Std.isOfType(value, JsTypedArray);
-		if (array || string || typed) {
+		if (array)
+			return Js.has(value, k);
+		if (string || typed) {
 			if (k == "length" && !typed)
 				return true;
 			final i = Std.parseInt(k);
@@ -52,7 +54,9 @@ class JsStandard {
 	public static function keys(value:Dynamic):Array<String> {
 		if (value == null || value == Js.u)
 			throw "TypeError: null receiver";
-		if (Std.isOfType(value, Array) || Std.isOfType(value, String) || Std.isOfType(value, JsTypedArray))
+		if (Std.isOfType(value, Array))
+			return Js.keys(value);
+		if (Std.isOfType(value, String) || Std.isOfType(value, JsTypedArray))
 			return [for (i in 0...Std.int(Js.num(Js.get(value, "length")))) Std.string(i)];
 		if (!Std.isOfType(value, JsObject))
 			return [];

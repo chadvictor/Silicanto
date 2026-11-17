@@ -11,6 +11,12 @@ class Js {
 	public static final tdz:Dynamic = new JsUninitialized();
 	static final cache:Map<Int, JsObject> = [];
 	static final globals:Map<String, Dynamic> = [];
+	// Dense elements stay in the target Array. Allocate a property bag only for named writes.
+	#if (cpp || java)
+	static final arrayProperties = new haxe.ds.WeakMap<Array<Dynamic>, JsObject>();
+	#else
+	static final arrayProperties = new haxe.ds.ObjectMap<Array<Dynamic>, JsObject>();
+	#end
 	static final ordinary = new JsObject();
 	static var ready = false;
 
@@ -208,6 +214,11 @@ class Js {
 			final a:Array<Dynamic> = receiver, i = index(k);
 			if (i >= 0)
 				return at(a, i);
+			if (k != "length") {
+				final props = arrayProperties.get(a);
+				if (props != null && JsProperties.own(props, k))
+					return props.read(k);
+			}
 			return switch k {
 				case "length": a.length;
 				case "push": fn((r, vs) -> {
@@ -313,6 +324,12 @@ class Js {
 						a.push(u);
 				return value;
 			}
+			var props = arrayProperties.get(a);
+			if (props == null) {
+				props = new JsObject();
+				arrayProperties.set(a, props);
+			}
+			return props.define(k, value);
 		}
 		throw 'TypeError: cannot write ' + k;
 	}
@@ -429,8 +446,10 @@ class Js {
 	}
 
 	public static function keys(value:Dynamic):Array<String> {
-		if (Std.isOfType(value, Array))
-			return [for (i in 0...(cast value : Array<Dynamic>).length) Std.string(i)];
+		if (Std.isOfType(value, Array)) {
+			final a:Array<Dynamic> = value, names = [for (i in 0...a.length) Std.string(i)], props = arrayProperties.get(a);
+			return props == null ? names : names.concat(props.keys);
+		}
 		final found:Array<String> = [];
 		if (Std.isOfType(value, JsObject)) {
 			var ob:JsObject = value;
@@ -471,12 +490,27 @@ class Js {
 		}
 		if (Std.isOfType(value, Array)) {
 			final i = index(k);
-			return k == "length" || (i >= 0 && i < (cast value:Array<Dynamic>).length);
+			final props = arrayProperties.get(cast value);
+			return k == "length" || (i >= 0 && i < (cast value:Array<Dynamic>).length) || (props != null && JsProperties.own(props, k));
 		}
 		throw "TypeError: cannot test " + k + " in " + str(value);
 	}
 
 	public static function remove(value:Dynamic, key:Dynamic):Bool {
+		if (Std.isOfType(value, Array)) {
+			final k = str(key);
+			if (k == "length")
+				return false;
+			if (index(k) < 0) {
+				final a:Array<Dynamic> = value, props = arrayProperties.get(a);
+				if (props == null)
+					return true;
+				final removed = remove(props, k);
+				if (props.keys.length == 0)
+					arrayProperties.remove(a);
+				return removed;
+			}
+		}
 		if (!Std.isOfType(value, JsObject))
 			throw "TypeError: delete requires an ordinary object";
 		final ob:JsObject = value, k = str(key);
