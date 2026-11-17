@@ -28,7 +28,7 @@ npx --no-install silicanto target dist/logic --payload examples/payloads/neko.mj
 neko dist/terrain-neko/neko/Terrain.n
 ```
 
-For a graphics payload, supply a platform-specific Haxe `DesktopSurface` on a higher-priority classpath or implement an equivalent host. The [Java adapter](../payloads/java/haxe/DesktopSurface.hx) consumes the shared [scene upload](../runtime/SceneUpload.hx) and [camera uniforms](../runtime/FrameUniforms.hx); it never sees the original JS. Its Swing/JNI implementation receives generic geometry, lights, camera and frame data. Another platform can reuse that interface and supply its own window, input, renderer and packaging.
+For a graphics payload, supply a platform-specific Haxe `DesktopSurface` on a higher-priority classpath or implement an equivalent host. The [Java adapter](../payloads/java/haxe/DesktopSurface.hx) consumes the shared [scene upload](../runtime/legacy/three/SceneUpload.hx) and [camera uniforms](../runtime/legacy/three/FrameUniforms.hx); it never sees the original JS. Its Swing/JNI implementation receives generic geometry, lights, camera and frame data. Another platform can reuse that interface and supply its own window, input, renderer and packaging.
 
 ## Selection and failure
 

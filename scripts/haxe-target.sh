@@ -15,6 +15,7 @@ if [[ "$graphics" == graphics && ( "$target" == c || "$target" == cpp ) ]]; then
 fi
 case "$target" in
   c)
+    if [[ -f haxe/WebImage.hx ]]; then args+=(--dce full); fi
     haxe "${args[@]}" -D no-compilation --hl c/main.c
     if [[ "$action" == build ]]; then
       bash "$root/scripts/link-hlc.sh" "$stage/c" "$name"
@@ -26,11 +27,20 @@ case "$target" in
   cpp)
     if [[ "$graphics" == graphics ]]; then
       bash "$root/scripts/generate.sh" "$stage"
-      cp "$root/runtime/build.sh" build.sh
+      cp "$root/runtime/legacy/three/build.sh" build.sh
       if [[ "$action" == build ]]; then bash build.sh; fi
     else
       flags=(-D HXCPP_ARM64 -D LEGACY_MACOSX_SDK -D MACOSX_VER=)
-      flags+=(-D no-compilation)
+      flags+=(-D no-compilation -D silicanto_apple_image)
+      if [[ -f haxe/WebWindow.hx ]]; then
+        flags+=(-D silicanto_window)
+        mkdir -p platform
+        cp "$root/payloads/canvas/macos/CanvasWindow.mm" platform/
+        if [[ "$action" == build ]]; then
+          xcrun clang++ -O2 -fobjc-arc -c platform/CanvasWindow.mm -o platform/canvas.o
+          ar rcs platform/libcanvas.a platform/canvas.o
+        fi
+      fi
       export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
       haxe "${args[@]}" --cpp cpp "${flags[@]}"
       if [[ "$action" == build ]]; then (cd cpp && neko "$HXCPP/hxcpp.n" Build.xml haxe); fi
@@ -54,6 +64,7 @@ HTML
     fi
     ;;
   external) haxe "${args[@]}" "$6" ;;
+  neko) mkdir -p neko; haxe "${args[@]}" --neko "neko/$name.n" ;;
   python) mkdir -p python; haxe "${args[@]}" --python python/program.py ;;
   *) echo "Unknown Haxe target $target" >&2; exit 1 ;;
 esac

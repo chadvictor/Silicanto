@@ -35,6 +35,10 @@ jobs:
           java-version: '17'
       - run: npm run setup:java
       - run: npm run test:java
+      - run: npx playwright install chromium
+      - run: npm run test:generic
+      - run: npm ci --prefix tests/phaser4
+      - run: npm run test:source-libraries
       - name: Compile the graphical Java application (no GPU needed to build)
         run: npx --no-install silicanto build examples/nacar/main.js --target java --name Nacar --out dist/ci-java
       - name: Build portable JVM fixture

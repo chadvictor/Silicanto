@@ -1,0 +1,78 @@
+name: Phaser 4 compatibility
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v1.0.0-rc.*", "v1.0.0"]
+permissions:
+  contents: read
+jobs:
+  catalog:
+    runs-on: macos-15
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [java, cpp]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: npm ci
+      - run: npm ci --prefix tests/phaser4
+      - run: npm run setup:c
+      - if: matrix.target == 'java'
+        run: npm run setup:java
+      - run: npx playwright install chromium
+      - name: Emit Haxe for every entry
+        if: matrix.target == 'cpp'
+        run: npm run test:phaser4 -- --stage frontend --out dist/frontend
+      - if: always() && matrix.target == 'cpp'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phaser4-frontend
+          path: dist/frontend/report.json
+          if-no-files-found: error
+      - name: Build, launch and compare every entry
+        if: ${{ !cancelled() }}
+        run: npm run test:phaser4 -- --target ${{ matrix.target }} --out dist/phaser4
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phaser4-${{ matrix.target }}
+          path: dist/phaser4/report.json
+          if-no-files-found: error
+
+  report:
+    needs: catalog
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: phaser4-frontend
+          path: dist/input/frontend
+      - uses: actions/download-artifact@v4
+        with:
+          name: phaser4-cpp
+          path: dist/input/cpp
+      - uses: actions/download-artifact@v4
+        with:
+          name: phaser4-java
+          path: dist/input/java
+      - name: Summarize the complete catalog, including failures
+        run: node tests/phaser4/results.mjs dist/input dist/report "$GITHUB_SHA"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phaser4-compatibility
+          path: dist/report
+          if-no-files-found: error

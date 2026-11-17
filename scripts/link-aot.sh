@@ -15,7 +15,7 @@ for lib in libEGL libGLESv2; do
   install_name_tool -id "@rpath/$lib.dylib" "$libs/$lib.dylib"
 done
 clang -O1 -DNDEBUG -fno-strict-aliasing -fno-strict-overflow -Ihermes/include -Ihermes/public -Ibuild/lib/config -c "$stage/app.c" -o "$stage/app.o"
-clang++ -std=c++20 -fobjc-arc -DNDEBUG -O2 -Iinclude -Ihermes/API/jsi -Ihermes/API -Ihermes/public -Iexpo/common -include expo/common/pch.h "$root/runtime/aot/host.mm" "$stage/app.o" libraries/libexgl.a -L"$libs" -lhermesvm -lEGL -lGLESv2 -framework AppKit -framework QuartzCore -Wl,-rpath,@executable_path/../Frameworks -o "$mac/$name"
+clang++ -std=c++20 -fobjc-arc -DNDEBUG -O2 -Iinclude -Ihermes/API/jsi -Ihermes/API -Ihermes/public -Iexpo/common -include expo/common/pch.h "$root/runtime/legacy/three/aot/host.mm" "$stage/app.o" libraries/libexgl.a -L"$libs" -lhermesvm -lEGL -lGLESv2 -framework AppKit -framework QuartzCore -Wl,-rpath,@executable_path/../Frameworks -o "$mac/$name"
 cp hermes/LICENSE "$licenses/hermes.txt"
 cp expo/LICENSE "$licenses/expo-gl.txt"
 cp "$root/node_modules/three/LICENSE" "$licenses/three.txt"

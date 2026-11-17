@@ -1,0 +1,6 @@
+{
+  "name": "silicanto-phaser-acceptance",
+  "private": true,
+  "description": "Pinned upstream engine used only by the acceptance suite",
+  "dependencies": { "phaser": "4.1.0" }
+}
