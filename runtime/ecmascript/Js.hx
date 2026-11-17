@@ -543,6 +543,7 @@ class Js {
 	static function boot():Void {
 		if (!ready) {
 			ready = true;
+			globals.set("eval", JsEval.install());
 			for (whole in [false, true]) {
 				globals.set(whole ? "encodeURI" : "encodeURIComponent", fn((_, a) -> JsUri.encode(str(at(a, 0)), whole), false));
 				globals.set(whole ? "decodeURI" : "decodeURIComponent", fn((_, a) -> JsUri.decode(str(at(a, 0)), whole), false));
@@ -657,7 +658,7 @@ class Js {
 				ap.values.set(k, get(([] : Array<Dynamic>), k));
 			array.define("isArray", fn((_, a) -> Std.isOfType(at(a, 0), Array), false));
 			globals.set("Array", array);
-			for (k in ["Error", "TypeError", "RangeError", "ReferenceError", "URIError", "SyntaxError"]) {
+			for (k in ["Error", "TypeError", "RangeError", "ReferenceError", "URIError", "SyntaxError", "EvalError"]) {
 				final constructor = fn((_, a) -> {
 					final e = new JsObject(cast get(global(k), "prototype"));
 					e.define("name", k);

@@ -184,6 +184,22 @@ check(
     end.height === 80,
   "named grid areas and fractional track geometry",
 );
+const tokenElement = document.createElement("div");
+const tokens = tokenElement.classList;
+tokenElement.setAttribute("class", "first second first");
+tokens.add("third", "second");
+tokens.replace("second", "next");
+tokens.toggle("first", false);
+check(
+  tokens === tokenElement.classList &&
+    tokens.length === 2 &&
+    tokens.item(0) === "next" &&
+    tokens.contains("third") &&
+    tokenElement.getAttribute("class") === "next third",
+  "live class token list",
+);
+tokenElement.className = "direct";
+check(tokens.value === "direct", "class name updates token list");
 const styleElement = document.createElement("style");
 document.head.appendChild(styleElement);
 styleElement.textContent = "#end { width: 55px; }";

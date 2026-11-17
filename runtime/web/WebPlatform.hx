@@ -45,6 +45,11 @@ class WebPlatform {
 		o.define("nodeName", tag.toUpperCase());
 		o.define("nodeType", 1);
 		o.define("tagName", tag.toUpperCase());
+		var classList:WebClassList = null;
+		o.getters.set("classList", () -> {
+			if (classList == null) classList = new WebClassList(o);
+			return classList;
+		});
 		final children:Array<Dynamic> = [];
 		o.define("children", children);
 		o.define("childNodes", children);
@@ -57,7 +62,8 @@ class WebPlatform {
 			return Js.u;
 		}, false));
 		o.define("getAttribute", Js.fn((_, a) -> {
-			final x = o.read(Js.str(a[0]));
+			final key = Js.str(a[0]);
+			final x = o.read(key == "class" ? "className" : key);
 			return x == Js.u ? null : Js.str(x);
 		}, false));
 		o.define("removeChild", Js.fn((_, a) -> {

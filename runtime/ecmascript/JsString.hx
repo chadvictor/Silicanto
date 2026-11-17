@@ -5,7 +5,7 @@ class JsString {
 	public static function member(k:String):Dynamic {
 		return switch k {
 			case "concat", "valueOf", "toString", "toLowerCase", "toUpperCase", "indexOf", "lastIndexOf", "charAt", "charCodeAt", "substring", "substr",
-				"slice", "split", "trim", "replace", "includes", "match":
+				"slice", "split", "trim", "replace", "includes", "startsWith", "endsWith", "match":
 				Js.fn(function(r:Dynamic, a:Array<Dynamic>):Dynamic {
 					final s:String = r, x:Dynamic = Js.at(a, 0), i = offset(a, 0, 0), j = offset(a, 1, s.length);
 					return switch k {
@@ -21,6 +21,14 @@ class JsString {
 						case "indexOf": s.indexOf(Js.str(x), offset(a, 1, 0));
 						case "lastIndexOf": s.lastIndexOf(Js.str(x), j);
 						case "trim": StringTools.trim(s);
+						case "startsWith", "endsWith":
+							if (Std.isOfType(x, JsPattern))
+								throw Js.construct(Js.global("TypeError"), ["Expected a string search value"]);
+							final search = Js.str(x);
+							final position = a.length <= 1 || a[1] == Js.u ? (k == "endsWith" ? s.length : 0) : Js.num(a[1]);
+							final bounded = Math.isNaN(position) ? 0 : Std.int(Math.max(0, Math.min(s.length, position)));
+							final start = k == "endsWith" ? bounded - search.length : bounded;
+							start >= 0 && s.substr(start, search.length) == search;
 						case "includes": s.indexOf(Js.str(x), offset(a, 1, 0)) >= 0;
 						case "substring": s.substring(Std.int(Math.max(0, Math.min(i, j))), Std.int(Math.max(i, j)));
 						case "substr": s.substr(i, j);

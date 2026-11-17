@@ -47,6 +47,28 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
     exports = [],
     hoisted = [],
     preamble = [];
+  // Only functions with a direct eval in their lexical subtree need a runtime
+  // environment. Each getter closes over one binding, even in large modules.
+  const evalOwners = new Set();
+  if (/\beval\b/.test(file.text)) {
+    function mark(node) {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === "eval"
+      )
+        for (let p = node.parent; p; p = p.parent)
+          if (ts.isFunctionLike(p)) evalOwners.add(p);
+      ts.forEachChild(node, mark);
+    }
+    mark(file);
+  }
+  if (evalOwners.size && module.format !== "classic") {
+    root.evalEnv = fresh("environment");
+    initial.push(
+      "var " + root.evalEnv + " = new JsEvalScope(JsEval.globalRead);",
+    );
+  }
   const position = (n) => {
     const loc = file.getLineAndCharacterOfPosition(n.getStart(file));
     const original = lowered.map?.findEntry(loc.line, loc.character);
@@ -98,6 +120,15 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
       };
     s.names.set(name, sym);
     lines.push("var " + id + ":Dynamic = " + init + ";");
+    if (s.evalEnv && s !== root)
+      lines.push(
+        s.evalEnv +
+          ".add(" +
+          quoted(name) +
+          ",function():Dynamic return " +
+          sym.read +
+          ");",
+      );
     return sym;
   }
   function bindingNames(n) {
@@ -198,6 +229,12 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
       args = fresh("args");
     const frame = { scope: s, closed: true };
     frames.push(frame);
+    if (evalOwners.has(n)) {
+      s.evalEnv = fresh("environment");
+      lines.push(
+        "var " + s.evalEnv + " = new JsEvalScope(" + evalLookup(outer) + ");",
+      );
+    }
     const arrow = ts.isArrowFunction(n);
     s.strict =
       outer.strict ||
@@ -216,8 +253,16 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
     if (constructor) s.constructorInfo = constructor;
     s.self = arrow ? outer.self : self;
     s.selfOwner = arrow ? outer.selfOwner : s;
-    if (!arrow)
+    if (!arrow) {
       s.names.set("arguments", { id: args, read: args, mutable: false });
+      if (s.evalEnv)
+        lines.push(
+          s.evalEnv +
+            '.add("arguments",function():Dynamic return ' +
+            args +
+            ");",
+        );
+    }
     for (const [i, p] of n.parameters.entries()) {
       if (!ts.isIdentifier(p.name)) {
         for (const name of bindingNames(p.name))
@@ -369,6 +414,38 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
     if (n.text === "Infinity") return "Math.POSITIVE_INFINITY";
     globals.add(n.text);
     return "Js.global(" + quoted(n.text) + ")";
+  }
+  function evalLookup(s) {
+    const cases = [];
+    const seen = new Set();
+    let fallback = "JsEval.globalRead";
+    for (let p = s; p; p = p.parent) {
+      if (p.evalEnv) {
+        capture(p);
+        fallback = p.evalEnv + ".read";
+        break;
+      }
+      for (const [name, sym] of p.names) {
+        if (seen.has(name)) continue;
+        seen.add(name);
+        if (
+          p === root &&
+          module.format === "classic" &&
+          (!lowered.identifiers || lowered.identifiers.has(name))
+        )
+          continue;
+        capture(p);
+        cases.push("case " + quoted(name) + ": " + sym.read + ";");
+      }
+    }
+    if (!cases.length) return fallback;
+    return (
+      "function(name:String, typeOnly:Bool):Dynamic { var v:Dynamic = switch name {" +
+      cases.join("\n") +
+      "default: return " +
+      fallback +
+      "(name,typeOnly); }; return typeOnly ? Js.type(v) : v; }"
+    );
   }
   function sequence(values, finish, save = false) {
     // No expression can change another operand if they are all local reads/literals.
@@ -723,6 +800,33 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
         if (n.arguments.length !== 1 || !ts.isStringLiteralLike(n.arguments[0]))
           fail(n, "computed require needs a finite dependency set");
         return load(dependency(n, n.arguments[0].text));
+      }
+      if (
+        ts.isCallExpression(n) &&
+        ts.isIdentifier(n.expression) &&
+        n.expression.text === "eval"
+      ) {
+        capture(s.selfOwner ?? root);
+        const args = n.arguments.some(ts.isSpreadElement)
+          ? argumentArray(n.arguments, s)
+          : sequence(
+              n.arguments.map((arg) => expr(arg, s)),
+              (values) => "[" + values + "]",
+            );
+        return sequence(
+          [identifier(n.expression, s), args],
+          ([fn, actual]) =>
+            "JsEval.direct(" +
+            fn +
+            "," +
+            actual +
+            "," +
+            evalLookup(s) +
+            "," +
+            s.self +
+            ")",
+          true,
+        );
       }
       const variadic = n.arguments?.some(ts.isSpreadElement);
       const args = variadic ? [] : (n.arguments ?? []).map((a) => expr(a, s));
@@ -1195,6 +1299,18 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
               : "") +
             ");",
         );
+    }
+  }
+  if (root.evalEnv) {
+    for (const [name, sym] of root.names) {
+      preamble.push(
+        root.evalEnv +
+          ".add(" +
+          quoted(name) +
+          ",function():Dynamic return " +
+          sym.read +
+          ");",
+      );
     }
   }
   return [

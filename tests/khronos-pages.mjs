@@ -27,6 +27,7 @@ const { values } = parseArgs({
     version: { type: "string", default: "1.0.4" },
     target: { type: "string", default: "cpp" },
     "frontend-only": { type: "boolean" },
+    "build-timeout-ms": { type: "string", default: "600000" },
   },
 });
 assert.ok(["1.0.4", "2.0.1"].includes(values.version));
@@ -74,8 +75,31 @@ assert.ok(selected.length);
 const compiler = execFileSync("git", ["-C", root, "rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
+const buildTimeout = Number(values["build-timeout-ms"]);
+assert.ok(Number.isSafeInteger(buildTimeout) && buildTimeout > 0);
+const modifiedCompilerOrSuite =
+  execFileSync(
+    "git",
+    [
+      "-C",
+      root,
+      "status",
+      "--porcelain",
+      "--",
+      "src",
+      "runtime",
+      "scripts",
+      "payloads",
+      "package.json",
+      "package-lock.json",
+      "tests/khronos-pages.mjs",
+      "tests/khronos-source.mjs",
+    ],
+    { encoding: "utf8" },
+  ).trim().length !== 0;
 const report = {
   compiler,
+  modifiedCompilerOrSuite,
   revision,
   version: values.version,
   target: values.target,
@@ -159,19 +183,23 @@ for (const id of selected) {
       const entry = nativePage(id, work),
         project = join(work, "project");
       stage = "build";
-      run(process.execPath, [
-        "src/cli.mjs",
-        "build",
-        entry,
-        "--frontend",
-        "generic",
-        "--web-root",
-        join(work, "tests"),
-        "--target",
-        values.target,
-        "--out",
-        project,
-      ]);
+      run(
+        process.execPath,
+        [
+          "src/cli.mjs",
+          "build",
+          entry,
+          "--frontend",
+          "generic",
+          "--web-root",
+          join(work, "tests"),
+          "--target",
+          values.target,
+          "--out",
+          project,
+        ],
+        buildTimeout,
+      );
       stage = "run";
       const args = ["--asset-root", dirname(entry), "--frames", "240"];
       const output =

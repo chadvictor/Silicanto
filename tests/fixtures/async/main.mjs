@@ -7,7 +7,37 @@ async function twice(value) {
     order.push("finally");
   }
 }
+function verifyEval() {
+  const increment = {
+    base: 4,
+    next(x) {
+      return this.base + x;
+    },
+  };
+  const amount = 2;
+  function nested() {
+    return eval("increment.base + amount");
+  }
+  if (
+    nested() !== 6 ||
+    !"String".startsWith("tr", 1) ||
+    !"String".endsWith("ri", 4)
+  )
+    throw Error("nested eval and string boundaries");
+  const expression = ["increment", "next"].join(".") + "(amount * 3)";
+  const indirect = eval;
+  if (
+    eval(expression) !== 10 ||
+    indirect("typeof amount") !== "undefined" ||
+    eval("true || missing()") !== true ||
+    eval("typeof missing") !== "undefined" ||
+    eval(increment) !== increment ||
+    eval("'a' + 'b' === 'ab'") !== true
+  )
+    throw Error("native expression evaluation and lexical lookup");
+}
 async function verify() {
+  verifyEval();
   const re = new RegExp("a+", "ig");
   if (
     !(re instanceof RegExp) ||
