@@ -543,6 +543,10 @@ class Js {
 	static function boot():Void {
 		if (!ready) {
 			ready = true;
+			for (whole in [false, true]) {
+				globals.set(whole ? "encodeURI" : "encodeURIComponent", fn((_, a) -> JsUri.encode(str(at(a, 0)), whole), false));
+				globals.set(whole ? "decodeURI" : "decodeURIComponent", fn((_, a) -> JsUri.decode(str(at(a, 0)), whole), false));
+			}
 			final console = obj();
 			for (level in ["log", "info", "debug", "warn", "error"])
 				console.define(level, fn((_, a) -> {
@@ -553,6 +557,13 @@ class Js {
 						WebConsole.log(line);
 					return u;
 				}, false));
+			console.define("assert", fn((_, a) -> {
+				if (!truth(at(a, 0))) {
+					final detail = [for (arg in a.slice(1)) str(arg)].join(" ");
+					WebConsole.error(detail == "" ? "Assertion failed" : "Assertion failed: " + detail);
+				}
+				return u;
+			}, false));
 			globals.set("console", console);
 			globals.set("Math", mathObject());
 			final number = fn((_, a) -> a.length == 0 ? 0. : num(a[0]), false);
@@ -644,13 +655,17 @@ class Js {
 				ap.values.set(k, get(([] : Array<Dynamic>), k));
 			array.define("isArray", fn((_, a) -> Std.isOfType(at(a, 0), Array), false));
 			globals.set("Array", array);
-			for (k in ["Error", "TypeError", "RangeError", "ReferenceError"])
-				globals.set(k, fn((r, a) -> {
-					final e = obj();
+			for (k in ["Error", "TypeError", "RangeError", "ReferenceError", "URIError"]) {
+				final constructor = fn((_, a) -> {
+					final e = new JsObject(cast get(global(k), "prototype"));
 					e.define("name", k);
 					e.define("message", a.length == 0 ? "" : str(a[0]));
 					return e;
-				}, true));
+				}, true);
+				if (k != "Error")
+					(cast constructor.read("prototype") : JsObject).prototype = cast get(globals.get("Error"), "prototype");
+				globals.set(k, constructor);
+			}
 			globals.set("globalThis", realm);
 			globals.set("undefined", u);
 			globals.set("NaN", Math.NaN);

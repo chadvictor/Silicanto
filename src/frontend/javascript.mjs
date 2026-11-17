@@ -11,7 +11,25 @@ export function emitModule(graph, module, file, units, globals) {
   let next = 0;
   const fresh = (name) =>
     "j_" + name.replace(/[^a-zA-Z0-9_]/g, "_") + "_" + next++;
+  function strictDirective(statements) {
+    for (const statement of statements ?? []) {
+      if (
+        !ts.isExpressionStatement(statement) ||
+        !ts.isStringLiteral(statement.expression)
+      )
+        break;
+      if (
+        statement.expression.getText(file) === '"use strict"' ||
+        statement.expression.getText(file) === "'use strict'"
+      )
+        return true;
+    }
+    return false;
+  }
   const scope = (parent = null) => ({
+    strict:
+      parent?.strict ??
+      (module.format === "esm" || strictDirective(file.statements)),
     parent,
     selfOwner: parent?.selfOwner,
     names: new Map(),
@@ -176,6 +194,20 @@ export function emitModule(graph, module, file, units, globals) {
     const frame = { scope: s, closed: true };
     frames.push(frame);
     const arrow = ts.isArrowFunction(n);
+    s.strict =
+      outer.strict ||
+      ts.isClassLike(n.parent) ||
+      strictDirective(n.body?.statements);
+    if (!s.strict && !arrow)
+      lines.push(
+        "if (" +
+          self +
+          " == Js.u || " +
+          self +
+          " == null) " +
+          self +
+          " = Js.realm;",
+      );
     if (constructor) s.constructorInfo = constructor;
     s.self = arrow ? outer.self : self;
     s.selfOwner = arrow ? outer.selfOwner : s;
@@ -398,9 +430,7 @@ export function emitModule(graph, module, file, units, globals) {
             "," +
             x +
             "," +
-            (module.format === "classic" &&
-              !file.text.includes('"use strict"') &&
-              !file.text.includes("'use strict'")) +
+            !s.strict +
             ")",
         );
       }
@@ -939,6 +969,7 @@ export function emitModule(graph, module, file, units, globals) {
       return 'Js.put(exports,"default",' + expr(n.expression, s) + ");";
     if (ts.isBlock(n)) return nested(n.statements, s);
     if (ts.isExpressionStatement(n)) return expr(n.expression, s) + ";";
+    if (ts.isDebuggerStatement(n)) return "";
     if (ts.isReturnStatement(n))
       return "return " + (n.expression ? expr(n.expression, s) : "Js.u") + ";";
     if (ts.isThrowStatement(n)) return "throw " + expr(n.expression, s) + ";";

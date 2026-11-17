@@ -39,3 +39,10 @@ if (
 delete events.beforeUpdate;
 if (events.beforeUpdate !== undefined || Object.keys(events).length !== 0)
   throw new Error("delete named array property");
+
+const uriText = "Nácar 🌎/#";
+if (
+  decodeURIComponent(encodeURIComponent(uriText)) !== uriText ||
+  encodeURI(uriText) !== "N%C3%A1car%20%F0%9F%8C%8E/#"
+)
+  throw new Error("native Unicode URI codec");
