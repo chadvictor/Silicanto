@@ -1,0 +1,32 @@
+{
+  "compiler": "90d2d105403377788bdd5b28e0368b8e49ec0135",
+  "modifiedCompilerOrSuite": false,
+  "stage": "native",
+  "oracle": "fourth-frame-foreground-v2",
+  "engine": "4.1.0",
+  "revision": "eb87db8355861ae222d0c5cd13aae54c2d7d72ae",
+  "target": "cpp",
+  "catalogSize": 2061,
+  "selected": 1,
+  "bootstrap": {
+    "status": "passed"
+  },
+  "cases": [
+    {
+      "page": "tweens/view/dynamic-end-property",
+      "file": "src/tweens/dynamic end property.js",
+      "status": "frame-matched",
+      "executed": true,
+      "measurement": {
+        "mean": 0,
+        "within8": 1,
+        "foreground": 900,
+        "foregroundMatched": 900
+      }
+    }
+  ],
+  "counts": {
+    "frame-matched": 1
+  },
+  "engineSHA256": "71d92687457da59f1233c75827df628ba173e2ad329d3c75f4e4b92d27c9dd1e"
+}

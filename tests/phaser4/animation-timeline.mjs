@@ -13,25 +13,25 @@ import {
   referenceFrame,
 } from "./reference.mjs";
 
-const [sourceTree, cppDir, javaDir] = process.argv.slice(2);
-if (!sourceTree || !cppDir || !javaDir)
+const [sourceTree, cppDir, javaDir, mode = "exact"] = process.argv.slice(2);
+if (!sourceTree || !cppDir || !javaDir || !["exact", "gallery"].includes(mode))
   throw Error(
-    "Usage: node tests/phaser4/animation-timeline.mjs CHECKOUT CPP_RUN JAVA_RUN",
+    "Usage: node tests/phaser4/animation-timeline.mjs CHECKOUT CPP_RUN JAVA_RUN [exact|gallery]",
   );
 const checkout = resolve(sourceTree);
 const pub = join(checkout, "public");
 const engine = fileURLToPath(
   new URL("./node_modules/phaser/dist/phaser.js", import.meta.url),
 );
-const file = "src/animation/animation from png sequence.js";
 const reports = [cppDir, javaDir].map((dir, index) => {
   const r = JSON.parse(readFileSync(join(dir, "report.json")));
   assert.equal(r.target, index === 0 ? "cpp" : "java");
   assert.equal(r.selected, 1);
-  assert.equal(r.cases[0].file, file);
   assert.equal(r.cases[0].status, "frame-matched");
   return r;
 });
+const file = reports[0].cases[0].file;
+assert.equal(reports[1].cases[0].file, file);
 const revision = execFileSync("git", ["-C", checkout, "rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
@@ -42,6 +42,7 @@ for (const r of reports) {
 }
 const work = mkdtempSync(join(tmpdir(), "silicanto-timeline-"));
 const unique = new Set();
+const nativeFrames = [new Set(), new Set()];
 const targets = [
   [join(resolve(cppDir), "case-0/project/cpp/Sample"), []],
   [
@@ -68,7 +69,7 @@ try {
         '"></script>',
     });
     unique.add(hash(Buffer.from(ref.pixels, "base64")));
-    for (const [exe, args] of targets) {
+    for (const [index, [exe, args]] of targets.entries()) {
       const ppm = join(work, "frame.ppm");
       rmSync(ppm, { force: true });
       execFileSync(
@@ -84,14 +85,28 @@ try {
         ],
         { timeout: 60000 },
       );
-      assert.equal(
-        compareFrame(readFileSync(ppm), ref).mean,
-        0,
-        "Frame " + frames + " differs from Chromium",
+      const pixels = readFileSync(ppm);
+      const measurement = compareFrame(pixels, ref);
+      nativeFrames[index].add(hash(pixels));
+      if (mode === "exact")
+        assert.equal(
+          measurement.mean,
+          0,
+          "Frame " + frames + " differs from Chromium",
+        );
+      console.log(
+        "%s frame %d: mean RGB error %s, within tolerance %s",
+        index === 0 ? "cpp" : "java",
+        frames,
+        measurement.mean.toFixed(6),
+        measurement.within8.toFixed(6),
       );
     }
-    console.log("Frame %d matched exactly on C++ and Java.", frames);
   }
+  assert.ok(
+    nativeFrames.every((frames) => frames.size > 1),
+    "A target animation never visibly advanced",
+  );
   assert.ok(unique.size > 1, "The reference animation never visibly advanced");
 } finally {
   await closeReferenceBrowser();

@@ -6,6 +6,15 @@ class WebCanvas extends JsObject {
 	public var pixels(default, null):Bytes;
 
 	final ctx:JsObject;
+	var mode:String;
+	var gl:WebGL;
+
+	public function surface():Bytes {
+		if (gl != null)
+			pixels = gl.snapshot();
+		return pixels;
+	}
+
 	var fill = 0;
 	var alpha = 255;
 	var style = "#000000";
@@ -18,9 +27,11 @@ class WebCanvas extends JsObject {
 	var strokeAlpha = 255;
 	var strokeStyle = "#000000";
 	var lineWidth = 1.;
+	var text = new WebText();
 
 	var stack:Array<{
 		matrix:WebTransform,
+		text:WebText,
 		opacity:Float,
 		op:String,
 		style:String,
@@ -48,7 +59,25 @@ class WebCanvas extends JsObject {
 		getters.set("height", () -> height);
 		setters.set("width", v -> resize(Std.int(Js.num(v)), height));
 		setters.set("height", v -> resize(width, Std.int(Js.num(v))));
-		define("getContext", Js.fn((_, a) -> Js.str(Js.at(a, 0)) == "2d" ? ctx : null, false));
+		define("getContext", Js.fn((_, a) -> {
+			var name = Js.str(Js.at(a, 0));
+			if (name == "experimental-webgl")
+				name = "webgl";
+			if (mode != null && mode != name)
+				return null;
+			if (name == "2d") {
+				mode = name;
+				return ctx;
+			}
+			if (name == "webgl") {
+				if (gl == null)
+					gl = WebGL.create(this, Js.at(a, 1));
+				if (gl != null)
+					mode = name;
+				return (gl : JsObject);
+			}
+			return null;
+		}, false));
 		ctx.define("canvas", this);
 		ctx.define("imageSmoothingEnabled", true);
 		ctx.getters.set("globalAlpha", () -> opacity);
@@ -60,6 +89,7 @@ class WebCanvas extends JsObject {
 		ctx.define("save", Js.fn((_, a) -> {
 			stack.push({
 				matrix: transform.copy(),
+				text: text.copy(),
 				opacity: opacity,
 				op: op,
 				style: style,
@@ -77,6 +107,7 @@ class WebCanvas extends JsObject {
 			final s = stack.pop();
 			if (s != null) {
 				transform = s.matrix;
+				text = s.text;
 				opacity = s.opacity;
 				op = s.op;
 				style = s.style;
@@ -114,9 +145,24 @@ class WebCanvas extends JsObject {
 		ctx.getters.set("globalCompositeOperation", () -> op);
 		ctx.setters.set("globalCompositeOperation", v -> {
 			final k = Js.str(v);
-			if (k != "multiply" && k != "source-over")
-				throw "E-CANVAS: unsupported composition " + k;
-			op = k;
+			if ([
+				"source-over",
+				"multiply",
+				"lighter",
+				"destination-out",
+				"destination-over",
+				"screen",
+				"darken",
+				"lighten",
+				"xor",
+				"source-atop",
+				"destination-atop",
+				"source-in",
+				"destination-in",
+				"source-out",
+				"copy"
+			].contains(k))
+				op = k;
 		});
 		ctx.getters.set("strokeStyle", () -> strokeStyle);
 		ctx.setters.set("strokeStyle", v -> {
@@ -163,6 +209,48 @@ class WebCanvas extends JsObject {
 				return Js.u;
 			}, false));
 		}
+		ctx.getters.set("font", () -> text.font);
+		ctx.setters.set("font", v -> text.setFont(Js.str(v)));
+		ctx.getters.set("textAlign", () -> text.align);
+		ctx.setters.set("textAlign", v -> {
+			final k = Js.str(v);
+			if (["start", "end", "left", "right", "center"].contains(k))
+				text.align = k;
+		});
+		ctx.getters.set("textBaseline", () -> text.baseline);
+		ctx.setters.set("textBaseline", v -> {
+			final k = Js.str(v);
+			if (["top", "hanging", "middle", "alphabetic", "ideographic", "bottom"].contains(k))
+				text.baseline = k;
+		});
+		ctx.define("measureText", Js.fn((_, a) -> text.measure(Js.str(Js.at(a, 0))), false));
+		for (name in ["fillText", "strokeText"])
+			ctx.define(name, Js.fn((_, a) -> {
+				final outline = name == "strokeText", b = text.glyphs(Js.str(Js.at(a, 0)), outline ? lineWidth : 0, true);
+				final w = Std.int(b.getFloat(28)), h = Std.int(b.getFloat(32)), advance = b.getFloat(0);
+				final limit = a.length > 3 ? Js.num(a[3]) : Math.POSITIVE_INFINITY;
+				if (w == 0 || h == 0 || !(limit > 0))
+					return Js.u;
+				final scale = advance > limit ? limit / advance : 1.;
+				final x = Js.num(Js.at(a, 1)) + (text.dx(b) + b.getFloat(4)) * scale, y = Js.num(Js.at(a, 2)) + text.dy(b) + b.getFloat(8);
+				final col = outline ? stroke : fill, opacityByte = (outline ? strokeAlpha : alpha) * opacity;
+				project(x, y, w * scale, h, (i, u, v) -> {
+					final coverage = b.get(36 + Std.int(v * h) * w + Std.int(u * w));
+					if (coverage > 0)
+						WebRaster.blend(pixels, i, col >> 16, (col >> 8) & 255, col & 255, WebRaster.byte(coverage * opacityByte / 255), op);
+				});
+				return Js.u;
+			}, false));
+		for (name in ["arc", "ellipse", "quadraticCurveTo", "bezierCurveTo"])
+			ctx.define(name, Js.fn((_, a) -> {
+				final v = [for (i in 0...a.length) Js.num(a[i])];
+				switch name {
+					case "arc": path.ellipse(transform, v[0], v[1], v[2], v[2], 0, v[3], v[4], Js.truth(Js.at(a, 5)));
+					case "ellipse": path.ellipse(transform, v[0], v[1], v[2], v[3], v[4], v[5], v[6], Js.truth(Js.at(a, 7)));
+					default: path.curve(transform, v, name == "bezierCurveTo");
+				}
+				return Js.u;
+			}, false));
 		ctx.define("fillRect", Js.fn((_, a) -> {
 			rect(a, false);
 			return Js.u;
@@ -223,6 +311,9 @@ class WebCanvas extends JsObject {
 		pixels = Bytes.alloc(WebRaster.size(w, h));
 		width = w;
 		height = h;
+		if (gl != null)
+			gl.resize();
+		text = new WebText();
 		style = "#000000";
 		fill = 0;
 		alpha = 255;
@@ -324,7 +415,7 @@ class WebCanvas extends JsObject {
 			final c:WebCanvas = img;
 			w = c.width;
 			h = c.height;
-			src = c == this ? pixels.sub(0, pixels.length) : c.pixels;
+			src = c == this ? pixels.sub(0, pixels.length) : c.surface();
 		} else
 			throw "E-CANVAS: expected an image or canvas";
 		final crop = a.length == 9, i = crop ? 5 : 1;

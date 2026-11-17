@@ -11,6 +11,12 @@ class Js {
 	public static final tdz:Dynamic = new JsUninitialized();
 	static final cache:Map<Int, JsObject> = [];
 	static final globals:Map<String, Dynamic> = [];
+	// Dense elements stay in the target Array. Allocate a property bag only for named writes.
+	#if (cpp || java)
+	static final arrayProperties = new haxe.ds.WeakMap<Array<Dynamic>, JsObject>();
+	#else
+	static final arrayProperties = new haxe.ds.ObjectMap<Array<Dynamic>, JsObject>();
+	#end
 	static final ordinary = new JsObject();
 	static var ready = false;
 
@@ -208,6 +214,11 @@ class Js {
 			final a:Array<Dynamic> = receiver, i = index(k);
 			if (i >= 0)
 				return at(a, i);
+			if (k != "length") {
+				final props = arrayProperties.get(a);
+				if (props != null && JsProperties.own(props, k))
+					return props.read(k);
+			}
 			return switch k {
 				case "length": a.length;
 				case "push": fn((r, vs) -> {
@@ -233,7 +244,9 @@ class Js {
 						final arr:Array<Dynamic> = r;
 						return [for (x in arr) x == u || x == null ? "" : str(x)].join(v.length == 0 ? "," : str(v[0]));
 					}, false);
-				default: JsList.method(k);
+				default:
+					final method = JsList.method(k);
+					method == u ? ordinary.read(k) : method;
 			}
 		}
 		if (Std.isOfType(receiver, String)) {
@@ -242,15 +255,24 @@ class Js {
 				return s.length;
 			if (i >= 0 && i < s.length)
 				return s.charAt(i);
-			return JsString.member(k);
+			final member = JsString.member(k);
+			return member == u ? ordinary.read(k) : member;
 		}
+		if (type(receiver) == "number" && k == "toFixed")
+			return fn((r, a) -> JsDecimal.fixed(num(r), at(a, 0)), false);
 		if (type(receiver) == "number" && k == "toString")
 			return fn((r, args) -> {
-				if (args.length > 0 && num(args[0]) != 10)
-					throw "E-NUMBER: unsupported radix";
+				if (args.length > 0 && args[0] != u && num(args[0]) != 10) {
+					final radix = Std.int(num(args[0])), n = num(r);
+					if (radix < 2 || radix > 36)
+						throw "RangeError: invalid radix";
+					if (!Math.isFinite(n) || n == 0)
+						return str(r);
+					return JsStandard.radix(n, radix);
+				}
 				return str(r);
 			}, false);
-		return u;
+		return ordinary.read(k);
 	}
 
 	public static function put(receiver:Dynamic, key:Dynamic, value:Dynamic):Dynamic {
@@ -302,6 +324,12 @@ class Js {
 						a.push(u);
 				return value;
 			}
+			var props = arrayProperties.get(a);
+			if (props == null) {
+				props = new JsObject();
+				arrayProperties.set(a, props);
+			}
+			return props.define(k, value);
 		}
 		throw 'TypeError: cannot write ' + k;
 	}
@@ -309,8 +337,19 @@ class Js {
 	static function mathObject():JsObject {
 		final o = obj();
 		o.define("PI", Math.PI);
+		for (k => v in [
+			"E" => Math.exp(1),
+			"LN2" => Math.log(2),
+			"LN10" => Math.log(10),
+			"LOG2E" => 1 / Math.log(2),
+			"LOG10E" => 1 / Math.log(10),
+			"SQRT2" => Math.sqrt(2),
+			"SQRT1_2" => Math.sqrt(0.5)
+		])
+			o.define(k, v);
 		for (name in [
-			"abs", "floor", "ceil", "round", "sqrt", "sin", "cos", "tan", "atan2", "pow", "min", "max", "random"
+			"abs", "floor", "ceil", "round", "sqrt", "sin", "cos", "tan", "atan2", "pow", "min", "max", "random", "asin", "acos", "atan", "exp", "log",
+			"log2", "log10", "trunc", "sign", "cbrt", "hypot", "imul", "fround"
 		]) {
 			o.define(name, fn((_, a) -> {
 				final x = num(at(a, 0)), y = num(at(a, 1));
@@ -324,6 +363,30 @@ class Js {
 					case "cos": Math.cos(x);
 					case "tan": Math.tan(x);
 					case "atan2": Math.atan2(x, y);
+					case "asin": Math.asin(x);
+					case "acos": Math.acos(x);
+					case "atan": Math.atan(x);
+					case "exp": Math.exp(x);
+					case "log": Math.log(x);
+					case "log2": Math.log(x) / Math.log(2);
+					case "log10": Math.log(x) / Math.log(10);
+					case "trunc": x < 0 ? Math.fceil(x) : Math.ffloor(x);
+					case "sign": Math.isNaN(x) || x == 0 ? x : x < 0 ? -1. : 1.;
+					case "cbrt": x < 0 ? -Math.pow(-x, 1 / 3.) : Math.pow(x, 1 / 3.);
+					case "fround": haxe.io.FPHelper.i32ToFloat(haxe.io.FPHelper.floatToI32(x));
+					case "imul": WebBits.signed(x) * WebBits.signed(y);
+					case "hypot":
+						var max = 0.;
+						for (v in a)
+							max = Math.max(max, Math.abs(num(v)));
+						if (max == 0 || !Math.isFinite(max)) max; else {
+							var s = 0.;
+							for (v in a) {
+								final c = num(v) / max;
+								s += c * c;
+							}
+							Math.sqrt(s) * max;
+						}
 					case "pow": Math.pow(x, y);
 					case "random": Math.random();
 					default:
@@ -383,8 +446,10 @@ class Js {
 	}
 
 	public static function keys(value:Dynamic):Array<String> {
-		if (Std.isOfType(value, Array))
-			return [for (i in 0...(cast value : Array<Dynamic>).length) Std.string(i)];
+		if (Std.isOfType(value, Array)) {
+			final a:Array<Dynamic> = value, names = [for (i in 0...a.length) Std.string(i)], props = arrayProperties.get(a);
+			return props == null ? names : names.concat(props.keys);
+		}
 		final found:Array<String> = [];
 		if (Std.isOfType(value, JsObject)) {
 			var ob:JsObject = value;
@@ -425,12 +490,27 @@ class Js {
 		}
 		if (Std.isOfType(value, Array)) {
 			final i = index(k);
-			return k == "length" || (i >= 0 && i < (cast value:Array<Dynamic>).length);
+			final props = arrayProperties.get(cast value);
+			return k == "length" || (i >= 0 && i < (cast value:Array<Dynamic>).length) || (props != null && JsProperties.own(props, k));
 		}
 		throw "TypeError: cannot test " + k + " in " + str(value);
 	}
 
 	public static function remove(value:Dynamic, key:Dynamic):Bool {
+		if (Std.isOfType(value, Array)) {
+			final k = str(key);
+			if (k == "length")
+				return false;
+			if (index(k) < 0) {
+				final a:Array<Dynamic> = value, props = arrayProperties.get(a);
+				if (props == null)
+					return true;
+				final removed = remove(props, k);
+				if (props.keys.length == 0)
+					arrayProperties.remove(a);
+				return removed;
+			}
+		}
 		if (!Std.isOfType(value, JsObject))
 			throw "TypeError: delete requires an ordinary object";
 		final ob:JsObject = value, k = str(key);
@@ -447,6 +527,8 @@ class Js {
 		if (Std.isOfType(ctor, JsObject) && (cast ctor : JsObject).boundTarget != null)
 			return instance(value, (cast ctor : JsObject).boundTarget);
 		final p = get(ctor, "prototype");
+		if (Std.isOfType(value, Array))
+			return p == ordinary || ctor == globals.get("Array");
 		if (!Std.isOfType(value, JsObject))
 			return false;
 		var ob = (cast value : JsObject).prototype;
@@ -520,12 +602,7 @@ class Js {
 			object.define("prototype", ordinary);
 			// Built-in methods are non-enumerable.
 			ordinary.values.set("toString", fn((r, _) -> str(r), false));
-			ordinary.values.set("hasOwnProperty", fn((r, a) -> {
-				if (!Std.isOfType(r, JsObject))
-					return false;
-				final o:JsObject = r, k = str(at(a, 0));
-				return JsProperties.own(o, k);
-			}, false));
+			ordinary.values.set("hasOwnProperty", fn((r, a) -> JsStandard.own(r, at(a, 0)), false));
 			object.define("create", fn((_, a) -> {
 				final p = at(a, 0);
 				if (p != null && !Std.isOfType(p, JsObject))
@@ -583,6 +660,7 @@ class Js {
 			JsCollection.install(realm);
 			for (k in globals.keys())
 				realm.define(k, globals.get(k));
+			JsStandard.install(realm, object, array, number, globals.get("String"));
 		}
 	}
 

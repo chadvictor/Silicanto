@@ -24,6 +24,7 @@
     "test:java": "node tests/java-target.mjs",
     "test:nacar-java": "node tests/nacar.mjs --java",
     "test:java-graphics": "node tests/metal.mjs --java",
+    "test:webgl": "node tests/webgl-targets.mjs",
     "test:phaser4": "node tests/phaser4/run.mjs",
     "test:generic": "node tests/generic-targets.mjs",
     "test:source-libraries": "node tests/phaser4/library-logic.mjs"

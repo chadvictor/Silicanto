@@ -8,7 +8,7 @@ class JsList {
 	public static function method(name:String):Dynamic {
 		switch name {
 			case "slice", "splice", "shift", "unshift", "indexOf", "lastIndexOf", "includes", "map", "filter", "some", "every", "find", "concat", "reverse",
-				"sort", "entries":
+				"sort", "entries", "fill", "at", "reduce", "reduceRight", "copyWithin", "findIndex":
 			default:
 				return Js.u;
 		}
@@ -17,6 +17,37 @@ class JsList {
 			final f:Dynamic = Js.at(args, 0), self:Dynamic = Js.at(args, 1);
 			final len = a.length;
 			switch name {
+				case "at":
+					var i = Std.int(Js.num(f));
+					if (i < 0)
+						i += len;
+					return i >= 0 && i < len ? a[i] : Js.u;
+				case "fill":
+					for (i in JsStandard.relative(self, len, 0)...JsStandard.relative(Js.at(args, 2), len, len))
+						a[i] = f;
+					return a;
+				case "copyWithin":
+					final dest = JsStandard.relative(f, len, 0), src = JsStandard.relative(self, len, 0), end = JsStandard.relative(Js.at(args, 2), len, len);
+					final part = a.slice(src, end);
+					for (i in 0...Std.int(Math.min(len - dest, part.length)))
+						a[dest + i] = part[i];
+					return a;
+				case "reduce", "reduceRight":
+					final backwards = name == "reduceRight";
+					var pos = backwards ? len - 1 : 0,
+						delta = backwards ? -1 : 1,
+						acc:Dynamic = self;
+					if (args.length < 2) {
+						if (len == 0)
+							throw "TypeError: empty reduce";
+						acc = a[pos];
+						pos += delta;
+					}
+					while (pos >= 0 && pos < len) {
+						acc = Js.call(f, Js.u, [acc, a[pos], pos, a]);
+						pos += delta;
+					}
+					return acc;
 				case "slice":
 					return a.slice(index(f, len), self == Js.u ? len : index(self, len));
 				case "splice":
@@ -87,12 +118,14 @@ class JsList {
 								case "some": if (Js.truth(b)) return true;
 								case "every": if (!Js.truth(b)) return false;
 								case "find": if (Js.truth(b)) return v;
+								case "findIndex": if (Js.truth(b)) return i;
 							}
 						}
 					return switch name {
 						case "some": false;
 						case "every": true;
 						case "find": Js.u;
+						case "findIndex": -1;
 						default: out;
 					};
 			}

@@ -46,6 +46,10 @@ if [[ "$profile" == graphics ]]; then
     -framework Metal -framework Foundation java/native/MetalDisplay.mm -o "$libdir/libsilicanto_metal.dylib"
   cp -R java/resources/. "$work/classes/"
 fi
+if [[ -f haxe/WebGLNative.hx && "$(uname -sm)" == "Darwin arm64" ]]; then
+  bash "$root/scripts/setup-webgl.sh"
+  bash "$root/payloads/webgl/macos/build.sh" "$work/classes/native/webgl/macos-arm64" java
+fi
 mkdir -p "$work/classes/META-INF/licenses"
 cp licenses/* "$work/classes/META-INF/licenses/"
 jar --create --file "java/$name.jar" --main-class haxe.root.Sample -C "$work/classes" .

@@ -14,10 +14,16 @@ class WebRequest extends JsObject {
 		define("responseType", "");
 		define("response", null);
 		define("responseText", "");
+		define("responseXML", null);
 		define("open", Js.fn((_, a) -> {
 			if (Js.str(Js.at(a, 0)).toUpperCase() != "GET")
 				throw "E-XHR: only GET is available for local resources";
 			token++;
+			mime = null;
+			define("status", 0);
+			define("response", null);
+			define("responseText", "");
+			define("responseXML", null);
 			url = Js.str(Js.at(a, 1));
 			async = a.length < 3 || Js.truth(a[2]);
 			state(1);
@@ -69,15 +75,25 @@ class WebRequest extends JsObject {
 						final v:JsTypedArray.JsBuffer = Js.construct(Js.global("ArrayBuffer"), [b.bytes.length]);
 						v.bytes.blit(0, b.bytes, 0, b.bytes.length);
 						define("response", v);
+					case "document":
+						final doc = WebXml.parse(textBody(b.bytes));
+						final value = Js.get(Js.get(doc, "documentElement"), "tagName") == "parsererror" ? null : doc;
+						define("response", value);
+						define("responseXML", value);
 					case "json": try {
-							define("response", Js.json(b.bytes.toString()));
+							define("response", Js.json(textBody(b.bytes)));
 						} catch (_:Dynamic) {
 							define("response", null);
 						}
 					case "", "text":
-						final s = b.bytes.toString();
+						final s = textBody(b.bytes);
 						define("response", s);
 						define("responseText", s);
+						if (kind == "" && (mime != null && mime.toLowerCase().indexOf("xml") >= 0)) {
+							final xml = WebXml.parse(s);
+							if (Js.get(Js.get(xml, "documentElement"), "tagName") != "parsererror")
+								define("responseXML", xml);
+						}
 					default: throw "E-XHR: unsupported response type " + kind;
 				}
 				final ev = Js.obj();
@@ -96,6 +112,11 @@ class WebRequest extends JsObject {
 				fetch();
 			return Js.u;
 		}, false));
+	}
+
+	static function textBody(bytes:haxe.io.Bytes):String {
+		final bom = bytes.length >= 3 && bytes.get(0) == 239 && bytes.get(1) == 187 && bytes.get(2) == 191;
+		return bytes.getString(bom ? 3 : 0, bytes.length - (bom ? 3 : 0));
 	}
 
 	function state(n:Int) {

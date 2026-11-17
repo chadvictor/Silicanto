@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  symlinkSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { resolveGraph } from "../src/frontend/graph.mjs";
@@ -75,4 +81,20 @@ test("a blank output cannot pass a mostly-black reference frame", () => {
     compareFrame(Buffer.concat([header, pixels]), ref).foregroundMatched,
     1,
   );
+});
+
+test("HTML script roots retain classic semantics through a symlink", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "silicanto-symlink-"));
+  try {
+    mkdirSync(join(dir, "vendor"));
+    writeFileSync(join(dir, "vendor", "library.js"), "var library = 42;");
+    symlinkSync(join("vendor", "library.js"), join(dir, "entry.js"));
+    writeFileSync(join(dir, "index.html"), '<script src="entry.js"></script>');
+    const graph = await resolveGraph(join(dir, "index.html"));
+    assert.equal(graph.roots.length, 1);
+    assert.equal(graph.roots[0].format, "classic");
+    assert.equal(graph.roots[0].source, "var library = 42;");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

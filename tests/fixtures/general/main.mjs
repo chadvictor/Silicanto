@@ -25,3 +25,17 @@ resource.onload = () => {
   sprite.src = url;
 };
 resource.send();
+
+const events = [];
+events.beforeUpdate = ["step"];
+if (
+  events.length !== 0 ||
+  events.beforeUpdate[0] !== "step" ||
+  !("beforeUpdate" in events) ||
+  !Object.hasOwn(events, "beforeUpdate") ||
+  Object.keys(events).join(",") !== "beforeUpdate"
+)
+  throw new Error("named array properties");
+delete events.beforeUpdate;
+if (events.beforeUpdate !== undefined || Object.keys(events).length !== 0)
+  throw new Error("delete named array property");
