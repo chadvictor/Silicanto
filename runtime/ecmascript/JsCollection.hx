@@ -19,7 +19,7 @@ class JsCollection extends JsObject {
 	function find(k:Dynamic):Int {
 		for (i in 0...entries.length)
 			if (entries[i].live) {
-				final key = entries[i].key;
+				final key:Dynamic = entries[i].key;
 				if (Js.equal(key, k) || (Js.type(key) == "number" && Js.type(k) == "number" && Math.isNaN(key) && Math.isNaN(k)))
 					return i;
 			}

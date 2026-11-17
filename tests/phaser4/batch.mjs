@@ -25,6 +25,7 @@ export async function batchSuite({
   execute,
   compare,
   batchSize,
+  jobs: parallelism,
 }) {
   let batchId = 0;
   const main = readFileSync(join(project, "haxe/Sample.hx"), "utf8");
@@ -145,7 +146,7 @@ export async function batchSuite({
       }
     }
     await Promise.all(
-      Array.from({ length: Math.min(3, items.length) }, worker),
+      Array.from({ length: Math.min(parallelism, items.length) }, worker),
     );
     save();
     rmSync(folder, { recursive: true, force: true });

@@ -37,6 +37,7 @@ const options = parseArgs({
     cases: { type: "string" },
     stage: { type: "string", default: "native" },
     "batch-size": { type: "string", default: "128" },
+    jobs: { type: "string", default: "3" },
   },
 }).values;
 const checkout = resolve(
@@ -119,6 +120,9 @@ const cases = catalog.filter(
 );
 if (requested && !options.filter && cases.length !== requested.size)
   throw Error("Case selection contains an unknown source path");
+const jobs = Number(options.jobs);
+if (!Number.isInteger(jobs) || jobs < 1 || jobs > 8)
+  throw Error("Use 1 to 8 concurrent target processes");
 const size = Number(options["batch-size"]);
 if (!Number.isInteger(size) || size < 1 || size > 512)
   throw Error("Use a batch size between 1 and 512");
@@ -391,6 +395,7 @@ if (report.bootstrap.status === "failed") {
     report,
     save,
     batchSize: size,
+    jobs,
     documentFor: (c) => {
       const scripts = nativePaths(out, scriptsFor(c.file));
       writeFileSync(

@@ -462,10 +462,15 @@ class Js {
 		if (!ready) {
 			ready = true;
 			final console = obj();
-			console.define("log", fn((_, a) -> {
-				WebConsole.log([for (v in a) str(v)].join(" "));
-				return u;
-			}, false));
+			for (level in ["log", "info", "debug", "warn", "error"])
+				console.define(level, fn((_, a) -> {
+					final line = [for (v in a) str(v)].join(" ");
+					if (level == "warn" || level == "error")
+						WebConsole.error(line);
+					else
+						WebConsole.log(line);
+					return u;
+				}, false));
 			globals.set("console", console);
 			globals.set("Math", mathObject());
 			final number = fn((_, a) -> a.length == 0 ? 0. : num(a[0]), false);

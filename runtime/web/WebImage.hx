@@ -31,14 +31,18 @@ class WebImage extends JsObject {
 			var event = "load", failure = "";
 			try {
 				final data = WebResources.read(src).bytes;
-				if (data.length >= 2 && data.get(0) == 255 && data.get(1) == 216) {
-					final decoded = WebImageCodec.jpeg(data);
-					if (decoded == null)
-						throw "JPEG decoding unavailable on this target";
+				final jpeg = data.length >= 2 && data.get(0) == 255 && data.get(1) == 216;
+				final png = data.length >= 8 && data.get(0) == 137 && data.getString(1, 3) == "PNG";
+				if (!png && !jpeg)
+					throw "Unsupported image format";
+				final decoded = WebImageCodec.raster(data);
+				if (decoded != null) {
 					width = decoded.getInt32(0);
 					height = decoded.getInt32(4);
 					pixels = decoded.sub(8, decoded.length - 8);
 				} else {
+					if (jpeg)
+						throw "JPEG decoding unavailable on this target";
 					final png = new Reader(new haxe.io.BytesInput(data)).read();
 					final h = Tools.getHeader(png);
 					if (h.interlaced || h.width < 1 || h.height < 1 || 1.0 * h.width * h.height > 16777216)

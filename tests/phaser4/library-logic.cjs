@@ -12,3 +12,6 @@ for (let i = 0; i < 4; i++) {
     if (intersects(a, b)) bus.emit("contact");
     console.log(b.x, hits);
 }
+
+const seen = new Set([a,b]);
+console.log(seen.has(a), seen.delete(b), seen.size);
