@@ -70,12 +70,12 @@ class WebRequest extends JsObject {
 						v.bytes.blit(0, b.bytes, 0, b.bytes.length);
 						define("response", v);
 					case "json": try {
-							define("response", Js.json(b.bytes.toString()));
+							define("response", Js.json(textBody(b.bytes)));
 						} catch (_:Dynamic) {
 							define("response", null);
 						}
 					case "", "text":
-						final s = b.bytes.toString();
+						final s = textBody(b.bytes);
 						define("response", s);
 						define("responseText", s);
 					default: throw "E-XHR: unsupported response type " + kind;
@@ -96,6 +96,11 @@ class WebRequest extends JsObject {
 				fetch();
 			return Js.u;
 		}, false));
+	}
+
+	static function textBody(bytes:haxe.io.Bytes):String {
+		final bom = bytes.length >= 3 && bytes.get(0) == 239 && bytes.get(1) == 187 && bytes.get(2) == 191;
+		return bytes.getString(bom ? 3 : 0, bytes.length - (bom ? 3 : 0));
 	}
 
 	function state(n:Int) {

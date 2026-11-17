@@ -15,21 +15,21 @@ export function readDocument(path) {
       );
     return resolve(dir, decodeURIComponent(url));
   };
-  function walk(n) {
+  function walk(n, parent = -1) {
     const attrs = Object.fromEntries(
       (n.attrs ?? []).map((a) => [a.name, a.value]),
     );
-    if (
-      n.tagName &&
-      n.tagName !== "script" &&
-      (attrs.id || n.tagName === "canvas")
-    )
+    if (n.tagName && n.tagName !== "script") {
+      const index = elements.length;
       elements.push({
+        parent,
         tag: n.tagName,
         id: attrs.id ?? "",
         width: attrs.width,
         height: attrs.height,
       });
+      parent = index;
+    }
     if (n.tagName === "script") {
       const type = (attrs.type ?? "").toLowerCase(),
         raw = (n.childNodes ?? []).map((c) => c.value ?? "").join("");
@@ -69,7 +69,7 @@ export function readDocument(path) {
         scripts.push(script);
       }
     }
-    for (const child of n.childNodes ?? []) walk(child);
+    for (const child of n.childNodes ?? []) walk(child, parent);
   }
   walk(parse(text, { sourceCodeLocationInfo: true }));
   if (!scripts.length)

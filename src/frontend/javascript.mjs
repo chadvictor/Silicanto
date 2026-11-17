@@ -501,7 +501,13 @@ export function emitModule(graph, module, file, units, globals) {
           quoted(span.literal.text);
       return "(" + v + ")";
     }
-    if (ts.isStringLiteralLike(n)) return quoted(n.text);
+    if (ts.isStringLiteralLike(n)) {
+      // Class-file UTF-8 constants are limited to 65535 bytes. Join at runtime
+      // so javac cannot fold adjacent literal chunks back into one constant.
+      if (n.text.length <= 12000) return quoted(n.text);
+      const chunks = n.text.match(/[\s\S]{1,12000}/gu) ?? [];
+      return "[" + chunks.map(quoted).join(",") + '].join("")';
+    }
     if (ts.isNumericLiteral(n))
       return /^\d+$/.test(String(+n.text))
         ? String(+n.text) + ".0"
@@ -519,6 +525,27 @@ export function emitModule(graph, module, file, units, globals) {
       ts.isNonNullExpression(n)
     )
       return expr(n.expression, s);
+    if (
+      ts.isArrayLiteralExpression(n) &&
+      n.elements.length > 128 &&
+      n.elements.every(
+        (e) =>
+          ts.isNumericLiteral(e) ||
+          ts.isStringLiteral(e) ||
+          e.kind === K.NullKeyword,
+      )
+    ) {
+      const parts = [];
+      for (let i = 0; i < n.elements.length; i += 128) {
+        const lines = n.elements
+          .slice(i, i + 128)
+          .map((e) => "out.push(" + expr(e, s) + ");");
+        parts.push(
+          units.method("out:Array<Dynamic>", "Void", block(lines)) + "(out);",
+        );
+      }
+      return block(["var out:Array<Dynamic> = [];", ...parts, "out;"]);
+    }
     if (ts.isArrayLiteralExpression(n) && n.elements.some(ts.isSpreadElement))
       return argumentArray(n.elements, s);
     if (ts.isArrayLiteralExpression(n))

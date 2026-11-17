@@ -25,7 +25,19 @@ class WebPlatform {
 	static function element(tag:String):JsObject {
 		final o:JsObject = tag == "canvas" ? new WebCanvas(300, 150) : Js.obj();
 		new WebEvents(o);
-		o.define("style", Js.obj());
+		final style = Js.obj();
+		style.values.set("setProperty", Js.fn((_, a) -> {
+			style.define(Js.str(a[0]), Js.str(a[1]));
+			return Js.u;
+		}, false));
+		style.values.set("getPropertyValue", Js.fn((_, a) -> {
+			final v = style.read(Js.str(a[0]));
+			return v == Js.u ? "" : Js.str(v);
+		}, false));
+		o.define("style", style);
+		o.define("parentNode", null);
+		o.define("parentElement", null);
+		o.define("nodeName", tag.toUpperCase());
 		o.define("nodeType", 1);
 		o.define("tagName", tag.toUpperCase());
 		o.define("getBoundingClientRect", Js.fn((_, a) -> {
@@ -41,18 +53,34 @@ class WebPlatform {
 		}, false));
 		final children:Array<Dynamic> = [];
 		o.define("children", children);
+		o.define("childNodes", children);
+		o.getters.set("firstChild", () -> children.length == 0 ? null : children[0]);
+		o.getters.set("lastChild", () -> children.length == 0 ? null : children[children.length - 1]);
+		o.define("setAttribute", Js.fn((_, a) -> {
+			Js.put(o, Js.str(a[0]), Js.str(a[1]));
+			return Js.u;
+		}, false));
+		o.define("getAttribute", Js.fn((_, a) -> {
+			final x = o.read(Js.str(a[0]));
+			return x == Js.u ? null : Js.str(x);
+		}, false));
 		o.define("removeChild", Js.fn((_, a) -> {
 			final n = Js.at(a, 0);
 			if (!children.remove(n))
 				throw "NotFoundError";
+			Js.put(n, "parentElement", null);
 			Js.put(n, "parentNode", null);
 			return n;
 		}, false));
 		o.define("appendChild", Js.fn((_, args) -> {
-			final n = Js.at(args, 0);
+			final n:Dynamic = Js.at(args, 0);
 			if (Std.isOfType(n, WebCanvas))
-				canvas = n;
+				canvas = cast n;
+			final old = Js.get(n, "parentNode");
+			if (old != null && old != Js.u)
+				Js.call(Js.get(old, "removeChild"), old, [n]);
 			children.push(n);
+			Js.put(n, "parentElement", o);
 			Js.put(n, "parentNode", o);
 			return n;
 		}, false));
@@ -61,6 +89,9 @@ class WebPlatform {
 
 	public static function init(markup:String) {
 		WebResources.install();
+		WebGL.install();
+		WebTimers.install();
+		WebEncoding.install();
 		#if sys
 		final args = Sys.args();
 		final rootArg = args.indexOf("--asset-root");
@@ -74,7 +105,23 @@ class WebPlatform {
 		Js.realm.define("HTMLImageElement", image);
 		final dom = Js.obj(), body = element("body");
 		dom.define("body", body);
-		dom.define("documentElement", element("html"));
+		final html = element("html"), head = element("head");
+		dom.define("documentElement", html);
+		dom.define("head", head);
+		for (child in [head, body])
+			Js.call(html.read("appendChild"), html, [child]);
+		dom.define("createElementNS", Js.fn((_, a) -> element(Js.str(Js.at(a, 1)).toLowerCase()), false));
+		dom.define("getElementsByTagName", Js.fn((_, a) -> {
+			final tag = Js.str(Js.at(a, 0)).toUpperCase(), found:Array<Dynamic> = [];
+			function visit(o:JsObject) {
+				if (tag == "*" || o.read("tagName") == tag)
+					found.push(o);
+				for (child in (cast o.read("children") : Array<Dynamic>))
+					visit(child);
+			}
+			visit(html);
+			return found;
+		}, false));
 		final domEvents = new WebEvents(dom), winEvents = new WebEvents(Js.realm);
 		dom.define("readyState", "loading");
 		enqueue(() -> {
@@ -95,8 +142,20 @@ class WebPlatform {
 		Js.realm.define("innerWidth", 800);
 		Js.realm.define("innerHeight", 600);
 		final nodes:Array<Dynamic> = haxe.Json.parse(markup);
+		final built:Array<JsObject> = [];
 		for (n in nodes) {
-			final e = element(n.tag);
+			final e = switch Std.string(n.tag) {
+				case "head": head;
+				case "body": body;
+				case "html": html;
+				default: element(n.tag);
+			};
+			if (e != head && e != body && e != html) {
+				final parent:JsObject = n.parent != null && n.parent >= 0 && n.parent < built.length ? built[n.parent] : body;
+				Js.call(parent.read("appendChild"), parent, [e]);
+			}
+			built.push(e);
+			e.define("id", n.id);
 			if (n.id != "")
 				ids.set(n.id, e);
 			if (Std.isOfType(e, WebCanvas)) {
@@ -166,6 +225,7 @@ class WebPlatform {
 		final start = haxe.Timer.stamp();
 		while (window && !finite || i < frames) {
 			clock = window && !finite ? (haxe.Timer.stamp() - start) * 1000 : i * 1000. / 60.;
+			WebTimers.advance(clock);
 			var count = 0;
 			while (tasks.length > 0) {
 				if (++count > 100000)
@@ -179,7 +239,7 @@ class WebPlatform {
 			if (window) {
 				if (canvas == null || canvas.width == 0 || canvas.height == 0)
 					throw "E-CANVAS: no display canvas";
-				if (!WebWindow.present(canvas.width, canvas.height, canvas.pixels))
+				if (!WebWindow.present(canvas.width, canvas.height, canvas.surface()))
 					break;
 				Sys.sleep(Math.max(0, (i + 1) / 60. - (haxe.Timer.stamp() - start)));
 			}
@@ -192,10 +252,11 @@ class WebPlatform {
 				throw "E-CANVAS: nothing to capture";
 			final f = sys.io.File.write(path, true);
 			f.writeString("P6\n" + canvas.width + " " + canvas.height + "\n255\n");
+			final rgba = canvas.surface();
 			final rgb = Bytes.alloc(canvas.width * canvas.height * 3);
 			for (i in 0...(canvas.width * canvas.height))
 				for (k in 0...3)
-					rgb.set(i * 3 + k, WebRaster.byte(canvas.pixels.get(i * 4 + k) * canvas.pixels.get(i * 4 + 3) / 255.));
+					rgb.set(i * 3 + k, WebRaster.byte(rgba.get(i * 4 + k) * rgba.get(i * 4 + 3) / 255.));
 			f.write(rgb);
 			f.close();
 		}

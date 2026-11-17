@@ -3,7 +3,7 @@ class JsPattern extends JsObject {
 	public final globalFlag:Bool;
 	public final sticky:Bool;
 
-	final groupsCount:Int;
+	public final groupsCount:Int;
 
 	public function new(pattern:String, flags:String) {
 		super();

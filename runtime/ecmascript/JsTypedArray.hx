@@ -104,6 +104,7 @@ class JsTypedArray extends JsObject {
 	public static function install(realm:JsObject) {
 		final ctor = Js.fn((self, args) -> new JsBuffer((cast self : JsObject).prototype, integer(Js.at(args, 0))), true);
 		bufferPrototype = ctor.read("prototype");
+		ctor.define("isView", Js.fn((_, a) -> Std.isOfType(Js.at(a, 0), JsTypedArray), false));
 		realm.define("ArrayBuffer", ctor);
 		for (kind in [
 			"Uint8Array",
@@ -130,6 +131,42 @@ class JsTypedArray extends JsObject {
 					dst.writeIndex(pos + i, snapshot[i]);
 				return Js.u;
 			}, false));
+			for (name in [
+				"fill",
+				"slice",
+				"subarray",
+				"at",
+				"indexOf",
+				"includes",
+				"join",
+				"forEach",
+				"map"
+			]) {
+				proto.values.set(name, Js.fn(function(self:Dynamic, a:Array<Dynamic>):Dynamic {
+					final v:JsTypedArray = self, first = Js.at(a, 0);
+					switch name {
+						case "fill":
+							for (i in JsStandard.relative(Js.at(a, 1), v.length, 0)...JsStandard.relative(Js.at(a, 2), v.length, v.length))
+								v.writeIndex(i, first);
+							return v;
+						case "subarray", "slice":
+							final start = JsStandard.relative(first, v.length,
+								0), end = JsStandard.relative(Js.at(a, 1), v.length, v.length), n = Std.int(Math.max(0, end - start));
+							if (name == "subarray")
+								return new JsTypedArray(proto, kind, stride, [v.buffer, v.offset + start * stride, n]);
+							return new JsTypedArray(proto, kind, stride, [[for (i in start...start + n) v.readIndex(i)]]);
+						default:
+							final values = Js.items(v);
+							if (name == "forEach" || name == "map") {
+								final out:Array<Dynamic> = [];
+								for (i in 0...v.length)
+									out.push(Js.call(first, Js.at(a, 1), [v.readIndex(i), i, v]));
+								return name == "map" ? new JsTypedArray(proto, kind, stride, [out]) : Js.u;
+							}
+							return Js.call(Js.get(values, name), values, a);
+					}
+				}, false));
+			}
 			realm.define(kind, c);
 		}
 	}

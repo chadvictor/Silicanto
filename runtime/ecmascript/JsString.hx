@@ -7,7 +7,7 @@ class JsString {
 			case "concat", "valueOf", "toString", "toLowerCase", "toUpperCase", "indexOf", "lastIndexOf", "charAt", "charCodeAt", "substring", "substr",
 				"slice", "split", "trim", "replace", "includes", "match":
 				Js.fn(function(r:Dynamic, a:Array<Dynamic>):Dynamic {
-					final s:String = r, x = Js.at(a, 0), i = offset(a, 0, 0), j = offset(a, 1, s.length);
+					final s:String = r, x:Dynamic = Js.at(a, 0), i = offset(a, 0, 0), j = offset(a, 1, s.length);
 					return switch k {
 						case "match":
 							final pattern:JsPattern = Std.isOfType(x, JsPattern) ? cast x : new JsPattern(x == Js.u ? "" : Js.str(x), "");
@@ -30,7 +30,25 @@ class JsString {
 						case "split":
 							if (Std.isOfType(x, JsPattern)) (cast x : JsPattern).regex.split(s); else if (x == Js.u) [s]; else s.split(Js.str(x));
 						default:
-							final replacement = Js.str(Js.at(a, 1));
+							final repl = Js.at(a, 1);
+							if (Js.type(repl) == "function") {
+								if (Std.isOfType(x, JsPattern)) {
+									final pattern:JsPattern = x;
+									return pattern.regex.map(s, r -> {
+										final args:Array<Dynamic> = [];
+										for (i in 0...pattern.groupsCount) {
+											final v = r.matched(i);
+											args.push(v == null ? Js.u : v);
+										}
+										args.push(r.matchedPos().pos);
+										args.push(s);
+										return Js.str(Js.call(repl, Js.u, args));
+									});
+								}
+								final find = Js.str(x), p = s.indexOf(find);
+								return p < 0 ? s : s.substr(0, p) + Js.str(Js.call(repl, Js.u, [find, p, s])) + s.substr(p + find.length);
+							}
+							final replacement = Js.str(repl);
 							if (Std.isOfType(x, JsPattern)) (cast x : JsPattern).regex.replace(s, replacement); else {
 								final find = Js.str(x), p = s.indexOf(find);
 								p < 0 ? s : s.substr(0, p) + replacement + s.substr(p + find.length);

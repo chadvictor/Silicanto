@@ -299,11 +299,11 @@ async function execute(project, args, index) {
     });
   } catch (error) {
     const output =
-      error.stderr?.trim() ||
       error.stdout
         ?.split("\n")
         .filter((line) => /^Error :|Exception|E-[A-Z]+:/.test(line))
         .join("\n") ||
+      error.stderr?.trim() ||
       error.stdout?.trim() ||
       error.message;
     throw Error(output.slice(0, 4000));

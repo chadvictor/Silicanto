@@ -34,16 +34,28 @@ case "$target" in
       flags+=(-D no-compilation -D silicanto_apple_image)
       if [[ -f haxe/WebWindow.hx ]]; then
         flags+=(-D silicanto_window)
+        if [[ -f haxe/WebGLNative.hx ]]; then
+          bash "$root/scripts/setup-webgl.sh"
+          flags+=(-D silicanto_webgl)
+          if [[ "$action" == build ]]; then bash "$root/payloads/webgl/macos/build.sh" platform/webgl; fi
+        fi
         mkdir -p platform
         cp "$root/payloads/canvas/macos/CanvasWindow.mm" platform/
         if [[ "$action" == build ]]; then
           xcrun clang++ -O2 -fobjc-arc -c platform/CanvasWindow.mm -o platform/canvas.o
-          ar rcs platform/libcanvas.a platform/canvas.o
+          if [[ -f haxe/WebText.hx ]]; then
+            cp "$root/payloads/canvas/macos/CanvasText.mm" platform/
+            xcrun clang++ -std=c++17 -O2 -fobjc-arc -c platform/CanvasText.mm -o platform/text.o
+          fi
+          ar rcs platform/libcanvas.a platform/*.o
         fi
       fi
       export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
       haxe "${args[@]}" --cpp cpp "${flags[@]}"
-      if [[ "$action" == build ]]; then (cd cpp && neko "$HXCPP/hxcpp.n" Build.xml haxe); fi
+      if [[ "$action" == build ]]; then
+        (cd cpp && neko "$HXCPP/hxcpp.n" Build.xml haxe)
+        if [[ -d platform/webgl ]]; then cp -R platform/webgl cpp/; fi
+      fi
       cp "$HXCPP/LICENSE.txt" licenses/hxcpp.txt
     fi
     if [[ "$action" == build && "$name" != Sample ]]; then mv cpp/Sample "cpp/$name"; fi
