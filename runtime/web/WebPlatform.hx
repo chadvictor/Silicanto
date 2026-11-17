@@ -91,6 +91,7 @@ class WebPlatform {
 		WebResources.install();
 		WebGL.install();
 		WebTimers.install();
+		WebXml.install();
 		WebEncoding.install();
 		#if sys
 		final args = Sys.args();

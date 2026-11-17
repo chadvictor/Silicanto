@@ -20,6 +20,7 @@ try {
   await page.goto("about:blank");
   await page.setContent('<canvas id="view" width="48" height="32"></canvas>');
   await page.addScriptTag({ path: join(source, "draw.js") });
+  await page.addScriptTag({ path: join(source, "resources.js") });
   assert.deepEqual(errors, []);
   const expected = await page.evaluate(() => {
     const c = document.querySelector("canvas"),

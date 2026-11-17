@@ -1,16 +1,25 @@
 import { build } from "esbuild";
-import { readFileSync } from "node:fs";
-import { dirname, relative, resolve } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { basename, dirname, relative, resolve } from "node:path";
 import ts from "typescript";
 import { hasModuleSyntax } from "./classic.mjs";
 import { readDocument } from "./document.mjs";
 
 export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
-  entry = resolve(entry);
-  const dir = dirname(entry),
-    document = /\.html?$/i.test(entry) ? readDocument(entry) : null;
+  const dir = realpathSync(dirname(resolve(entry)));
+  entry = resolve(dir, basename(entry));
+  const document = /\.html?$/i.test(entry) ? readDocument(entry) : null;
   const scripts = document?.scripts ?? [{ path: entry, kind: "entry" }];
-  const byPath = new Map(scripts.map((s) => [s.path, s]));
+  const canonical = (script) =>
+    script.source === undefined && existsSync(script.path)
+      ? realpathSync(script.path)
+      : script.path;
+  const byPath = new Map(
+    scripts.flatMap((s) => [
+      [s.path, s],
+      [canonical(s), s],
+    ]),
+  );
   const inline = new Map(
     scripts.filter((s) => s.source !== undefined).map((s) => [s.path, s]),
   );
@@ -120,7 +129,11 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
       };
     });
   const byId = new Map(modules.map((m) => [m.id, m])),
-    roots = scripts.map((s) => byId.get(relative(dir, s.path)));
+    roots = scripts.map(
+      (s) =>
+        byId.get(relative(dir, s.path)) ??
+        byId.get(relative(dir, canonical(s))),
+    );
   if (roots.some((r) => !r))
     throw Error("E-MODULE: missing graph entry " + entry);
   return {

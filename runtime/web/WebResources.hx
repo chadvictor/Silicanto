@@ -60,6 +60,7 @@ class WebResources {
 			case "png": "image/png";
 			case "jpg", "jpeg": "image/jpeg";
 			case "json": "application/json";
+			case "xml", "fnt": "application/xml";
 			case "txt", "csv": "text/plain";
 			default: "application/octet-stream";
 		};

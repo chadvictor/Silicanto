@@ -247,6 +247,8 @@ class Js {
 			final member = JsString.member(k);
 			return member == u ? ordinary.read(k) : member;
 		}
+		if (type(receiver) == "number" && k == "toFixed")
+			return fn((r, a) -> JsDecimal.fixed(num(r), at(a, 0)), false);
 		if (type(receiver) == "number" && k == "toString")
 			return fn((r, args) -> {
 				if (args.length > 0 && args[0] != u && num(args[0]) != 10) {
