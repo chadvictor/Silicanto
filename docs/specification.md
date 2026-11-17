@@ -1,8 +1,8 @@
 # Silicanto compiler specification
 
-**Run Three.js as native code.** Revision 0.7, November 16, 2026.
+**Run Three.js as native code.** Revision 0.8, November 16, 2026.
 
-Silicanto takes a web JavaScript entry point and emits a readable, editable Haxe project containing the application and the modules it uses. Each target builds from that same project. Three.js applications are the first use case. The long-term goal is to support additional JavaScript programs and output languages as the corresponding language features, code generators and platform services become available.
+Silicanto takes a web JavaScript entry point and emits a readable, editable Haxe project containing the application and the modules it uses. Each target builds from that same project. Three.js applications were the first use case. The 1.0 goal is to compile applications without any prior knowledge of their libraries. The JavaScript frontend owns language semantics and the module graph; target payloads own the web and operating-system services an application uses. The goal does not establish current compatibility.
 
 ## Product contract
 
@@ -11,16 +11,28 @@ Silicanto takes a web JavaScript entry point and emits a readable, editable Haxe
 3. If the application creates geometry, evaluates lighting or animates a camera, the delivered application must perform that work at runtime. Existing input assets may remain data.
 4. Each output language needs a generator. Each platform service used by the program, such as a WebGL canvas, network or audio, needs an implementation on the target. Diagnostics should distinguish an unsupported JavaScript construct from a missing platform implementation.
 
+## 1.0 release gate: unmodified web applications
+
+- Resolve the entire statically discoverable dependency graph from the application entry and installed dependency tree, including dependencies of dependencies. Preserve module identity, order of side effects and observable exports. If an input depends on code that cannot be resolved, identify the edge; do not silently drop it.
+- Compile the implementation of each application library from its source. No opt-in adapter, package-name switch, substitute framework implementation, embedded browser, or JavaScript interpreter qualifies. The legacy Three.js path can remain available independently.
+- Translate to one editable Haxe project and retarget it without the input JavaScript. Only advertise a target/platform pair for which the declared host services can actually be supplied.
+- Use the [upstream Phaser gallery](../tests/phaser4/README.md) as an external consumer. For the pinned catalog, account for every entry on C++ and Java. Each must build, initialize, and demonstrate the behavior of its web reference. A native process that starts, a blank frame, or a source-only compilation is insufficient.
+- For visual scenes, compare real output with the browser. For input, audio, timing or nonvisual logic, add a repeatable scenario with observable assertions. A missing reference or an unavailable service remains an open case. Passing this catalog would establish compatibility for the tested revision and targets; other frameworks still need independent evidence.
+
+The [case-by-case measurements](compatibility/phaser4/README.md) are the current baseline. The 1.0 release criterion **has not been met**.
+
 ## Current evidence
 
 | Workload | Reference | Verified behavior |
 | --- | --- | --- |
 | Application logic with modules | A JavaScript program imports functions from the real Three.js r180 MathUtils module, constructs a class and manipulates vertex data | The original JavaScript and the C, C++, Java, JavaScript and Python outputs agree on the computation. Editing the Haxe changes the result. Custom HXML can select another backend. [Java JAR isolation](../tests/java-target.mjs) · [Other targets](../tests/haxe-targets.mjs) |
+| General web application | Classic script, ES modules, CommonJS, JSON, local XHR and PNG drawn to a Canvas | The original Chromium image matches C, C++, Java and Neko pixel for pixel. [Fixture and test](../tests/generic-targets.mjs) |
+| Unmodified Phaser 4 catalog | The published UMD engine and the original sources and assets | [Native results by example](compatibility/phaser4/README.md); source emission, execution and visual checks are separate. |
 | Haxe-to-JavaScript round trip | A projection calculation compiled by Haxe 4.3.7 to both ES5 and ES6 | Both complete scripts translate back to Haxe and produce the reference result in JS and native C. The corpus includes handwritten JavaScript and the recurrence used by the Nácar terrain. [Test](../tests/haxe-js-roundtrip.mjs) |
 | Official Three.js samples | The static and animated Fundamentals examples from r180 | Compare the original WebGL frames to the regenerated web program and to the C/Metal and Java/Metal programs. Preserve the original dimensions and options. [Test](../tests/metal.mjs) · [Upstream examples](https://github.com/mrdoob/three.js/tree/r180/manual/examples) |
 | Nácar procedural world | Three original JavaScript modules generate the scene and move the camera; Three.js WebGLRenderer supplies the browser reference | The native ARM64 app generates geometry and an HDR environment at startup. At 1280 × 720, compare original WebGL, regenerated WebGL and C/Metal or Java/Metal at 0, 14 and 35 seconds. Metal passes if mean channel error is below 4/255 and more than 92% of pixels have every RGB channel within eight levels of the reference. [Test](../tests/nacar.mjs) |
 
-Compatibility is measured for an **entry point, its dependency graph, the Three.js revision and an output target**. Support for a mesh type alone says little about an application that also loads assets or uses browser UI. The CLI currently reports the first translation error it detects. The engineering requirements below describe both implemented behavior and goals for later releases.
+Compatibility is measured for an **entry point, its dependency graph, the dependency revisions, the host services and an output target**. Support for a mesh type alone says little about an application that also loads assets or uses browser UI. The CLI currently reports the first translation error it detects. The engineering requirements below describe both implemented behavior and goals for later releases.
 
 ## What the upstream Haxe compiler can tell us
 
@@ -84,11 +96,11 @@ Record supported signatures, defaults and option keys for each target. TypeScrip
 
 ## Architecture and interop
 
-1. **Read the input.** A JavaScript frontend uses the TypeScript compiler API to parse syntax. esbuild resolves static module graphs. Three.js imports and aliases are bound to the supported API; local classes keep their identity. Source maps connect bundled locations to the original modules. [Module graph](../src/module-graph.mjs) · [TypeScript compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)
+1. **Read the input.** The general frontend parses JavaScript with the TypeScript compiler API and uses the [dependency resolver](../src/frontend/graph.mjs) to follow imports and literal require calls into package sources. Only the legacy path binds Three.js imports to the supported scene API; local classes keep their identity. Source maps connect bundled locations to the original modules. [Module graph](../src/module-graph.mjs) · [TypeScript compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)
 2. **Preserve behavior.** Track functions, control flow, captured state and source locations while lowering. A shared typed intermediate representation is a design goal. In the cube program, giving each callback a separate copy of `playing` would break pause.
 3. **Emit Haxe.** Emit the application and the required compatibility code into a portable project. Keep supported JavaScript numbers at 64-bit precision on the CPU and narrow data when preparing typed arrays or GPU buffers.
 4. **Build the target.** Haxe 4.3.7 generates HashLink/C through `--hl c/main.c`; Clang builds and links the executable. hxcpp builds C++ output. The Java payload uses hxjava 4.2.0 and Haxe’s Java source generator, then compiles with `javac --release 17`. A platform registry selects a payload by target, platform, graphics API and project profile. [Payload contract](payloads.md) [HashLink/C](https://haxe.org/manual/target-hl-c-compilation.html) · [C++](https://haxe.org/manual/target-cpp-getting-started.html) · [Java](https://haxe.org/manual/target-java-getting-started.html)
-5. **Draw and present.** The native host uses hx-n for the Metal device, pipeline, textures, command queue, window and input events. The rendering path can present a frame or capture it for comparison. Native bindings and linkage depend on the target; the Java desktop payload uses Swing for presentation and input, and JNI to submit the same scene buffers and shaders to Metal. The graphics JAR contains its JNI library; the app bundle also includes a JVM. [Metal bindings](https://github.com/hx-n/hxn-gpu-metal) · [Window bindings](https://github.com/hx-n/hxn-window) · [Haxe externs](https://haxe.org/manual/lf-externs.html)
+5. **Draw and present.** The general Canvas host draws to a software surface that C++ can present with AppKit and Java can present with Swing. The legacy Three.js native host uses hx-n for the Metal device, pipeline, textures, command queue, window and input events. The rendering path can present a frame or capture it for comparison. Native bindings and linkage depend on the target; the Java desktop payload uses Swing for presentation and input, and JNI to submit the same scene buffers and shaders to Metal. The graphics JAR contains its JNI library; the app bundle also includes a JVM. [Metal bindings](https://github.com/hx-n/hxn-gpu-metal) · [Window bindings](https://github.com/hx-n/hxn-window) · [Haxe externs](https://haxe.org/manual/lf-externs.html)
 
 ## Engineering requirements
 
@@ -134,4 +146,4 @@ The original r180 cube ran in Chromium 158.0.8127.18 using WebGL 2 with SwiftSha
 | M4 · Java | Implemented for portable JVM logic and macOS ARM64 graphics. Expand graphical support by adding a platform payload and passing the same image comparison. |
 | M5 · Models and textures | Add the upstream webgl_geometry_cube sample and a local model viewer. Verify asset packaging, UV orientation, color and interaction against the web reference. |
 
-The original compiler and runtime use the MIT license. Preserve dependency notices in distributions. API contributions should include a recognized signature, a runtime implementation, a runnable example and the expected behavior, including unsupported parameters. [Contributor guide](../CONTRIBUTING.md)
+The original compiler and runtime use the MIT license. Preserve dependency notices in distributions. Generic frontend changes should identify the language or web behavior, include a small independent reproducer and compare observable results. Legacy scene API changes should include a recognized signature, runtime implementation and expected behavior, including unsupported parameters. [Contributor guide](../CONTRIBUTING.md)

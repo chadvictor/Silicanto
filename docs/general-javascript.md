@@ -18,6 +18,23 @@ java -jar dist/jvm/java/Sample.jar --asset-root tests/fixtures/general --window
 
 The compiler also accepts a single JS entry, ES modules, CommonJS, and local HTML pages with multiple scripts. Install the application's dependencies using its lockfile before building. Use `--web-root DIR` when relative JS import URLs at a mounted directory's boundary should resolve as they do on a web server. The CLI never installs arbitrary app dependencies. Look at `manifest.json` for module edges, input hashes, host profile and payload; look at `haxe/JsModule*.hx` and `haxe/JsUnit*.hx` for the application and its libraries. Copying the generated project to a new directory and running `silicanto target` requires no original JavaScript.
 
+The library and the application take the same route. A platform payload supplies services that have no JavaScript implementation in the application's source tree:
+
+```mermaid
+flowchart LR
+    A["HTML or JS entry"] --> B["Module graph"]
+    P["Installed npm packages and local modules"] --> B
+    B --> C["JavaScript to Haxe"]
+    C --> H["Editable Haxe project"]
+    S["ECMAScript and web runtime"] --> H
+    H --> N["C or C++"]
+    H --> J["Java"]
+    H --> K["Neko"]
+    N --> M["Native process"]
+    J --> V["JVM"]
+    K --> W["Neko VM"]
+```
+
 | Component | Responsibility |
 | --- | --- |
 | [HTML input](../src/frontend/document.mjs) | Parse script order, inline and external sources, module roots and simple import maps. |
@@ -34,3 +51,5 @@ A library is source code; a browser API is a platform service. New language feat
 The same canvas can run offscreen or in a desktop window. `--window` presents its pixels via AppKit on native macOS C++ or Swing on Java. Close the window to stop; add `--frames N` for a finite run. C and Neko currently use the offscreen surface. Supply `--asset-root DIR` to mount local files as the application’s origin; XHR supports GET, text/JSON, blobs and array buffers. PNG decoding works on all four tested targets; JPEG uses ImageIO on C++/macOS and Java. WebGL, network transport, audio playback, keyboard/pointer interaction and full CSS layout are still missing. Canvas supports a subset of paths, images and transforms. Curves, text and browser-accurate antialiasing are incomplete. Dynamic imports, unbounded runtime dependency discovery, eval, async functions/generators, return or break across finally and full ES module cycle semantics are incomplete. Retargeting does not supply the missing services. A successful translation is not evidence that a game runs.
 
 Run `npm run test:generic` after installing the [native tools](../README.md) and `npx playwright install chromium`. The test bundles only the browser reference. The native builds consume the original classic script, ES modules, CommonJS and JSON through the general compiler. A local PNG is loaded through XHR, turned into a blob URL and drawn into the scene. All four targets are compared with Chromium byte for byte.
+
+The [Phaser 4 compatibility report](compatibility/phaser4/README.md) measures the full upstream gallery on C++ and Java and records the first failing stage per target.

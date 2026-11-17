@@ -16,11 +16,28 @@ npm run test:phaser4 -- --target java --out dist/catalog-java
 npm run test:phaser4 -- --target cpp --out dist/catalog-cpp
 ```
 
+See the [published native results](../../docs/compatibility/phaser4/README.md) for the tested compiler revision and the outcome of each example. To regenerate that table, run the three stages above with output paths ending in `frontend`, `java` and `cpp` under one directory (for example, `dist/phaser4-validation`), then run:
+
+```sh
+node tests/phaser4/results.mjs dist/phaser4-validation dist/phaser4-results "$(git rev-parse HEAD)"
+```
+
+Run the stages from a clean checkout. The publisher rejects incomplete reports and mismatched catalogs; newly stamped reports must also agree on the clean compiler and suite revision. The native commands exit nonzero while any cases fail; keep both reports.
+
 To reproduce a single example as an ordinary standalone application:
 
 ```sh
 npm run test:phaser4 -- --target java --filter 'graphics/stroke rect.js' --out dist/stroke
 java -jar dist/stroke/case-0/project/java/Sample.jar --window
+```
+
+The PNG animation has an additional test: the sprite must change over time, and every pixel on both targets must equal Chromium at frames 4, 12, 20, 30 and 48. Build two standalone copies of the original example, then run the timeline:
+
+```sh
+npm run test:phaser4 -- --target cpp --filter 'animation/animation from png sequence.js' --out dist/animation-cpp
+npm run test:phaser4 -- --target java --filter 'animation/animation from png sequence.js' --out dist/animation-java
+node tests/phaser4/animation-timeline.mjs .toolchain/phaser-examples dist/animation-cpp dist/animation-java
+dist/animation-cpp/case-0/project/cpp/Sample --asset-root .toolchain/phaser-examples/public --window
 ```
 
 The runner clones the upstream repository on first use. Supply `--checkout PATH` to use an existing clean checkout of the pinned revision. Output directories must be new. Neko is also selectable; generating bytecode for the complete bundled engine takes much longer than building a small Neko app.
