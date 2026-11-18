@@ -1,0 +1,282 @@
+[
+  {
+    "compiler": "7117550f1fcf09f33ea9d5fde9e7077de6e6af53",
+    "modifiedCompilerOrSuite": false,
+    "revision": "39443210f7f81db4773eb104facadfb85d05dfa4",
+    "version": "1.0.4",
+    "target": "cpp",
+    "selected": 6,
+    "cases": [
+      {
+        "id": "conformance/programs/program-infolog.html",
+        "assertions": {
+          "pass": 3,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/programs/use-program-crash-with-discard-in-fragment-shader.html",
+        "assertions": {
+          "pass": 4,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/copytexsubimage2d-subrects.html",
+        "assertions": {
+          "pass": 1,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/cube-map-uploads-out-of-order.html",
+        "assertions": {
+          "pass": 2,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/tex-image-with-format-and-type.html",
+        "assertions": {
+          "pass": 73,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/uniforms/gl-uniform-arrays.html",
+        "assertions": {
+          "pass": 111,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "compiler": "7117550f1fcf09f33ea9d5fde9e7077de6e6af53",
+    "modifiedCompilerOrSuite": false,
+    "revision": "39443210f7f81db4773eb104facadfb85d05dfa4",
+    "version": "1.0.4",
+    "target": "java",
+    "selected": 6,
+    "cases": [
+      {
+        "id": "conformance/programs/program-infolog.html",
+        "assertions": {
+          "pass": 3,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/programs/use-program-crash-with-discard-in-fragment-shader.html",
+        "assertions": {
+          "pass": 4,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/copytexsubimage2d-subrects.html",
+        "assertions": {
+          "pass": 1,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/cube-map-uploads-out-of-order.html",
+        "assertions": {
+          "pass": 2,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/tex-image-with-format-and-type.html",
+        "assertions": {
+          "pass": 73,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/uniforms/gl-uniform-arrays.html",
+        "assertions": {
+          "pass": 111,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "compiler": "7117550f1fcf09f33ea9d5fde9e7077de6e6af53",
+    "modifiedCompilerOrSuite": false,
+    "revision": "39443210f7f81db4773eb104facadfb85d05dfa4",
+    "version": "2.0.1",
+    "target": "cpp",
+    "selected": 6,
+    "cases": [
+      {
+        "id": "conformance/programs/program-infolog.html",
+        "assertions": {
+          "pass": 3,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/programs/use-program-crash-with-discard-in-fragment-shader.html",
+        "assertions": {
+          "pass": 4,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/copytexsubimage2d-subrects.html",
+        "assertions": {
+          "pass": 1,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/cube-map-uploads-out-of-order.html",
+        "assertions": {
+          "pass": 2,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/tex-image-with-format-and-type.html",
+        "assertions": {
+          "pass": 73,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/uniforms/gl-uniform-arrays.html",
+        "assertions": {
+          "pass": 441,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "compiler": "7117550f1fcf09f33ea9d5fde9e7077de6e6af53",
+    "modifiedCompilerOrSuite": false,
+    "revision": "39443210f7f81db4773eb104facadfb85d05dfa4",
+    "version": "2.0.1",
+    "target": "java",
+    "selected": 6,
+    "cases": [
+      {
+        "id": "conformance/programs/program-infolog.html",
+        "assertions": {
+          "pass": 3,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/programs/use-program-crash-with-discard-in-fragment-shader.html",
+        "assertions": {
+          "pass": 4,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/copytexsubimage2d-subrects.html",
+        "assertions": {
+          "pass": 1,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/cube-map-uploads-out-of-order.html",
+        "assertions": {
+          "pass": 2,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/textures/misc/tex-image-with-format-and-type.html",
+        "assertions": {
+          "pass": 73,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      },
+      {
+        "id": "conformance/uniforms/gl-uniform-arrays.html",
+        "assertions": {
+          "pass": 441,
+          "fail": 0,
+          "skipped": 0,
+          "errors": []
+        },
+        "status": "passed"
+      }
+    ]
+  }
+]

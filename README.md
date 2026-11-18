@@ -104,7 +104,8 @@ The C++ and Java desktop hosts draw through ANGLE on Metal, play audio through A
 | **WebGL 1 shaders** | Both targets passed **178/178** OGLES shader build cases and **775/775** reference rendering comparisons. |
 | **WebGL context behavior** | Both targets passed **6/21** WebGL 1 context pages and **8/9** WebGL 2 context pages. Full conformance remains open. |
 | **CSS layout and paint** | C++ completed **1,714** WPT pairs. **630** matched with visible detail, **28** matched uniformly and **1,056** differed. |
-| **Full WebGL page lists** | The compiler emitted Haxe for **964/970** WebGL 1 entries and **2,856/2,865** WebGL 2 entries. This count measures translation only. |
+| **Full WebGL page lists** | **970/970** WebGL 1 and **2,862/2,865** WebGL 2 entries emitted Haxe. The three remaining translation failures use JavaScript generators. |
+| **Six recovered WebGL pages** | All six ran through their original assertions on C++ and Java with Metal. Each target passed **194 assertions in WebGL 1** and **524 in WebGL 2**. [Results by page](docs/compatibility/native-desktop/webgl-recovered-pages.json) |
 
 The report records the compiler and upstream revision for each measurement. It includes individual failures, frame hashes and reproduction commands. Gallery captures measure selected moments. Playability still needs input and longer-running checks for individual games. [Read the native report](docs/compatibility/native-desktop/README.md) · [Browse the gallery matrix](docs/compatibility/native-desktop/phaser4/matrix.tsv) · [Run the gallery](tests/phaser4/README.md)
 

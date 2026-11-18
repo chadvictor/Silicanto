@@ -34,9 +34,17 @@ The render runner reads pixels from the Metal-backed framebuffer and applies eac
 
 The full page runner loads the original upstream scripts and listens for their assertion and completion callbacks. In the initial C++ sweep, 914 of 970 WebGL 1 pages stopped during translation and 56 stopped during execution. For WebGL 2, 2,808 of 2,865 stopped during translation and 57 stopped during execution. No page completed that first sweep. The shared JavaScript harness itself used features the compiler did not yet implement. [WebGL 1 page diagnostics](webgl-native-before-async-1.0.4.json.gz) · [WebGL 2 page diagnostics](webgl-native-before-async-2.0.1.json.gz)
 
-With the complete upstream test tree, the compiler emitted Haxe for **964 of 970 WebGL 1 pages** and **2,856 of 2,865 WebGL 2 pages** at [d048f3a](https://github.com/chadvictor/Silicanto/commit/d048f3ab210e6984ae9839e68161dbfd432dddf1). The previous census included 31 WebGL 1 entries and 793 WebGL 2 entries whose checkout lacked the upstream Closure Library. The page runner now expands a sparse checkout before translation. The nine remaining distinct failing inputs have individual source diagnostics. [WebGL 1 translation census](webgl-frontend-1.0.4.json.gz) · [WebGL 2 translation census](webgl-frontend-2.0.1.json.gz)
+With the complete upstream test tree, **970 of 970 WebGL 1 pages** and **2,862 of 2,865 WebGL 2 pages** emitted Haxe at [7117550](https://github.com/chadvictor/Silicanto/commit/7117550f1fcf09f33ea9d5fde9e7077de6e6af53). The three remaining translation failures use synchronous generators. The previous census reached 964 and 2,856 pages respectively. [WebGL 1 translation census](webgl-frontend-1.0.4.json.gz) · [WebGL 2 translation census](webgl-frontend-2.0.1.json.gz)
 
-One newly translated case, `deqp/data/gles3/shaders/arrays.html`, also built a native C++ executable. It stopped at runtime with `ReferenceError: modules is not defined` before reporting completion. The full-page translation figures count Haxe emission. The following context results count completed native assertions. [Native execution record](webgl-native-arrays.json)
+### Running the six recovered pages
+
+Each page was built and executed four ways on Apple Silicon, once per WebGL version and target. All 24 runs reached the upstream completion callback with zero failed or skipped assertions. Both C++ and Java passed 194 assertions under WebGL 1 and 524 under WebGL 2. The six pages cover shader scripts, program logs, uniform arrays, subrectangle copies, cube-map uploads and texture format conversion. [Per-page native assertions](webgl-recovered-pages.json)
+
+The texture page exercises precision loss in RGB565, RGBA4444 and RGBA5551, and checks premultiplied alpha. The native upload path also handles row alignment and vertical flipping for these formats. The regression fixture checks framebuffer bytes and verifies that the source view retains its original values. [Texture regression](../../../tests/fixtures/webgl/resources.js) · [WebGL pixel storage](https://registry.khronos.org/webgl/specs/latest/1.0/#PIXEL_STORAGE_PARAMETERS)
+
+### Other native page measurements
+
+At d048f3a, `deqp/data/gles3/shaders/arrays.html` built a native C++ executable and stopped at runtime with `ReferenceError: modules is not defined` before reporting completion. [Native execution record](webgl-native-arrays.json)
 
 The native executables also ran every page in the upstream context directory for each version at 6def5e8. On both C++ and Java, 6 of 21 WebGL 1 context pages passed, 3 completed with assertion failures and 12 stopped during execution. For WebGL 2, 8 of 9 context pages passed and one completed with assertion failures involving objects from a different context. This run includes the original texture isolation test, which checked green and blue framebuffer pixels from two independent ES 3 contexts. [Native assertions and diagnostics for every context page](webgl-native-context-pages.json.gz)
 
@@ -76,6 +84,18 @@ npm run test:webgl-render -- --target java --out dist/gles-java.json
 npm run test:webgl-pages -- --target cpp --version 1.0.4 --out dist/webgl1.json
 npm run test:webgl-pages -- --target cpp --version 2.0.1 --out dist/webgl2.json
 npm run test:css -- --out dist/wpt-css.json
+```
+
+Repeat `--filter` to select several pages in one invocation. To reproduce the recovered-page measurement, run the following command with each target (`cpp`, `java`) and version (`1.0.4`, `2.0.1`).
+
+```sh
+target=cpp
+version=1.0.4
+npm run test:webgl-pages -- --target "$target" --version "$version" \
+  --filter program-infolog.html --filter use-program-crash-with-discard-in-fragment-shader.html \
+  --filter copytexsubimage2d-subrects.html --filter cube-map-uploads-out-of-order.html \
+  --filter tex-image-with-format-and-type.html --filter gl-uniform-arrays.html \
+  --out "dist/recovered-$target-$version.json"
 ```
 
 The CSS and WebGL page runners return a failing status when comparisons or assertions fail. The JSON reports retain those outcomes.
