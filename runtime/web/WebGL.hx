@@ -495,8 +495,21 @@ class WebGL extends JsObject {
 				a.insert(pos + i, extra[i]);
 			a.push(Base64.encode(data));
 		} else if (a.length == 9) {
-			if (Std.isOfType(a[8], JsTypedArray))
-				a[8] = Base64.encode(viewBytes(a[8]));
+			if (Std.isOfType(a[8], JsTypedArray)) {
+				final bytes = viewBytes(a[8]);
+				if (unpackFlip || unpackPremultiply) {
+					final w = Std.int(Js.num(a[sub ? 4 : 3])), h = Std.int(Js.num(a[sub ? 5 : 4]));
+					final row = version == 2 ? Std.int(Js.num(parameter(0x0cf2))) : 0;
+					final skipRows = version == 2 ? Std.int(Js.num(parameter(0x0cf3))) : 0;
+					final skipPixels = version == 2 ? Std.int(Js.num(parameter(0x0cf4))) : 0;
+					if (!WebGLPixels.unpackView(bytes, w, h, Std.int(Js.num(a[6])), Std.int(Js.num(a[7])),
+						unpackAlignment, row, skipRows, skipPixels, unpackFlip, unpackPremultiply))
+						return fail(0x0502);
+				}
+				a[8] = Base64.encode(bytes);
+			}
+			else if (version == 2 && Js.type(a[8]) == "number" && (unpackFlip || unpackPremultiply))
+				return fail(0x0502);
 			else if (a[8] != null && !(version == 2 && Js.type(a[8]) == "number"))
 				return fail(0x0501);
 		} else

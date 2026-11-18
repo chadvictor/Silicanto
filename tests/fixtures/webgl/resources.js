@@ -42,6 +42,16 @@ if (
   gpu.getError() !== gpu.NO_ERROR
 )
   throw new Error("typed texture upload or readback offset");
+const rows = new Uint8Array([200, 30, 0, 0, 80, 40, 20, 128]);
+gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true);
+gpu.pixelStorei(gpu.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+gpu.texImage2D(gpu.TEXTURE_2D, 0, gpu.RGBA, 1, 2, 0, gpu.RGBA, gpu.UNSIGNED_BYTE, rows);
+gpu.readPixels(0, 0, 1, 2, gpu.RGBA, gpu.UNSIGNED_BYTE, output);
+if (output.join() !== "40,20,10,128,0,0,0,0" || rows[0] !== 200 ||
+    rows[4] !== 80 || gpu.getError() !== gpu.NO_ERROR)
+  throw Error("flipped and premultiplied texture upload");
+gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, false);
+gpu.pixelStorei(gpu.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 gpu.deleteFramebuffer(frameBuffer);
 gpu.deleteTexture(tex);
 const tint = gl.getUniform(program, gl.getUniformLocation(program, "tint"));

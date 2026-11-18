@@ -43,13 +43,13 @@ gl.bufferData(
 const p = gl.getAttribLocation(program, "p");
 gl.enableVertexAttribArray(p);
 gl.vertexAttribPointer(p, 2, gl.FLOAT, false, 0, 0);
-const tint = gl.getUniformLocation(program, "tint");
+const tintLocation = gl.getUniformLocation(program, "tint");
 let rejected = false;
-try { gl.uniform4fv(tint, 1); } catch (err) { rejected = err instanceof TypeError; }
+try { gl.uniform4fv(tintLocation, 1); } catch (err) { rejected = err instanceof TypeError; }
 if (!rejected || gl.getError() !== gl.NO_ERROR) throw Error("uniform sequence conversion");
-gl.uniform4fv(tint, []);
+gl.uniform4fv(tintLocation, []);
 if (gl.getError() !== gl.INVALID_VALUE) throw Error("empty uniform vector");
-gl.uniform4f(tint, 1, 0, 0, 1);
+gl.uniform4f(tintLocation, 1, 0, 0, 1);
 gl.clearColor(0, 0, 1, 1);
 gl.clear(gl.COLOR_BUFFER_BIT);
 gl.drawArrays(gl.TRIANGLES, 0, 3);
