@@ -25,9 +25,10 @@ const classicTypes = new Set([
 ]);
 
 function scriptType(node) {
-  return (node.attrs?.find((a) => a.name === "type")?.value ?? "")
-    .trim()
-    .toLowerCase();
+  const type = node.attrs?.find((a) => a.name === "type");
+  if (type) return type.value.trim().toLowerCase();
+  const language = node.attrs?.find((a) => a.name === "language")?.value;
+  return language ? "text/" + language.toLowerCase() : "";
 }
 
 function storesScriptText(node) {

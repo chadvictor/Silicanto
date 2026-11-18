@@ -39,6 +39,17 @@ class JsCollection extends JsObject {
 		return [for (e in entries) if (e.live) map ? ([e.key, e.value] : Dynamic) : e.key];
 	}
 
+	public function iterate(exhausted:Dynamic):Void->Dynamic {
+		var i = 0;
+		return function():Dynamic {
+			while (i < entries.length) {
+				final entry = entries[i++];
+				if (entry.live) return map ? ([entry.key, entry.value] : Dynamic) : entry.key;
+			}
+			return exhausted;
+		};
+	}
+
 	public static function install(realm:JsObject) {
 		for (isMap in [false, true]) {
 			final c = Js.fn((r, args) -> new JsCollection((cast r : JsObject).prototype, isMap, Js.at(args, 0)), true), p:JsObject = c.read("prototype");

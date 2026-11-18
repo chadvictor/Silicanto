@@ -139,36 +139,61 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
         .flatMap((e) => bindingNames(e.name));
     fail(n, "unsupported binding target");
   }
+  function withDefault(read, initializer, s) {
+    if (!initializer) return read;
+    return sequence(
+      [read],
+      ([v]) => `(${v} == Js.u ? (${expr(initializer, s)}:Dynamic) : ${v})`,
+      true,
+    );
+  }
+  function arrayPattern(n, source, s, binding) {
+    const value = fresh("source");
+    const cursor = fresh("iterator");
+    const lines = [
+      "var " + value + ":Dynamic = " + source + ";",
+      "var " + cursor + " = new JsIterator(" + value + ");",
+    ];
+    for (const element of n.elements) {
+      if (ts.isOmittedExpression(element)) {
+        lines.push(cursor + ".take();");
+        continue;
+      }
+      const rest = binding
+        ? !!element.dotDotDotToken
+        : ts.isSpreadElement(element);
+      const read = cursor + (rest ? ".rest()" : ".take()");
+      if (binding) {
+        const input = withDefault(read, element.initializer, s);
+        lines.push(bindPattern(element.name, input, s));
+      } else {
+        const target = rest ? element.expression : element;
+        const defaulted = ts.isBinaryExpression(target) &&
+          target.operatorToken.kind === K.EqualsToken;
+        const input = withDefault(read, defaulted ? target.right : null, s);
+        lines.push(writeAssignment(defaulted ? target.left : target, input, s) + ";");
+      }
+    }
+    return block([...lines, value + ";"]);
+  }
+  function writeAssignment(n, source, s) {
+    if (ts.isParenthesizedExpression(n))
+      return writeAssignment(n.expression, source, s);
+    if (ts.isArrayLiteralExpression(n)) return arrayPattern(n, source, s, false);
+    return assign(n, s, () => source, false, true);
+  }
   function bindPattern(n, source, s) {
     if (ts.isIdentifier(n)) return find(s, n.text).id + " = " + source + ";";
+    if (ts.isArrayBindingPattern(n)) return arrayPattern(n, source, s, true) + ";";
     const id = fresh("unpack"),
       lines = ["var " + id + ":Dynamic = " + source + ";"];
-    n.elements.forEach((e, i) => {
-      if (ts.isOmittedExpression(e)) return;
-      const array = ts.isArrayBindingPattern(n);
-      if (e.dotDotDotToken && !array) fail(e, "object rest binding");
-      const key = array
-        ? String(i)
-        : ts.isComputedPropertyName(e.propertyName ?? {})
-          ? expr(e.propertyName.expression, s)
-          : quoted(plainName(e.propertyName ?? e.name));
-      let read = e.dotDotDotToken
-        ? "Js.items(" + id + ").slice(" + i + ")"
-        : "Js.get(" + id + "," + key + ")";
-      if (e.initializer)
-        read = sequence(
-          [read],
-          ([v]) =>
-            "(" +
-            v +
-            " == Js.u ? (" +
-            expr(e.initializer, s) +
-            ":Dynamic) : " +
-            v +
-            ")",
-          true,
-        );
-      lines.push(bindPattern(e.name, read, s));
+    n.elements.forEach((e) => {
+      if (e.dotDotDotToken) fail(e, "object rest binding");
+      const key = ts.isComputedPropertyName(e.propertyName ?? {})
+        ? expr(e.propertyName.expression, s)
+        : quoted(plainName(e.propertyName ?? e.name));
+      const read = "Js.get(" + id + "," + key + ")";
+      lines.push(bindPattern(e.name, withDefault(read, e.initializer, s), s));
     });
     return block(lines);
   }
@@ -471,7 +496,7 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
     if (ts.isElementAccessExpression(n))
       return [expr(n.expression, s), expr(n.argumentExpression, s)];
   }
-  function assign(n, s, convert, post = false) {
+  function assign(n, s, convert, post = false, saveReference = false) {
     const perform = (get, write) =>
       typeof post === "string"
         ? sequence(
@@ -522,11 +547,13 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
     }
     const a = access(n, s);
     if (!a) fail(n, "unsupported assignment target");
-    return sequence(a, ([o, k]) =>
-      perform(
+    return sequence(
+      a,
+      ([o, k]) => perform(
         "Js.get(" + o + "," + k + ")",
         (x) => "Js.put(" + o + "," + k + "," + x + ")",
       ),
+      saveReference,
     );
   }
   function op(token, x, y) {
@@ -921,6 +948,8 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
     if (ts.isBinaryExpression(n)) {
       const t = n.operatorToken.getText(file),
         y = expr(n.right, s);
+      if (t === "=" && ts.isArrayLiteralExpression(n.left))
+        return arrayPattern(n.left, y, s, false);
       if (t === "=") return assign(n.left, s, () => y);
       if (["??=", "||=", "&&="].includes(t))
         return assign(n.left, s, () => y, t);
@@ -1183,7 +1212,7 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
               true,
             );
         lines.push(bindPattern(pattern, key, local));
-      } else lines.push(assign(n.initializer, local, () => key) + ";");
+      } else lines.push(writeAssignment(n.initializer, key, local) + ";");
       return (
         "for (" +
         key +

@@ -9,9 +9,27 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
-import { resolveGraph } from "../src/frontend/graph.mjs";
+import { resolveGraph, syntax } from "../src/frontend/graph.mjs";
 import { emitModules } from "../src/frontend/modules.mjs";
 import { compareFrame } from "./phaser4/reference.mjs";
+
+test("legacy string escapes respect script strictness and keep source positions", () => {
+  const parse = (source, format = "classic") =>
+    syntax({ id: "input.js", path: "input.js", sourcePath: "input.js", source, line: 0, format });
+  const bytes = String.raw`"\211\032\8"`;
+  assert.equal(parse(bytes).statements[0].expression.text, "\x89\x1a8");
+  assert.throws(() => parse(bytes, "esm"), /input.js:1:2 E-SYNTAX/);
+  for (const source of [
+    '"use strict";' + bytes,
+    'function f() { "use strict"; return ' + bytes + '; }',
+    'class C { get x() { return ' + bytes + '; } }',
+    '`' + String.raw`\211` + '`',
+  ]) assert.throws(() => parse(source), /E-SYNTAX/);
+  const literal = '"<!-- -->"';
+  assert.equal(parse(literal).statements[0].expression.getText(), literal);
+  const prefix = "<!-- hidden\r\n";
+  assert.equal(parse(prefix + literal).statements[0].expression.getStart(), prefix.length);
+});
 
 test("an unknown npm package resolves browser exports and a nested cycle from source", async () => {
   const dir = mkdtempSync(join(tmpdir(), "silicanto-module-"));

@@ -2,7 +2,7 @@ import { build } from "esbuild";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { basename, dirname, relative, resolve } from "node:path";
 import ts from "typescript";
-import { hasModuleSyntax } from "./classic.mjs";
+import { hasModuleSyntax, normalizeScriptComments, parseScript } from "./classic.mjs";
 import { readDocument } from "./document.mjs";
 
 export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
@@ -182,30 +182,32 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
 }
 
 export function syntax(module) {
+  const script = ["classic", "cjs", "script"].includes(module.format)
+    && !/\.[cm]?tsx?$/.test(module.path);
+  let source = module.source, parsed;
+  const parseLegacy = () => {
+    if (parsed === undefined) {
+      try {
+        parsed = parseScript(source, module.format === "cjs");
+      } catch {
+        parsed = null;
+      }
+    }
+    return parsed;
+  };
+  if (script && /<!--|-->/.test(source) && parseLegacy())
+    source = normalizeScriptComments(source, parsed.comments);
   const file = ts.createSourceFile(
     module.sourcePath,
-    module.source,
+    source,
     ts.ScriptTarget.Latest,
     true,
     /\.[cm]?tsx?$/.test(module.path) ? ts.ScriptKind.TS : ts.ScriptKind.JS,
   );
   const diagnostic = file.parseDiagnostics.find((d) => {
-    // TypeScript diagnoses legacy octals even in sloppy classic JavaScript.
-    if (d.code !== 1121 || module.format !== "classic") return true;
-    let token = ts.getTokenAtPosition(file, d.start);
-    for (; token; token = token.parent) {
-      if (ts.isClassLike(token)) return true;
-      if (ts.isSourceFile(token) || ts.isBlock(token))
-        for (const stmt of token.statements) {
-          if (
-            !ts.isExpressionStatement(stmt) ||
-            !ts.isStringLiteral(stmt.expression)
-          )
-            break;
-          if (stmt.expression.text === "use strict") return true;
-        }
-    }
-    return false;
+    // TypeScript decodes legacy octals but diagnoses them in every scope.
+    // The script parser enforces the actual directive, function and class scope.
+    return !script || ![1121, 1487, 1488].includes(d.code) || !parseLegacy();
   });
   if (diagnostic) {
     const error = diagnostic,

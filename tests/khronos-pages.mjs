@@ -22,7 +22,7 @@ const { values } = parseArgs({
   options: {
     checkout: { type: "string" },
     out: { type: "string" },
-    filter: { type: "string" },
+    filter: { type: "string", multiple: true },
     version: { type: "string", default: "1.0.4" },
     target: { type: "string", default: "cpp" },
     "frontend-only": { type: "boolean" },
@@ -67,7 +67,7 @@ function list(file, minimum = "1.0.0", maximum = "9.9.9") {
       version(values.version) <= version(hi)
     ) {
       const id = relative(tests, path);
-      if (!values.filter || id.includes(values.filter)) selected.push(id);
+      if (!values.filter || values.filter.some((part) => id.includes(part))) selected.push(id);
     }
   }
 }
