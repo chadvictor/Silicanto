@@ -756,6 +756,10 @@ class WebGL extends JsObject {
 		}
 		if (StringTools.startsWith(name, "uniform") && Js.at(args, 0) == null)
 			return Js.u;
+		// GLES accepts a zero count. WebGL requires at least one complete
+		// element after applying the optional source offset and length.
+		if ((matrix || uniform) && Js.get(args[matrix ? 2 : 1], "length") == 0)
+			return fail(0x0501);
 		final result:Dynamic = WebGLNative.call(driver, name, a);
 		if (Std.isOfType(result, String) && result == "INVALID_OPERATION")
 			return fail(0x0502);
