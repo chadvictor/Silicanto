@@ -1,4 +1,5 @@
 import { lowerAsync } from "./async.mjs";
+import { haxeString } from "./haxe-string.mjs";
 import { Units } from "./units.mjs";
 import { syntax } from "./graph.mjs";
 import { emitModule } from "./javascript.mjs";
@@ -14,7 +15,7 @@ export function emitModules(graph) {
     if (module.format === "json")
       body =
         'Js.put(module,"exports",Js.json(' +
-        JSON.stringify(module.source) +
+        haxeString(module.source) +
         "));";
     else if (module.disabled) body = "";
     else {
@@ -44,7 +45,7 @@ export function emitModules(graph) {
     ].some((k) => globals.has(k));
   const init = web
     ? "WebPlatform.init(" +
-      JSON.stringify(JSON.stringify(graph.document?.elements ?? [])) +
+      haxeString(JSON.stringify(graph.document?.elements ?? [])) +
       ");\n    "
     : "";
   const scriptBindings = (graph.scriptModules ?? [])
@@ -52,7 +53,7 @@ export function emitModules(graph) {
       aliases.map(
         (url) =>
           "WebScriptElement.register(" +
-          JSON.stringify(url) +
+          haxeString(url) +
           "," +
           module.index +
           ",JsModule" +

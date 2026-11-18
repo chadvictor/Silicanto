@@ -3,6 +3,7 @@ private enum EvalExpr {
 	Name(key:String);
 	Member(owner:EvalExpr, key:EvalExpr);
 	Invoke(callee:EvalExpr, args:Array<EvalExpr>);
+	Construct(callee:EvalExpr, args:Array<EvalExpr>);
 	Unary(op:String, operand:EvalExpr);
 	Binary(op:String, left:EvalExpr, right:EvalExpr);
 }
@@ -38,6 +39,9 @@ class JsEval {
 			case Name("this"): self;
 			case Name(key): read(key, false);
 			case Member(owner, key): Js.get(get(owner), get(key));
+			case Construct(callee, args):
+				final constructor = get(callee);
+				Js.construct(constructor, [for (arg in args) get(arg)]);
 			case Invoke(Name("eval"), args):
 				final fn = read("eval", false);
 				direct(fn, [for (arg in args) get(arg)], read, self);
@@ -179,8 +183,27 @@ private class EvalParser {
 			case "!", "+", "-", "typeof", "void": return Unary(advance(), operand());
 			default:
 		}
+		var result = memberExpression();
+		while (take("("))
+			result = properties(Invoke(result, argumentsList()));
+		return result;
+	}
+
+	function argumentsList():Array<EvalExpr> {
+		final args = [];
+		if (!take(")")) {
+			do args.push(expression(0)) while (take(",") && next != ")");
+			expect(")");
+		}
+		return args;
+	}
+
+	function memberExpression():EvalExpr {
 		var expr:EvalExpr;
-		if (take("(")) {
+		if (take("new")) {
+			final constructor = memberExpression();
+			expr = Construct(constructor, take("(") ? argumentsList() : []);
+		} else if (take("(")) {
 			expr = expression(0);
 			expect(")");
 		} else if (next == "'" || next == "\"") expr = Literal(stringValue(next));
@@ -189,10 +212,14 @@ private class EvalParser {
 			case "true": Literal(true);
 			case "false": Literal(false);
 			case "null": Literal(null);
-			case "new", "class", "function", "delete", "var", "let", "const", "super", "import", "return", "throw": unsupported();
+			case "class", "function", "delete", "var", "let", "const", "super", "import", "return", "throw": unsupported();
 			case key: Name(key);
 		};
 		else return unsupported();
+		return properties(expr);
+	}
+
+	function properties(expr:EvalExpr):EvalExpr {
 		while (true) {
 			if (take(".")) {
 				if (!name.match(next)) unsupported();
@@ -201,13 +228,6 @@ private class EvalParser {
 				final key = expression(0);
 				expect("]");
 				expr = Member(expr, key);
-			} else if (take("(")) {
-				final args = [];
-				if (!take(")")) {
-					do args.push(expression(0)) while (take(",") && next != ")");
-					expect(")");
-				}
-				expr = Invoke(expr, args);
 			} else return expr;
 		}
 	}

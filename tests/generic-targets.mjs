@@ -2,18 +2,18 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import {
+  cpSync,
   mkdtempSync,
   mkdirSync,
   readFileSync,
   rmSync,
-  writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { jdk } from "./jdk.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const source = join(root, "tests/fixtures/general");
+const fixture = join(root, "tests/fixtures/general");
 mkdirSync(join(root, "dist"), { recursive: true });
 const out = mkdtempSync(join(root, "dist/generic-e2e-"));
 function run(exe, args, opts = {}) {
@@ -48,7 +48,8 @@ const native = Buffer.concat([
   Buffer.from(expected),
 ]);
 try {
-  const hx = join(out, "source");
+  const hx = join(out, "haxe-project"), source = join(out, "original");
+  cpSync(fixture, source, { recursive: true });
   run(process.execPath, [
     "src/cli.mjs",
     "emit",
@@ -63,6 +64,12 @@ try {
   assert.equal(manifest.graphicsHost, false);
   assert.deepEqual(manifest.moduleGraph.scripts, ["palette.js", "main.mjs"]);
   assert.ok(manifest.moduleGraph.modules.some((m) => m.id === "settings.json"));
+  // Only the PNG is a runtime input. Every source module used at emission
+  // is gone before any target gets a chance to compile or run the project.
+  const assets = join(out, "assets");
+  mkdirSync(assets);
+  cpSync(join(source, "tile.png"), join(assets, "tile.png"));
+  rmSync(source, { recursive: true });
   for (const target of ["java", "neko", "cpp", "c"]) {
     const dest = join(out, target),
       ppm = join(out, target + ".ppm");
@@ -75,7 +82,7 @@ try {
       "--out",
       dest,
     ]);
-    const args = ["--frames", "4", "--capture", ppm, "--asset-root", source];
+    const args = ["--frames", "4", "--capture", ppm, "--asset-root", assets];
     if (target === "java")
       run(jdk("java"), ["-jar", join(dest, "java/Sample.jar"), ...args]);
     else if (target === "neko")

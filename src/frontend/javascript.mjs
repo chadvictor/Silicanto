@@ -1,7 +1,7 @@
 import ts from "typescript";
+import { haxeString as quoted } from "./haxe-string.mjs";
 
 const K = ts.SyntaxKind;
-const quoted = (s) => JSON.stringify(String(s));
 const numericOps = new Set(["-", "*", "/", "%"]);
 const bitOps = new Set(["&", "|", "^", "<<", ">>"]);
 

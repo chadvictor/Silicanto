@@ -252,7 +252,7 @@ class Js {
 					}, false);
 				default:
 					final method = JsList.method(k);
-					method == u ? ordinary.read(k) : method;
+					method == u ? builtinPrototype("Array").read(k) : method;
 			}
 		}
 		if (Std.isOfType(receiver, String)) {
@@ -262,7 +262,7 @@ class Js {
 			if (i >= 0 && i < s.length)
 				return s.charAt(i);
 			final member = JsString.member(k);
-			return member == u ? ordinary.read(k) : member;
+			return member == u ? builtinPrototype("String").read(k) : member;
 		}
 		if (type(receiver) == "number" && k == "toFixed")
 			return fn((r, a) -> JsDecimal.fixed(num(r), at(a, 0)), false);
@@ -278,7 +278,13 @@ class Js {
 				}
 				return str(r);
 			}, false);
-		return ordinary.read(k);
+		return builtinPrototype(type(receiver) == "number" ? "Number" : "Boolean").read(k);
+	}
+
+	static function builtinPrototype(name:String):JsObject {
+		boot();
+		final constructor:JsObject = globals.get(name);
+		return constructor.read("prototype");
 	}
 
 	public static function put(receiver:Dynamic, key:Dynamic, value:Dynamic):Dynamic {
@@ -616,8 +622,14 @@ class Js {
 				return i == start ? Math.NaN : sign * value;
 			}, false));
 			globals.set("Boolean", fn((_, a) -> truth(at(a, 0)), false));
+			for (key in ["Boolean", "Number", "String"]) {
+				final ctor:JsObject = globals.get(key), proto = obj();
+				proto.values.set("constructor", ctor);
+				ctor.values.set("prototype", proto);
+			}
 			final object = fn((_, a) -> a.length > 0 && a[0] != u && a[0] != null ? a[0] : obj(), true);
 			object.define("prototype", ordinary);
+			ordinary.values.set("constructor", object);
 			// Built-in methods are non-enumerable.
 			ordinary.values.set("toString", fn((r, _) -> str(r), false));
 			ordinary.values.set("hasOwnProperty", fn((r, a) -> JsStandard.own(r, at(a, 0)), false));
@@ -642,6 +654,7 @@ class Js {
 				return a.copy();
 			}, true);
 			final ap:JsObject = array.read("prototype");
+			globals.set("Array", array);
 			for (k in [
 				"slice",
 				"splice",
@@ -663,7 +676,6 @@ class Js {
 			])
 				ap.values.set(k, get(([] : Array<Dynamic>), k));
 			array.define("isArray", fn((_, a) -> Std.isOfType(at(a, 0), Array), false));
-			globals.set("Array", array);
 			for (k in ["Error", "TypeError", "RangeError", "ReferenceError", "URIError", "SyntaxError", "EvalError"]) {
 				final constructor = fn((_, a) -> {
 					final e = new JsObject(cast get(global(k), "prototype"));
@@ -687,6 +699,15 @@ class Js {
 			for (k in globals.keys())
 				realm.define(k, globals.get(k));
 			JsStandard.install(realm, object, array, number, globals.get("String"));
+			for (key in realm.keys) {
+				final value:Dynamic = realm.read(key);
+				if (type(value) == "function" && !JsProperties.own(cast value, "name")) {
+					final descriptor = obj();
+					descriptor.define("value", key);
+					descriptor.define("configurable", true);
+					JsProperties.define(cast value, "name", descriptor);
+				}
+			}
 		}
 	}
 

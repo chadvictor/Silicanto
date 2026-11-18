@@ -23,6 +23,19 @@ if (planet !== "🌎" || letters.join("") !== "ab") throw Error("string code poi
 let typeError = false;
 try { [] = { length: 0 }; } catch (error) { typeError = error instanceof TypeError; }
 if (!typeError) throw Error("non-iterable array assignment");
+const controls = "\b\f\\b\\f";
+if (controls.length !== 6 || controls.charCodeAt(0) !== 8 ||
+    controls.charCodeAt(1) !== 12 || controls.slice(2) !== "\\b\\f")
+  throw Error("Haxe string escaping");
+if ((2).constructor !== Number || false.constructor.name !== "Boolean" ||
+    "".constructor !== String || [].constructor !== Array ||
+    ({}).constructor !== Object || new Uint8Array(0).constructor.name !== "Uint8Array")
+  throw Error("built-in constructor identity");
+const types = { Bytes: Uint8Array };
+if (eval("new types.Bytes(new ArrayBuffer(2 * 3)).length") !== 6 ||
+    eval("new types['Bytes']().length") !== 0 ||
+    !(eval("new types.Bytes") instanceof Uint8Array))
+  throw Error("native eval constructor calls");
 const sprite = new Image();
 function draw(time) {
   context.fillStyle = "#232b39";
