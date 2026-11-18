@@ -115,6 +115,7 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
         path,
         disabled,
         sourcePath: inline.has(path) ? entry : path,
+        bodyLoad: script?.kind === "handler",
         line: script?.line ?? 0,
         format: disabled
           ? "empty"
@@ -122,7 +123,7 @@ export async function resolveGraph(entry, { externals = [], webRoot } = {}) {
             ? "classic"
             : path.endsWith(".json")
               ? "json"
-              : (records[key].format ??
+              : script?.kind === "handler" ? "script" : (records[key].format ??
                 (script?.kind === "module" ? "esm" : "script")),
         edges,
         source: disabled

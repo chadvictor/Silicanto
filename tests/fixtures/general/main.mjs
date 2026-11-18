@@ -38,6 +38,7 @@ if (eval("new types.Bytes(new ArrayBuffer(2 * 3)).length") !== 6 ||
   throw Error("native eval constructor calls");
 const sprite = new Image();
 function draw(time) {
+  if (!loaded || document.body.onload !== window.onload) throw Error("body onload");
   context.fillStyle = "#232b39";
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = tileColor;

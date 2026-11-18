@@ -62,7 +62,9 @@ try {
   const manifest = JSON.parse(readFileSync(join(hx, "manifest.json")));
   assert.equal(manifest.frontend, "generic");
   assert.equal(manifest.graphicsHost, false);
-  assert.deepEqual(manifest.moduleGraph.scripts, ["palette.js", "main.mjs"]);
+  assert.deepEqual(manifest.moduleGraph.scripts, [
+    "index.html.body-onload.js", "palette.js", "main.mjs",
+  ]);
   assert.ok(manifest.moduleGraph.modules.some((m) => m.id === "settings.json"));
   // Only the PNG is a runtime input. Every source module used at emission
   // is gone before any target gets a chance to compile or run the project.

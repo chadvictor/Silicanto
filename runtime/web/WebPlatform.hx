@@ -114,6 +114,9 @@ class WebPlatform {
 		Js.realm.define("Image", image);
 		Js.realm.define("HTMLImageElement", image);
 		final dom = Js.obj(), body = element("body");
+		Js.realm.define("onload", null);
+		body.getters.set("onload", () -> Js.realm.read("onload"));
+		body.setters.set("onload", (fn) -> Js.put(Js.realm, "onload", fn));
 		dom.define("body", body);
 		final html = element("html"), head = element("head");
 		dom.define("documentElement", html);

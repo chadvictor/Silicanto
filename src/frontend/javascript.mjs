@@ -1106,7 +1106,12 @@ export function emitModule(graph, module, file, units, globals, lowered = {}) {
     if (ts.isExportAssignment(n))
       return 'Js.put(exports,"default",' + expr(n.expression, s) + ");";
     if (ts.isBlock(n)) return nested(n.statements, s);
-    if (ts.isExpressionStatement(n)) return expr(n.expression, s) + ";";
+    if (ts.isExpressionStatement(n)) {
+      const value = expr(n.expression, s);
+      if (module.bodyLoad && n === file.statements.at(-1))
+        return 'Js.put(module,"exports",' + value + ");";
+      return value + ";";
+    }
     if (ts.isDebuggerStatement(n)) return "";
     if (ts.isReturnStatement(n))
       return "return " + (n.expression ? expr(n.expression, s) : "Js.u") + ";";

@@ -62,12 +62,16 @@ export function emitModules(graph) {
       ),
     )
     .join("\n    ");
+  const runRoots = graph.roots.map((root) => {
+    const load = "JsModule" + root.index + ".load()";
+    return root.bodyLoad ? 'Js.put(Js.realm,"onload",' + load + ');' : load + ";";
+  });
   return {
     sources,
     scriptBindings,
     web,
     asyncLowering,
     globals: [...globals].sort(),
-    haxe: `class Sample {\n  static function main() {\n    ${init}${scriptBindings}${graph.roots.map((root) => "JsModule" + root.index + ".load();").join("\n    ")}${web ? "\n    WebPlatform.run();" : "\n    JsPromise.checkpoint();"}\n  }\n}\n`,
+    haxe: `class Sample {\n  static function main() {\n    ${init}${scriptBindings}${runRoots.join("\n    ")}${web ? "\n    WebPlatform.run();" : "\n    JsPromise.checkpoint();"}\n  }\n}\n`,
   };
 }

@@ -1,6 +1,7 @@
 import { scriptResources } from "./script-resources.mjs";
 import { buildSync } from "esbuild";
 import { parse } from "parse5";
+import { parseSync } from "@babel/core";
 import { basename, dirname, resolve } from "node:path";
 import { readFileSync } from "node:fs";
 
@@ -112,6 +113,26 @@ export function readDocument(path, webRoot = dirname(path)) {
         width: attrs.width,
         height: attrs.height,
       });
+      if (n.tagName === "body" && attrs.onload !== undefined) {
+        const line = n.sourceCodeLocation?.attrs?.onload?.startLine ?? 1;
+        // Validate the attribute as a function body before placing it inside
+        // a generated function. Braces in the attribute cannot escape it.
+        try {
+          parseSync(attrs.onload, {
+            babelrc: false, configFile: false, sourceType: "script",
+            parserOpts: { allowReturnOutsideFunction: true, allowNewTargetOutsideFunction: true },
+          });
+        } catch (error) {
+          throw Error(path + ":" + (line + (error.loc?.line ?? 1) - 1) +
+            " E-SYNTAX: invalid body load handler: " + error.message.split("\n")[0]);
+        }
+        scripts.push({
+          path: resolve(dir, basename(path) + ".body-onload.js"),
+          kind: "handler",
+          source: "(function onload(event) {\n" + attrs.onload + "\n});",
+          line: line - 2,
+        });
+      }
       parent = index;
     }
     if (n.tagName === "script") {

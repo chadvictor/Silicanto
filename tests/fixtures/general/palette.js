@@ -1,4 +1,5 @@
 var tileColor = '#47a86e';
+var loaded = false;
 <!-- A line comment in a classic script.
 var legacyBytes = "\211PNG\032\8";
 --> The closing marker can also start a line comment.

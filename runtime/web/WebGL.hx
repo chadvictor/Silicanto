@@ -600,7 +600,18 @@ class WebGL extends JsObject {
 		return true;
 	}
 
+	static final vectorUniform = ~/^uniform[1-4](f|i|ui)v$/;
+
 	function invokeMethod(name:String, args:Array<Dynamic>):Dynamic {
+		final matrix = StringTools.startsWith(name, "uniformMatrix"), uniform = vectorUniform.match(name);
+		if (matrix || uniform) {
+			final slot = matrix ? 2 : 1, data:Dynamic = Js.at(args, slot);
+			if (Std.isOfType(data, JsCollection)) {
+				args = args.copy();
+				args[slot] = Js.items(data);
+			} else if (!Std.isOfType(data, Array) && !Std.isOfType(data, JsTypedArray))
+				throw Js.construct(Js.global("TypeError"), ["Expected an iterable uniform value"]);
+		}
 		if (lost) {
 			if (name == "isContextLost")
 				return true;
@@ -626,8 +637,7 @@ class WebGL extends JsObject {
 		if (version == 2) {
 			final buffer = name == "bufferData" || name == "bufferSubData", tex = name.indexOf("texImage") == 0 || name.indexOf("texSubImage") == 0
 				|| name.indexOf("compressedTex") == 0;
-			final matrix = StringTools.startsWith(name,
-				"uniformMatrix"), uniform = ~/^uniform[1-4](f|i|ui)v$/.match(name), clear = ~/^clearBuffer(fv|iv|uiv)$/.match(name);
+			final clear = ~/^clearBuffer(fv|iv|uiv)$/.match(name);
 			final dataIndex = buffer ? (name == "bufferData" ? 1 : 2) : matrix
 				|| clear ? 2 : uniform ? 1 : tex ? (StringTools.startsWith(name,
 					"compressed") ? (name == "compressedTexImage2D" ? 6 : name == "compressedTexSubImage2D" ? 7 : name == "compressedTexImage3D" ? 7 : 9) : name == "texImage3D" ? 9 : name == "texSubImage3D" ? 10 : 8) : -1;

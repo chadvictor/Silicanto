@@ -43,7 +43,11 @@ gl.bufferData(
 const p = gl.getAttribLocation(program, "p");
 gl.enableVertexAttribArray(p);
 gl.vertexAttribPointer(p, 2, gl.FLOAT, false, 0, 0);
-gl.uniform4f(gl.getUniformLocation(program, "tint"), 1, 0, 0, 1);
+const tint = gl.getUniformLocation(program, "tint");
+let rejected = false;
+try { gl.uniform4fv(tint, 1); } catch (err) { rejected = err instanceof TypeError; }
+if (!rejected || gl.getError() !== gl.NO_ERROR) throw Error("uniform sequence conversion");
+gl.uniform4f(tint, 1, 0, 0, 1);
 gl.clearColor(0, 0, 1, 1);
 gl.clear(gl.COLOR_BUFFER_BIT);
 gl.drawArrays(gl.TRIANGLES, 0, 3);
