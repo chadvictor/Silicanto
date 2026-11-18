@@ -485,20 +485,10 @@ class WebGL extends JsObject {
 				return fail(0x0501);
 			if (bytes == null || w < 0 || h < 0 || 4. * w * h != bytes.length)
 				return fail(0x0501);
-			final format = Std.int(Js.num(a[sub ? 4 : 3]));
-			if ((format != 0x1908 && format != 0x1907) || Js.num(a[sub ? 5 : 4]) != 0x1401)
+			final format = Std.int(Js.num(a[sub ? 4 : 3])), type = Std.int(Js.num(a[sub ? 5 : 4]));
+			final data = WebGLPixels.pack(bytes, w, h, format, type, unpackAlignment, unpackFlip, unpackPremultiply);
+			if (data == null)
 				return fail(0x0502);
-			final channels = format == 0x1907 ? 3 : 4;
-			final pitch = Std.int(Math.ceil(w * channels / unpackAlignment)) * unpackAlignment;
-			final data = Bytes.alloc(pitch * h);
-			for (y in 0...h)
-				for (x in 0...w) {
-					final srcIndex = ((unpackFlip ? h - 1 - y : y) * w + x) * 4, dstIndex = y * pitch + x * channels, alpha = bytes.get(srcIndex + 3);
-					for (k in 0...3)
-						data.set(dstIndex + k, unpackPremultiply ? Math.round(bytes.get(srcIndex + k) * alpha / 255) : bytes.get(srcIndex + k));
-					if (channels == 4)
-						data.set(dstIndex + 3, alpha);
-				}
 			final extra:Array<Dynamic> = sub ? [w, h] : [w, h, 0];
 			final pos = sub ? 4 : 3;
 			for (i in 0...extra.length)
